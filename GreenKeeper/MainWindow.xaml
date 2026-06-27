@@ -16,22 +16,27 @@
         <Grid Background="#22242A" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="100" />
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="*" />
                 <RowDefinition Height="50" />
             </Grid.RowDefinitions>
 
             <!-- Content -->
             <Label Foreground="White" Content="GreenKeeper" Grid.Row="0" FontSize="32" FontWeight="Bold" />
+            <TextBox Grid.Column="0" Grid.Row="1" />
         </Grid>
         
         <!-- Dashboard with tabs, stats and the history -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100"/>
-                <RowDefinition Height="50"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
+
+            
+            <!-- Content -->
+            
         </Grid>
     </Grid>
 </Window>
