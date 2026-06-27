@@ -17,5 +17,5 @@ namespace GreenKeeper.Models
 
         // Navigation property
         public Plant SelectedPlant { get; set; } = null!;
-        }
+    }
 }
