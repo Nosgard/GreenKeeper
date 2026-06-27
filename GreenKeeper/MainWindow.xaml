@@ -5,8 +5,33 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
         mc:Ignorable="d"
-        Title="GreenKeeper" Height="800" Width="800">
-    <Grid>
+        Title="GreenKeeper" Height="650" Width="800">
+    <Grid Background="Black">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
 
+        <!-- List of all plants including a search-bar and a button to add a plant -->
+        <Grid Background="#22242A" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100" />
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+
+            <!-- Content -->
+            <Label Foreground="White" Content="GreenKeeper" Grid.Row="0" FontSize="32" FontWeight="Bold" />
+        </Grid>
+        
+        <!-- Dashboard with tabs, stats and the history -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+        </Grid>
     </Grid>
 </Window>
