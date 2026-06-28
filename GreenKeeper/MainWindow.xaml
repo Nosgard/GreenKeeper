@@ -5,25 +5,73 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
         mc:Ignorable="d"
-        Title="GreenKeeper" Height="650" Width="800">
-    <Grid Background="Black">
+        Title="GreenKeeper" Height="650" Width="900">
+    <Grid Background="#1A1C22">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <!-- List of all plants including a search-bar and a button to add a plant -->
+        <!-- Sidebar -->
         <Grid Background="#22242A" Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100" />
-                <RowDefinition Height="50" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="50" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Content -->
-            <Label Foreground="White" Content="GreenKeeper" Grid.Row="0" FontSize="32" FontWeight="Bold" />
-            <TextBox Grid.Column="0" Grid.Row="1" />
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="16, 20, 16, 12">
+                <TextBlock Text="GreenKeeper"
+                           Foreground="#F0F0EE"
+                           FontSize="24"
+                           FontWeight="SemiBold" />
+            </StackPanel>
+            
+            <!-- Searchbar -->
+            <Border Grid.Row="1"
+                    Margin="10, 10, 10, 10"
+                    Background="#2C2F38"
+                    BorderBrush="#3A3D47"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox Grid.Column="1"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="#C8C8C4"
+                             CaretBrush="#C8C8C4"
+                             FontSize="13"
+                             VerticalContentAlignment="Center"
+                             Padding="0, 8, 10, 8">
+                    </TextBox>
+                </Grid>
+            </Border>
+            
+            <!-- List of plants -->
+            <ListView Grid.Row="2"
+                      Background="Transparent"
+                      BorderThickness="0"
+                      Margin="6, 0, 6, 0"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            </ListView>
+            
+            <!-- Add-Button -->
+            <Button Grid.Row="3"
+                    Margin="10, 8, 10, 12"
+                    Padding="0, 10"
+                    Background="Transparent"
+                    BorderBrush="#3A3D47"
+                    BorderThickness="1"
+                    Foreground="#8A8A86"
+                    FontSize="24"
+                    Cursor="Hand"
+                    Content="+  Add Plant"></Button>
         </Grid>
         
         <!-- Dashboard with tabs, stats and the history -->
