@@ -28,7 +28,7 @@
                            FontSize="24"
                            FontWeight="SemiBold" />
             </StackPanel>
-            
+
             <!-- Searchbar -->
             <Border Grid.Row="1"
                     Margin="10, 10, 10, 10"
@@ -52,15 +52,51 @@
                     </TextBox>
                 </Grid>
             </Border>
-            
+
             <!-- List of plants -->
             <ListView Grid.Row="2"
                       Background="Transparent"
                       BorderThickness="0"
                       Margin="6, 0, 6, 0"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Grid.Column="1"
+                                    VerticalAlignment="Center"
+                                    Margin="8, 0, 0, 0">
+                            <TextBlock Foreground="#F0F0EE"
+                                       FontSize="13"
+                                       FontWeight="Medium" />
+
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+
+                <!-- Dummy entries -->
+                <ListViewItem>
+                    <ListViewItem.Content>
+                        <TextBlock Text="Delete me"
+                                   FontSize="24"
+                                   Foreground="#F0F0EE"/>
+                    </ListViewItem.Content>
+                </ListViewItem>
+                <ListViewItem>
+                    <ListViewItem.Content>
+                        <TextBlock Text="Delete me"
+                   FontSize="24"
+                   Foreground="#F0F0EE"/>
+                    </ListViewItem.Content>
+                </ListViewItem>
+                <ListViewItem>
+                    <ListViewItem.Content>
+                        <TextBlock Text="Delete me"
+                   FontSize="24"
+                   Foreground="#F0F0EE"/>
+                    </ListViewItem.Content>
+                </ListViewItem>
             </ListView>
-            
+
             <!-- Add-Button -->
             <Button Grid.Row="3"
                     Margin="10, 8, 10, 12"
@@ -73,7 +109,7 @@
                     Cursor="Hand"
                     Content="+  Add Plant"></Button>
         </Grid>
-        
+
         <!-- Dashboard with tabs, stats and the history -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
@@ -82,9 +118,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            
+
             <!-- Content -->
-            
+
         </Grid>
     </Grid>
 </Window>
