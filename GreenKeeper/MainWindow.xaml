@@ -110,17 +110,50 @@
                     Content="+  Add Plant"></Button>
         </Grid>
 
-        <!-- Dashboard with tabs, stats and the history -->
+        <!-- Dashboard -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="100" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!-- Navigation -->
+            <Grid Grid.Row="0" VerticalAlignment="Center" Margin="16, 20, 16, 12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <!-- Content -->
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Plant to be shown" Foreground="White" FontSize="28" FontWeight="Bold" />
 
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Padding="10"
+                            Background="Transparent"
+                            BorderBrush="#3A3D47"
+                            BorderThickness="1"
+                            Foreground="#8A8A86"
+                            FontSize="20"
+                            Cursor="Hand"
+                            Content="+  Add Schedule">
+
+                    </Button>
+
+                    <Button Margin="10, 0, 0, 0"
+                            Padding="10"
+                            Background="Transparent"
+                            BorderBrush="#3A3D47"
+                            BorderThickness="1"
+                            Foreground="#8A8A86"
+                            FontSize="20"
+                            Cursor="Hand"
+                            Content="-  Delete Plant">
+                    </Button>
+                </StackPanel>
+
+            </Grid>
+            
+            <Border Grid.Row="1" Height="1" Background="#444746" />
         </Grid>
     </Grid>
 </Window>
