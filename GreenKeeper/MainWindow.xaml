@@ -58,43 +58,24 @@
                       Background="Transparent"
                       BorderThickness="0"
                       Margin="6, 0, 6, 0"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      ItemsSource="{Binding Plants}"
+                      SelectedItem="{Binding SelectedPlant, Mode=TwoWay}">
 
+                <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Grid.Column="1"
                                     VerticalAlignment="Center"
                                     Margin="8, 0, 0, 0">
-                            <TextBlock Foreground="#F0F0EE"
-                                       FontSize="13"
+                            <TextBlock Text="{Binding Name}"
+                                       Foreground="#F0F0EE"
+                                       FontSize="24"
                                        FontWeight="Medium" />
 
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
-
-                <!-- Dummy entries -->
-                <ListViewItem>
-                    <ListViewItem.Content>
-                        <TextBlock Text="Delete me"
-                                   FontSize="24"
-                                   Foreground="#F0F0EE"/>
-                    </ListViewItem.Content>
-                </ListViewItem>
-                <ListViewItem>
-                    <ListViewItem.Content>
-                        <TextBlock Text="Delete me"
-                   FontSize="24"
-                   Foreground="#F0F0EE"/>
-                    </ListViewItem.Content>
-                </ListViewItem>
-                <ListViewItem>
-                    <ListViewItem.Content>
-                        <TextBlock Text="Delete me"
-                   FontSize="24"
-                   Foreground="#F0F0EE"/>
-                    </ListViewItem.Content>
-                </ListViewItem>
             </ListView>
 
             <!-- Add-Button -->
@@ -125,7 +106,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="Plant to be shown" Foreground="White" FontSize="28" FontWeight="Bold" />
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding SelectedPlant.Name}" Foreground="White" FontSize="28" FontWeight="Bold" />
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Padding="10"

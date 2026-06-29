@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using GreenKeeper.Repositories;
+using GreenKeeper.ViewModels;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -19,6 +21,8 @@ namespace GreenKeeper
         public MainWindow()
         {
             InitializeComponent();
+            MainViewModel mainViewModel = new MainViewModel(new PlantRepository());
+            this.DataContext = mainViewModel;
         }
     }
 }
