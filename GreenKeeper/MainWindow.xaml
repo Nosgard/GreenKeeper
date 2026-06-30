@@ -84,14 +84,10 @@
 
             <!-- Add-Button -->
             <Button Grid.Row="3"
+                    Style="{StaticResource BigDarkButton}"
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
-                    Background="Transparent"
-                    BorderBrush="#3A3D47"
-                    BorderThickness="1"
-                    Foreground="#8A8A86"
-                    FontSize="24"
-                    Cursor="Hand"
+                    
                     Content="+  Add Plant"></Button>
         </Grid>
 
@@ -113,25 +109,15 @@
                 <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding SelectedPlant.Name}" Foreground="White" FontSize="28" FontWeight="Bold" />
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Padding="10"
-                            Background="Transparent"
-                            BorderBrush="#3A3D47"
-                            BorderThickness="1"
-                            Foreground="#8A8A86"
-                            FontSize="20"
-                            Cursor="Hand"
+                    <Button Style="{StaticResource MediumDarkButton}"
+                            Padding="10"
                             Content="+  Add Schedule">
 
                     </Button>
 
-                    <Button Margin="10, 0, 0, 0"
+                    <Button Style="{StaticResource MediumDarkButton}"
+                            Margin="10, 0, 0, 0"
                             Padding="10"
-                            Background="Transparent"
-                            BorderBrush="#3A3D47"
-                            BorderThickness="1"
-                            Foreground="#8A8A86"
-                            FontSize="20"
-                            Cursor="Hand"
                             Content="-  Delete Plant">
                     </Button>
                 </StackPanel>
@@ -192,9 +178,9 @@
                             </StackPanel>
 
                             <!-- Complete-Button -->
-                            <Button Grid.Column="4"
+                            <Button Style="{StaticResource SmallDarkButton}"
+                                    Grid.Column="4"
                                     Content="Complete"
-                                    FontSize="14"
                                     Padding="10"
                                     VerticalAlignment="Center" />
                         </Grid>
