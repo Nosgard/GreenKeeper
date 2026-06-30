@@ -181,7 +181,7 @@
                                 
                                 <!-- Subtitle (Next watering) -->
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Next watering: "
+                                    <TextBlock Text="{Binding DaysUntilNextWatering, StringFormat={}{0} days}"
                                                Foreground="#8A8A86"
                                                FontSize="14" />
                                 </StackPanel>

@@ -13,10 +13,8 @@ namespace GreenKeeper.Models
         public string? ImagePath { get; set; }
         public string? Notes { get; set; }
 
-        //public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         // Navigation properties
 
-
+        public List<CareSchedule> CareSchedules { get; set; } = new List<CareSchedule>();
     }
 }

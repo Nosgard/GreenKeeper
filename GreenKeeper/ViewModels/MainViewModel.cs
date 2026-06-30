@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
 using System;
 using System.Collections.Generic;
@@ -29,12 +30,37 @@ namespace GreenKeeper.ViewModels
             set { _plants = value; OnPropertyChanged(nameof(Plants)); }
         }
 
+        // Calculate the days until the the next watering
+        public int? DaysUntilNextWatering
+        {
+            get
+            {
+                var waterSchedule = SelectedPlant?.CareSchedules
+                    .FirstOrDefault(s => s.Care == CareType.Water);
+
+                if (waterSchedule?.NextDueAt == null)
+                {
+                    return null;
+                }
+
+                // The days are the difference between the next due date and the current date
+
+                return (int)Math.Ceiling(
+                    (waterSchedule.NextDueAt.Value - DateTime.Now).TotalDays);
+            }
+        }
+
         // Selected plant in the ListView (Currently only dummy entries)
         private Plant? _SelectedPlant;
         public Plant? SelectedPlant
         {
             get { return _SelectedPlant; }
-            set { _SelectedPlant = value; OnPropertyChanged(nameof(SelectedPlant)); }
+            set
+            {
+                _SelectedPlant = value;
+                OnPropertyChanged(nameof(SelectedPlant));
+                OnPropertyChanged(nameof(DaysUntilNextWatering));
+            }
         }
 
         // Implementation of INotifyPropertyChanged
