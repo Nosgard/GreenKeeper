@@ -189,6 +189,7 @@
                                 <Button Style="{StaticResource SmallDarkButton}"
                                         Content="Edit"
                                         Padding="10"
+                                        Margin="0, 0, 6, 0"
                                         VerticalAlignment="Center" />
                             </UniformGrid>
                             
@@ -257,6 +258,7 @@
                                 <Button Style="{StaticResource SmallDarkButton}"
                                         Content="Remove"
                                         Padding="10"
+                                        Margin="0, 0, 6, 0"
                                         VerticalAlignment="Center" />
                             </UniformGrid>
 
