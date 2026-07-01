@@ -9,7 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Icons\Waterdrop.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Views\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\Waterdrop.png" />
   </ItemGroup>
 
 </Project>

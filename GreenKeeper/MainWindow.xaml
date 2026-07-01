@@ -158,7 +158,8 @@
                                     Margin="0, 0, 12, 0"
                                     VerticalAlignment="Center"
                                     >
-                                <!-- Icon Placeholder -->
+                                <!-- Icon -->
+                                <Image Source="/Resources/Icons/Waterdrop.png" />
                             </Border>
 
                             <!-- Subtitle container -->
