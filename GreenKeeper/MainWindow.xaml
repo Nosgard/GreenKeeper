@@ -9,6 +9,12 @@
         Title="GreenKeeper" Height="650" Width="900">
     <Window.Resources>
         <Converters:DaysUntilCareConverter x:Key="DaysUntilCareConverter" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <Style x:Key="CareActionButton" TargetType="Button" BasedOn="{StaticResource SmallDarkButton}">
+            <Setter Property="Width" Value="85" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
 
         <DataTemplate x:Key="CareStatusCardTemplate">
             <Border Background="#2C2C2E"
@@ -49,25 +55,30 @@
                     </StackPanel>
                     
                     <!-- Buttons -->
-                    <UniformGrid Grid.Column="3" Rows="1" Columns="3">
-                        <Button Style="{StaticResource SmallDarkButton}"
+                    <StackPanel Grid.Column="3"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        
+                        <Button Style="{StaticResource CareActionButton}"
                             Content="Complete"
                             Padding="10"
                             Margin="0, 0, 6, 0"
                             VerticalAlignment="Center" />
 
-                        <Button Style="{StaticResource SmallDarkButton}"
+                        <Button Style="{StaticResource CareActionButton}"
                             Content="Edit"
                             Padding="10"
                             Margin="0, 0, 6, 0"
                             VerticalAlignment="Center" />
 
-                        <Button Style="{StaticResource SmallDarkButton}"
+                        <Button Style="{StaticResource CareActionButton}"
                                 Content="Remove"
                                 Padding="10"
                                 Margin="0, 0, 6, 0"
-                                VerticalAlignment="Center" />
-                    </UniformGrid>
+                                VerticalAlignment="Center"
+                                Visibility="{Binding IsRemovable, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </DataTemplate>

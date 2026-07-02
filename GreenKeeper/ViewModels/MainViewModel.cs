@@ -18,10 +18,10 @@ namespace GreenKeeper.ViewModels
 
         // Metadata per CareType (Title, Icon, Icon-Background-Color)
         // Sunlighting is missing
-        private static readonly Dictionary<CareType, (string Title, string Icon, string Color)> CareTypeMeta = new()
+        private static readonly Dictionary<CareType, (string Title, string Icon, string Color, bool IsRemovable)> CareTypeMeta = new()
         {
-            { CareType.Water, ("Watering", "/Resources/Icons/Waterdrop.png", "#4accff") },
-            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b") }
+            { CareType.Water, ("Watering", "/Resources/Icons/Waterdrop.png", "#4accff", false) },
+            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b", true) }
         };
 
         // Set all plants for the ListView
@@ -53,7 +53,7 @@ namespace GreenKeeper.ViewModels
                     var schedule = SelectedPlant.CareSchedules
                         .FirstOrDefault(s => s.Care == careType);
 
-                    yield return new CareStatusViewModel(careType, schedule, meta.Title, meta.Icon, meta.Color);
+                    yield return new CareStatusViewModel(careType, schedule, meta.Title, meta.Icon, meta.Color, meta.IsRemovable);
                 }
             }
         }

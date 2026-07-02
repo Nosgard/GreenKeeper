@@ -18,15 +18,17 @@ namespace GreenKeeper.ViewModels
         public string Title { get; }
         public string IconSource { get; }
         public Brush IconBackground { get; }
+        public bool IsRemovable { get; }
 
         // Provide all important data for the card of the care status
-        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex)
+        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex, bool isRemovable)
         {
             Care = care;
             _schedule = schedule;
             Title = title;
             IconSource = iconSource;
             IconBackground = (Brush)new BrushConverter().ConvertFromString(iconBackgroundHex.ToString())!;
+            IsRemovable = isRemovable;
         }
 
         // Calculate the next due date in days. The amount of days will be depicted in the card of the care status
