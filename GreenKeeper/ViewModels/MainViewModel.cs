@@ -16,6 +16,14 @@ namespace GreenKeeper.ViewModels
         private readonly IPlantRepository _plantRepository;
         private ObservableCollection<Plant> _plants;
 
+        // Metadata per CareType (Title, Icon, Icon-Background-Color)
+        // Sunlighting is missing
+        private static readonly Dictionary<CareType, (string Title, string Icon, string Color)> CareTypeMeta = new()
+        {
+            { CareType.Water, ("Watering", "/Resources/Icons/Waterdrop.png", "#4accff") },
+            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b") }
+        };
+
         // Set all plants for the ListView
         public MainViewModel(IPlantRepository plantRepository)
         {
@@ -30,23 +38,23 @@ namespace GreenKeeper.ViewModels
             set { _plants = value; OnPropertyChanged(nameof(Plants)); }
         }
 
-        // Calculate the days until the the next watering
-        public int? DaysUntilNextWatering
+        // One card per defined CareType, filled with the appropriate schedule (as long as it exists)
+        public IEnumerable<CareStatusViewModel> CareStatuses
         {
             get
             {
-                var waterSchedule = SelectedPlant?.CareSchedules
-                    .FirstOrDefault(s => s.Care == CareType.Water);
-
-                if (waterSchedule?.NextDueAt == null)
+                if (SelectedPlant == null)
                 {
-                    return null;
+                    yield break;
                 }
 
-                // The days are the difference between the next due date and the current date
+                foreach (var (careType, meta) in CareTypeMeta)
+                {
+                    var schedule = SelectedPlant.CareSchedules
+                        .FirstOrDefault(s => s.Care == careType);
 
-                return (int)Math.Ceiling(
-                    (waterSchedule.NextDueAt.Value - DateTime.Now).TotalDays);
+                    yield return new CareStatusViewModel(careType, schedule, meta.Title, meta.Icon, meta.Color);
+                }
             }
         }
 
@@ -59,7 +67,7 @@ namespace GreenKeeper.ViewModels
             {
                 _SelectedPlant = value;
                 OnPropertyChanged(nameof(SelectedPlant));
-                OnPropertyChanged(nameof(DaysUntilNextWatering));
+                OnPropertyChanged(nameof(CareStatuses));
             }
         }
 

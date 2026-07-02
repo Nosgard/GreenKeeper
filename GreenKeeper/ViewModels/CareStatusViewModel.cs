@@ -20,7 +20,7 @@ namespace GreenKeeper.ViewModels
         public Brush IconBackground { get; }
 
         // Provide all important data for the card of the care status
-        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, Brush iconBackgroundHex)
+        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex)
         {
             Care = care;
             _schedule = schedule;
