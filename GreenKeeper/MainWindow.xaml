@@ -8,7 +8,69 @@
         mc:Ignorable="d"
         Title="GreenKeeper" Height="650" Width="900">
     <Window.Resources>
-        <Converters:DaysUntilWateringConverter x:Key="DaysUntilWateringConverter" />
+        <Converters:DaysUntilCareConverter x:Key="DaysUntilCareConverter" />
+
+        <DataTemplate x:Key="CareStatusCardTemplate">
+            <Border Background="#2C2C2E"
+                    CornerRadius="14"
+                    Padding="14"
+                    Margin="0, 14, 0, 0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Icon-Box -->
+                    <Border Grid.Column="0"
+                        Background="{Binding IconBackground}"
+                        CornerRadius="10"
+                        Width="44"
+                        Height="44"
+                        Margin="0, 0, 12, 0"
+                        VerticalAlignment="Center">
+                        <Image Source="{Binding IconSource}" />
+                    </Border>
+                    
+                    <!-- Subtitle container -->
+                    <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Title}"
+                               Foreground="#F0F0EE"
+                               FontSize="16"
+                               FontWeight="SemiBold" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding DaysUntilDue, Converter={StaticResource DaysUntilCareConverter}}"
+                                   Foreground="#8A8A86"
+                                   FontSize="14" />
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <!-- Buttons -->
+                    <UniformGrid Grid.Column="3" Rows="1" Columns="3">
+                        <Button Style="{StaticResource SmallDarkButton}"
+                            Content="Complete"
+                            Padding="10"
+                            Margin="0, 0, 6, 0"
+                            VerticalAlignment="Center" />
+
+                        <Button Style="{StaticResource SmallDarkButton}"
+                            Content="Edit"
+                            Padding="10"
+                            Margin="0, 0, 6, 0"
+                            VerticalAlignment="Center" />
+
+                        <Button Style="{StaticResource SmallDarkButton}"
+                                Content="Remove"
+                                Padding="10"
+                                Margin="0, 0, 6, 0"
+                                VerticalAlignment="Center" />
+                    </UniformGrid>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </Window.Resources>
     <Grid Background="#1A1C22">
         <Grid.ColumnDefinitions>
@@ -134,137 +196,9 @@
                                FontSize="24"
                                FontWeight="SemiBold" />
                     
-                    <!-- Watering Status -->
-                    <Border Background="#2C2C2E"
-                            CornerRadius="14"
-                            Padding="14"
-                            Margin="0, 14, 0, 0">
-
-                        <!-- Content -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            
-                            <!-- Icon-Box -->
-                            <Border Grid.Column="0"
-                                    Background="#4accff"
-                                    CornerRadius="10"
-                                    Width="44"
-                                    Height="44"
-                                    Margin="0, 0, 12, 0"
-                                    VerticalAlignment="Center"
-                                    >
-                                <!-- Icon -->
-                                <Image Source="/Resources/Icons/Waterdrop.png" />
-                            </Border>
-
-                            <!-- Subtitle container -->
-                            <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
-                                <!-- Subtitle -->
-                                <TextBlock Text="Watering"
-                                           Foreground="#F0F0EE"
-                                           FontSize="16"
-                                           FontWeight="SemiBold" />
-                                
-                                <!-- Subtitle (Next watering) -->
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding DaysUntilNextWatering, Converter={StaticResource DaysUntilWateringConverter}}"
-                                               Foreground="#8A8A86"
-                                               FontSize="14" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Buttons -->
-                            <UniformGrid Grid.Column="3" Rows="1" Columns="2">
-                                <Button Style="{StaticResource SmallDarkButton}"
-                                        Content="Complete"
-                                        Padding="10"
-                                        Margin="0, 0, 6, 0"
-                                        VerticalAlignment="Center" />
-                                
-                                <Button Style="{StaticResource SmallDarkButton}"
-                                        Content="Edit"
-                                        Padding="10"
-                                        Margin="0, 0, 6, 0"
-                                        VerticalAlignment="Center" />
-                            </UniformGrid>
-                            
-                            
-                        </Grid>
-                    </Border>
-                    
-                    <!-- Fertilizing Status -->
-                    <Border Background="#2C2C2E"
-                            CornerRadius="14"
-                            Padding="14"
-                            Margin="0, 14, 0, 0">
-
-                        <!-- Content -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Icon-Box -->
-                            <Border Grid.Column="0"
-                                    Background="#ff695b"
-                                    CornerRadius="10"
-                                    Width="44"
-                                    Height="44"
-                                    Margin="0, 0, 12, 0"
-                                    VerticalAlignment="Center"
-                >
-                                <!-- Icon -->
-                                <Image Source="/Resources/Icons/Pill.png" />
-                            </Border>
-
-                            <!-- Subtitle container -->
-                            <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
-                                <!-- Subtitle -->
-                                <TextBlock Text="Fertilizing"
-                                           Foreground="#F0F0EE"
-                                           FontSize="16"
-                                           FontWeight="SemiBold" />
-
-                                <!-- Subtitle (Next fertilizing) -->
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="{Binding DaysUntilNextWatering, Converter={StaticResource DaysUntilWateringConverter}}"
-                                               Foreground="#8A8A86"
-                                               FontSize="14" />
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Buttons -->
-                            <UniformGrid Grid.Column="3" Rows="1" Columns="3">
-                                <Button Style="{StaticResource SmallDarkButton}"
-                                        Padding="10"
-                                        Content="Complete"
-                                        Margin="0, 0, 6, 0"
-                                        VerticalAlignment="Center" />
-
-                                <Button Style="{StaticResource SmallDarkButton}"
-                                        Content="Edit"
-                                        Padding="10"
-                                        Margin="0, 0, 6, 0"
-                                        VerticalAlignment="Center" />
-
-                                <Button Style="{StaticResource SmallDarkButton}"
-                                        Content="Remove"
-                                        Padding="10"
-                                        Margin="0, 0, 6, 0"
-                                        VerticalAlignment="Center" />
-                            </UniformGrid>
-
-
-                        </Grid>
-                    </Border>
+                    <!-- Status Cards (Watering, Nutrients, Sunlighting (missing)) -->
+                    <ItemsControl ItemsSource="{Binding CareStatuses}"
+                                  ItemTemplate="{StaticResource CareStatusCardTemplate}" />
                 </StackPanel>
             </Grid>
         </Grid>
