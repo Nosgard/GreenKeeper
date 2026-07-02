@@ -21,7 +21,8 @@ namespace GreenKeeper.ViewModels
         private static readonly Dictionary<CareType, (string Title, string Icon, string Color, bool isAbleToComplete, bool IsRemovable)> CareTypeMeta = new()
         {
             { CareType.Water, ("Watering", "/Resources/Icons/Waterdrop.png", "#4accff", true, false) },
-            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b", true, true) }
+            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b", true, true) },
+            { CareType.Sunlight, ("Sunlight", "/Resources/Icons/Sun.png", "#FFDF22", false, true) }
         };
 
         // Set all plants for the ListView
