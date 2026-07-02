@@ -18,16 +18,18 @@ namespace GreenKeeper.ViewModels
         public string Title { get; }
         public string IconSource { get; }
         public Brush IconBackground { get; }
+        public bool IsAbleToComplete { get; }
         public bool IsRemovable { get; }
 
         // Provide all important data for the card of the care status
-        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex, bool isRemovable)
+        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex, bool isAbleToComplete, bool isRemovable)
         {
             Care = care;
             _schedule = schedule;
             Title = title;
             IconSource = iconSource;
             IconBackground = (Brush)new BrushConverter().ConvertFromString(iconBackgroundHex.ToString())!;
+            IsAbleToComplete = isAbleToComplete;
             IsRemovable = isRemovable;
         }
 
