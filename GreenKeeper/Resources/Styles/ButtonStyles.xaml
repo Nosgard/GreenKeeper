@@ -45,19 +45,26 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <!-- Medium Dark Button -->
     <Style x:Key="MediumDarkButton"
        TargetType="Button"
        BasedOn="{StaticResource BigDarkButton}">
         <Setter Property="FontSize" Value="16"/>
     </Style>
-    
+
     <!-- Small Dark Button -->
     <Style x:Key="SmallDarkButton"
        TargetType="Button"
        BasedOn="{StaticResource BigDarkButton}">
         <Setter Property="FontSize" Value="14"/>
     </Style>
-    
+
+
+    <!-- Status Card Buttons -->
+    <Style x:Key="CareActionButton" TargetType="Button" BasedOn="{StaticResource SmallDarkButton}">
+        <Setter Property="Width" Value="85" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
 </ResourceDictionary>
