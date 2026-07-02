@@ -7,9 +7,8 @@
         xmlns:Converters="clr-namespace:GreenKeeper.Converters"
         mc:Ignorable="d"
         Title="GreenKeeper" Height="650" Width="900">
-    <Window.Resources>
-        
-    </Window.Resources>
+    
+    <!-- Main Grid -->
     <Grid Background="#1A1C22">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
