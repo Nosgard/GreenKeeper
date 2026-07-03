@@ -8,13 +8,13 @@ namespace GreenKeeper.Models
 {
     public class Plant
     {
-        //public int Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string? ImagePath { get; set; }
         public string? Notes { get; set; }
 
         // Navigation properties
-
         public List<CareSchedule> CareSchedules { get; set; } = new List<CareSchedule>();
+        public SunlightRequirement? SunlightRequirement { get; set; }
     }
 }
