@@ -1,6 +1,8 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
+using GreenKeeper.ViewModels.CareStatuses;
+using GreenKeeper.ViewModels.CareStatuses.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,15 +18,6 @@ namespace GreenKeeper.ViewModels
         private readonly IPlantRepository _plantRepository;
         private ObservableCollection<Plant> _plants;
 
-        // Metadata per CareType (Title, Icon, Icon-Background-Color)
-        // Sunlighting is missing
-        private static readonly Dictionary<CareType, (string Title, string Icon, string Color, bool isAbleToComplete, bool IsRemovable)> CareTypeMeta = new()
-        {
-            { CareType.Water, ("Watering", "/Resources/Icons/Waterdrop.png", "#4accff", true, false) },
-            { CareType.Nutrients, ("Fertilizing", "/Resources/Icons/Pill.png", "#ff695b", true, true) },
-            { CareType.Sunlight, ("Sunlight", "/Resources/Icons/Sun.png", "#FFDF22", false, true) }
-        };
-
         // Set all plants for the ListView
         public MainViewModel(IPlantRepository plantRepository)
         {
@@ -39,7 +32,8 @@ namespace GreenKeeper.ViewModels
             set { _plants = value; OnPropertyChanged(nameof(Plants)); }
         }
 
-        // One card per defined CareType, filled with the appropriate schedule (as long as it exists)
+        // One card per defined CareType. The view models of each CareType contain their own metadata
+        // For more information, go to: GreenKeeper/ViewModels/CareStatuses
         public IEnumerable<CareStatusViewModel> CareStatuses
         {
             get
@@ -49,13 +43,12 @@ namespace GreenKeeper.ViewModels
                     yield break;
                 }
 
-                foreach (var (careType, meta) in CareTypeMeta)
-                {
-                    var schedule = SelectedPlant.CareSchedules
-                        .FirstOrDefault(s => s.Care == careType);
+                CareSchedule? ScheduleFor(CareType type) =>
+                    SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-                    yield return new CareStatusViewModel(careType, schedule, meta.Title, meta.Icon, meta.Color, meta.isAbleToComplete, meta.IsRemovable);
-                }
+                yield return new WateringStatusViewModel(ScheduleFor(CareType.Water));
+                yield return new FertilizingStatusViewModel(ScheduleFor(CareType.Nutrients));
+                yield return new SunlightStatusViewModel(ScheduleFor(CareType.Sunlight));
             }
         }
 

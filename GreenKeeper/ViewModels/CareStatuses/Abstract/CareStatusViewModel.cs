@@ -8,9 +8,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace GreenKeeper.ViewModels
+namespace GreenKeeper.ViewModels.CareStatuses.Abstract
 {
-    public class CareStatusViewModel : INotifyPropertyChanged
+    public abstract class CareStatusViewModel : INotifyPropertyChanged
     {
         private readonly CareSchedule? _schedule;
 
@@ -18,19 +18,15 @@ namespace GreenKeeper.ViewModels
         public string Title { get; }
         public string IconSource { get; }
         public Brush IconBackground { get; }
-        public bool IsAbleToComplete { get; }
-        public bool IsRemovable { get; }
 
         // Provide all important data for the card of the care status
-        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex, bool isAbleToComplete, bool isRemovable)
+        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex)
         {
             Care = care;
             _schedule = schedule;
             Title = title;
             IconSource = iconSource;
             IconBackground = (Brush)new BrushConverter().ConvertFromString(iconBackgroundHex.ToString())!;
-            IsAbleToComplete = isAbleToComplete;
-            IsRemovable = isRemovable;
         }
 
         // Calculate the next due date in days. The amount of days will be depicted in the card of the care status
