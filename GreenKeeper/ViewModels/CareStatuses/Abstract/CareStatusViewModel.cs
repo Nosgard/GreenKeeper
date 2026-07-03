@@ -20,27 +20,16 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public Brush IconBackground { get; }
 
         // Provide all important data for the card of the care status
-        public CareStatusViewModel(CareType care, CareSchedule? schedule, string title, string iconSource, string iconBackgroundHex)
+        public CareStatusViewModel(CareType care, string title, string iconSource, string iconBackgroundHex)
         {
             Care = care;
-            _schedule = schedule;
             Title = title;
             IconSource = iconSource;
             IconBackground = (Brush)new BrushConverter().ConvertFromString(iconBackgroundHex.ToString())!;
         }
 
-        // Calculate the next due date in days. The amount of days will be depicted in the card of the care status
-        public int? DaysUntilDue
-        {
-            get
-            {
-                if (_schedule?.NextDueAt == null)
-                {
-                    return null;
-                }
-                return (int)Math.Ceiling((_schedule.NextDueAt.Value - DateTime.Now).TotalDays);
-            }
-        }
+        // All status cards implement the status text in their own way
+        public abstract string StatusText { get; }
 
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;

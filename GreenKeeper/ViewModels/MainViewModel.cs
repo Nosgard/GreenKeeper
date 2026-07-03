@@ -48,7 +48,7 @@ namespace GreenKeeper.ViewModels
 
                 yield return new WateringStatusViewModel(ScheduleFor(CareType.Water));
                 yield return new FertilizingStatusViewModel(ScheduleFor(CareType.Nutrients));
-                yield return new SunlightStatusViewModel(ScheduleFor(CareType.Sunlight));
+                yield return new SunlightStatusViewModel(SelectedPlant.SunlightRequirement);
             }
         }
 

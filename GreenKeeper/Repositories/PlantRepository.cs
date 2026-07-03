@@ -22,8 +22,8 @@ namespace GreenKeeper.Repositories
                     {
                         new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(3)},
                         new CareSchedule { Care = CareType.Nutrients, NextDueAt = DateTime.Now.AddDays(30)},
-                        new CareSchedule { Care = CareType.Sunlight, NextDueAt = DateTime.Now.AddDays(10)}
-                    }
+                    },
+                    SunlightRequirement = new SunlightRequirement {Hours = 6, Period = SunlightPeriod.Day}
                 },
                 new Plant {
                     Name = "Snake Plant",

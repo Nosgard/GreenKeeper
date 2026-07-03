@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.CareStatuses
 {
-    public class WateringStatusViewModel : CareStatusViewModel
+    public class FertilizingStatusViewModel : ActiveCareStatusViewModel
     {
-        public WateringStatusViewModel(CareSchedule? schedule)
-            : base(CareType.Water, schedule, "Watering", "/Resources/Icons/Waterdrop.png", "#4accff")
+        public FertilizingStatusViewModel(CareSchedule? schedule)
+            : base(CareType.Nutrients, schedule, "Fertilizing", "/Resources/Icons/Pill.png", "#ff695b")
         {
 
         }
