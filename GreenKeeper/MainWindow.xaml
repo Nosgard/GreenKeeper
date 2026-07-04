@@ -136,6 +136,14 @@
                     <ItemsControl ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}" />
                 </StackPanel>
+                
+                <!-- Notes-Button -->
+                <Button Style="{StaticResource MediumDarkButton}"
+                        Content="View Notes"
+                        Padding="10"
+                        Margin="0, 0, 16, 16"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Bottom" />
             </Grid>
         </Grid>
     </Grid>
