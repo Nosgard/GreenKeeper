@@ -17,6 +17,7 @@ namespace GreenKeeper.Repositories
             {
                 new Plant {
                     Name = "Aloe Vera",
+                    Notes = "Aloe Vera is a succulent plant species that is known for it's medicinal purposes",
 
                     CareSchedules = new List<CareSchedule>
                     {

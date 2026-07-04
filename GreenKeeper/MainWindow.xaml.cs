@@ -1,5 +1,7 @@
-﻿using GreenKeeper.Repositories;
+﻿using GreenKeeper.Models;
+using GreenKeeper.Repositories;
 using GreenKeeper.ViewModels;
+using GreenKeeper.Views.Notes;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,11 +20,28 @@ namespace GreenKeeper
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly MainViewModel _mainViewModel;
         public MainWindow()
         {
             InitializeComponent();
-            MainViewModel mainViewModel = new MainViewModel(new PlantRepository());
-            this.DataContext = mainViewModel;
+            _mainViewModel = new MainViewModel(new PlantRepository());
+
+            // Subscription to the event that fires "OpenNotesCommand" in the MainViewModel.
+            // Opening a new window for the notes (NotesView) does not happen in the ViewModel
+            // so that it has no window-references and remains testable
+            _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
+            this.DataContext = _mainViewModel;
+        }
+
+        // The actual reaction on OpenNotesRequested, caused by the OpenNotesCommand in the ViewModel.
+        // It opens a new window and shows the notes of the given plant
+        private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
+        {
+            var notesView = new NotesView(plant)
+            {
+                Owner = this
+            };
+            notesView.ShowDialog();
         }
     }
 }
