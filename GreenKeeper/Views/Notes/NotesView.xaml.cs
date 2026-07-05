@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models;
+using GreenKeeper.Services;
 using GreenKeeper.ViewModels.Notes;
 using System;
 using System.Collections.Generic;
@@ -22,10 +23,10 @@ namespace GreenKeeper.Views.Notes
     public partial class NotesView : Window
     {
         private readonly NotesViewModel _notesViewModel;
-        public NotesView(Plant plant)
+        public NotesView(Plant plant, IDialogService dialogService)
         {
             InitializeComponent();
-            _notesViewModel = new NotesViewModel(plant);
+            _notesViewModel = new NotesViewModel(plant, dialogService);
             _notesViewModel.RequestClose += NotesViewModel_RequestClose;
             this.DataContext = _notesViewModel;
         }

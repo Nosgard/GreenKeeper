@@ -1,5 +1,6 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.Models;
+using GreenKeeper.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,6 +15,10 @@ namespace GreenKeeper.ViewModels.Notes
     public class NotesViewModel : INotifyPropertyChanged
     {
         private readonly Plant _plant;
+
+        // Dependency will be given from outside (Constructor Injection),
+        // instead of an explicit implementation.
+        private readonly IDialogService _dialogService;
 
         // Value when opening the NotesView. Reference if changes on the notes are made.
         // Used to compare via IsDirty (for more info scroll down) with the edited notes.
@@ -49,9 +54,10 @@ namespace GreenKeeper.ViewModels.Notes
         /// 
         /// </summary>
         /// <param name="plant"></param>
-        public NotesViewModel(Plant plant)
+        public NotesViewModel(Plant plant, IDialogService dialogService)
         {
             _plant = plant;
+            _dialogService = dialogService;
             _originalNotes = plant.Notes ?? string.Empty;
             _editableNotes = _originalNotes;
 
@@ -123,14 +129,15 @@ namespace GreenKeeper.ViewModels.Notes
         {
             if (IsDirty)
             {
-                var result = MessageBox.Show(
+                // Alternative and more clean way instead MessageBox.Show() by
+                // the injected abstraction. The ViewModel only knows that there
+                // is a yes or no.
+                bool shouldSave = _dialogService.Confirm(
                     "There are unsaved changes. Do you want to save?",
-                    "Unsaved Changes",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
+                    "Unsaved Changes");
 
                 // Act like Save + Close the View together
-                if (result == MessageBoxResult.Yes)
+                if (shouldSave)
                 {
                     Save();
                     RequestClose?.Invoke(this, true);

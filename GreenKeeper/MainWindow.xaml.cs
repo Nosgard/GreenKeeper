@@ -1,5 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Repositories;
+using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
 using GreenKeeper.Views.Notes;
 using System.Text;
@@ -21,6 +22,10 @@ namespace GreenKeeper
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _mainViewModel;
+
+        // One instance to be passed on from everywhere.
+        // This DialogService is primarily served for Yes/No-Warnings
+        private readonly IDialogService _dialogService = new MessageBoxDialogService();
         public MainWindow()
         {
             InitializeComponent();
@@ -37,7 +42,7 @@ namespace GreenKeeper
         // It opens a new window and shows the notes of the given plant
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
-            var notesView = new NotesView(plant)
+            var notesView = new NotesView(plant, _dialogService)
             {
                 Owner = this
             };
