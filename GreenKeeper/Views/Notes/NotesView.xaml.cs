@@ -21,10 +21,21 @@ namespace GreenKeeper.Views.Notes
     /// </summary>
     public partial class NotesView : Window
     {
+        private readonly NotesViewModel _notesViewModel;
         public NotesView(Plant plant)
         {
             InitializeComponent();
-            this.DataContext = new NotesViewModel(plant);
+            _notesViewModel = new NotesViewModel(plant);
+            _notesViewModel.RequestClose += NotesViewModel_RequestClose;
+            this.DataContext = _notesViewModel;
+        }
+
+        // Unsubscribing before closing prevents double subscriptions of the Event-Handler
+        // when opening the same window (view) multiple times
+        private void NotesViewModel_RequestClose(object? sender, bool? dialogResult)
+        {
+            _notesViewModel.RequestClose -= NotesViewModel_RequestClose;
+            DialogResult = dialogResult;
         }
     }
 }

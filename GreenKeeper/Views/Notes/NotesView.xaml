@@ -25,7 +25,7 @@
 
         <!-- Notes of the plant -->
         <TextBox Grid.Row="1"
-               Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}"
+               Text="{Binding EditableNotes, UpdateSourceTrigger=PropertyChanged}"
                Background="#2C2C2E"
                Foreground="#F0F0EE"
                CaretBrush="#F0F0EE"
@@ -46,13 +46,14 @@
             
             <Button Style="{StaticResource MediumDarkButton}"
                     Content="Save"
-                    Padding="10" />
+                    Padding="10"
+                    Command="{Binding SaveCommand}" />
 
             <Button Style="{StaticResource MediumDarkButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"
                     Padding="10"
-                    IsCancel="True" />
+                    Command="{Binding CancelCommand}" />
         </StackPanel>
 
     </Grid>
