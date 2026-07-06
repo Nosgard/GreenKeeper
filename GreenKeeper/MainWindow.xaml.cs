@@ -2,6 +2,7 @@
 using GreenKeeper.Repositories;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
+using GreenKeeper.Views.AddPlantWizard;
 using GreenKeeper.Views.Notes;
 using System.Text;
 using System.Windows;
@@ -30,6 +31,7 @@ namespace GreenKeeper
         {
             InitializeComponent();
             _mainViewModel = new MainViewModel(new PlantRepository());
+            _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
 
             // Subscription to the event that fires "OpenNotesCommand" in the MainViewModel.
             // Opening a new window for the notes (NotesView) does not happen in the ViewModel
@@ -47,6 +49,15 @@ namespace GreenKeeper
                 Owner = this
             };
             notesView.ShowDialog();
+        }
+
+        private void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
+        {
+            var WizardView = new AddPlantWizardView
+            {
+                Owner = this
+            };
+            WizardView.ShowDialog();
         }
     }
 }

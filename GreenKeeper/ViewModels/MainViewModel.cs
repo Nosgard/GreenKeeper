@@ -43,7 +43,12 @@ namespace GreenKeeper.ViewModels
             _plantRepository = plantRepository;
             _plants = new ObservableCollection<Plant>(_plantRepository.GetPlants());
 
+            // Add Plant Wizard related Command
+            AddPlantCommand = new RelayCommand(
+                execute: _ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
 
+
+            // Notes related Command
             OpenNotesCommand = new RelayCommand(
                 execute: _ => OpenNotesRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
@@ -124,6 +129,11 @@ namespace GreenKeeper.ViewModels
         // Will be subscribed by MainWindow.xaml.cs (for more information, go there).
         // Code-Behind opens the window (View), while the ViewModel does not know any Window-Class
         public event EventHandler<Plant>? OpenNotesRequested;
+
+
+        // Add Plant Wizard Section
+        public ICommand AddPlantCommand { get; }
+        public event EventHandler? AddPlantRequested;
 
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;

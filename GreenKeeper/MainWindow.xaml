@@ -85,8 +85,8 @@
                     Style="{StaticResource BigDarkButton}"
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
-                    
-                    Content="+  Add Plant"></Button>
+                    Content="+  Add Plant"
+                    Command="{Binding AddPlantCommand}"/>
         </Grid>
 
         <!-- Dashboard -->
