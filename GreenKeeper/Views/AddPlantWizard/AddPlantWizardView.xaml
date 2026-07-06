@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:GreenKeeper.ViewModels.AddPlantWizard.Steps"
         mc:Ignorable="d"
         Title="Add Plant" Height="300" Width="450"
+        MinWidth="400"
+        MinHeight="260"
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner">
     
@@ -26,6 +28,36 @@
                      BorderBrush="#3A3D47"
                      Padding="8"
                      FontSize="14" />
+            </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type local:WateringStepViewModel}">
+            <StackPanel Margin="20">
+                <TextBlock Text="* Enter the period for watering"
+                       Foreground="#F0F0EE"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Margin="0, 0, 0, 12" />
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                         Width="80"
+                         Background="#2C2C2E"
+                         Foreground="#F0F0EE"
+                         CaretBrush="#F0F0EE"
+                         BorderThickness="1"
+                         BorderBrush="#3A3D47"
+                         Padding="8"
+                         FontSize="14" />
+
+                    <ComboBox ItemsSource="{Binding AvailableUnits}"
+                          DisplayMemberPath="Value"
+                          SelectedValuePath="Key"
+                          SelectedValue="{Binding SelectedUnit}"
+                          Width="140"
+                          Margin="10, 0, 0, 0"
+                          Padding="8" />
+                </StackPanel>
             </StackPanel>
         </DataTemplate>
     </Window.Resources>

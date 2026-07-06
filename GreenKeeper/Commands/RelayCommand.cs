@@ -33,5 +33,16 @@ namespace GreenKeeper.Commands
             add => CommandManager.RequerySuggested += value;
             remove => CommandManager.RequerySuggested -= value;
         }
+
+        /// <summary>
+        /// Manual Firing of CanExecuteChanged in case CanExecute
+        /// can change when a state was changed (e.g. switching steps in the Wizard)
+        /// and not by a direct UI-Interaction, CommandManager.RequerySuggested would
+        /// react on anyways
+        /// </summary>
+        public void RaiseCanExecuteChanged()
+        {
+            CommandManager.InvalidateRequerySuggested();
+        }
     }
 }
