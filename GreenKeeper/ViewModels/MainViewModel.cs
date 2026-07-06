@@ -56,8 +56,16 @@ namespace GreenKeeper.ViewModels
             set { _plants = value; OnPropertyChanged(nameof(Plants)); }
         }
 
-        // One card per defined CareType. The view models of each CareType contain their own metadata
-        // For more information, go to: GreenKeeper/ViewModels/CareStatuses
+        /// <summary>
+        /// One card per defined CareType. Depending on the set care types,
+        /// only the cards of the allocated care types will appear in the status.
+        /// 
+        /// Important!
+        /// The watering schedule is mandatory for all plants, which means that
+        /// it's status card is always visible.
+        /// The fertilizing schedule and the separate sunlight requirement are optional
+        /// and will not show up if they are not set to a plant
+        /// </summary>
         public IEnumerable<CareStatusViewModel> CareStatuses
         {
             get
@@ -70,9 +78,21 @@ namespace GreenKeeper.ViewModels
                 CareSchedule? ScheduleFor(CareType type) =>
                     SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
+                // The watering schedule is mandatory for every plant
                 yield return new WateringStatusViewModel(ScheduleFor(CareType.Water));
-                yield return new FertilizingStatusViewModel(ScheduleFor(CareType.Nutrients));
-                yield return new SunlightStatusViewModel(SelectedPlant.SunlightRequirement);
+
+                // The fertilizing schedule is optional (only show the status if set to a plant)
+                var fertilizingSchedule = ScheduleFor(CareType.Nutrients);
+                if (fertilizingSchedule != null)
+                {
+                    yield return new FertilizingStatusViewModel(ScheduleFor(CareType.Nutrients));
+                }
+
+                // The sunlight requirement is optional (only show the status if set to a plant)
+                if (SelectedPlant.SunlightRequirement != null)
+                {
+                    yield return new SunlightStatusViewModel(SelectedPlant.SunlightRequirement);
+                }
             }
         }
 

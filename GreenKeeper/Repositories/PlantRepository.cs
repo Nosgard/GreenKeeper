@@ -31,7 +31,8 @@ namespace GreenKeeper.Repositories
 
                     CareSchedules = new List<CareSchedule>
                     {
-                        new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(0)}
+                        new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(0)},
+                        new CareSchedule { Care = CareType.Nutrients, NextDueAt = DateTime.Now.AddDays(20)},
                     }
                 },
                 new Plant {
