@@ -10,6 +10,7 @@ namespace GreenKeeper.Models.Enums
     {
         Day,
         Week,
-        Month
+        Month,
+        Year
     }
 }
