@@ -1,6 +1,7 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps.Active;
+using GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.CareStatuses;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace GreenKeeper.ViewModels
         private readonly PlantNameStepViewModel _plantNameStepViewModel = new PlantNameStepViewModel();
         private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
         private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
+        private readonly SunlightStepViewModel _sunlightStepViewModel = new SunlightStepViewModel();
 
         private readonly List<IWizardStepViewModel> _steps;
         private int _currentStepIndex;
@@ -31,6 +33,7 @@ namespace GreenKeeper.ViewModels
                 _plantNameStepViewModel,
                 _wateringStepViewModel,
                 _fertilizingStepViewModel,
+                _sunlightStepViewModel,
             };
 
             // Make the current step ready
@@ -71,10 +74,19 @@ namespace GreenKeeper.ViewModels
                 _currentStepIndex++;
                 CurrentStep = _steps[_currentStepIndex];
             }
+            else
             {
-                // Placeholder.
-                // Once Fertilizing and Sunlighting are included, a Finish-Command will follow
+                // Last step completed? Close the Wizard
+                Finish();
             }
+        }
+
+        private void Finish()
+        {
+            // Method currently under construction.
+            // This method will take all collected data and create
+            // a new Plant-Object that will be added to the ListView
+            RequestClose?.Invoke(this, true);
         }
 
         private void Cancel()
