@@ -1,5 +1,7 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps;
+using GreenKeeper.ViewModels.AddPlantWizard.Steps.Active;
+using GreenKeeper.ViewModels.CareStatuses;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +18,7 @@ namespace GreenKeeper.ViewModels
         // Will be turned into a Plant-Object by the end of the Wizard
         private readonly PlantNameStepViewModel _plantNameStepViewModel = new PlantNameStepViewModel();
         private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
+        private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
 
         private readonly List<IWizardStepViewModel> _steps;
         private int _currentStepIndex;
@@ -27,12 +30,12 @@ namespace GreenKeeper.ViewModels
             {
                 _plantNameStepViewModel,
                 _wateringStepViewModel,
+                _fertilizingStepViewModel,
             };
 
             // Make the current step ready
             _currentStepIndex = 0;
             CurrentStep = _steps[_currentStepIndex];
-            CurrentStep = _plantNameStepViewModel;
 
             NextCommand = new RelayCommand(
                 execute: _ => GoNext(),

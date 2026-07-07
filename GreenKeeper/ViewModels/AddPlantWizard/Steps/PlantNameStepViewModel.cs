@@ -31,6 +31,9 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
         // Mandatory: Only active, when there is no empty name
         public bool CanProceed => !string.IsNullOrWhiteSpace(PlantName);
 
+        // Because the step is mandatory, the button always shows "Next"
+        public string NextButtonLabel => "Next";
+
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged(string propertyName)

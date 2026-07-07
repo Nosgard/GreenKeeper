@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GreenKeeper.ViewModels.AddPlantWizard.Steps"
+        xmlns:steps="clr-namespace:GreenKeeper.ViewModels.AddPlantWizard.Steps"
+        xmlns:activeSteps="clr-namespace:GreenKeeper.ViewModels.AddPlantWizard.Steps.Active"
         mc:Ignorable="d"
         Title="Add Plant" Height="300" Width="450"
         MinWidth="400"
@@ -12,7 +13,7 @@
         WindowStartupLocation="CenterOwner">
     
     <Window.Resources>
-        <DataTemplate DataType="{x:Type local:PlantNameStepViewModel}">
+        <DataTemplate DataType="{x:Type steps:PlantNameStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Enter a name for the plant"
                        Foreground="#F0F0EE"
@@ -31,7 +32,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type local:WateringStepViewModel}">
+        <DataTemplate DataType="{x:Type activeSteps:WateringStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="* Enter the period for watering"
                        Foreground="#F0F0EE"
@@ -60,6 +61,36 @@
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type activeSteps:FertilizingStepViewModel}">
+            <StackPanel Margin="20">
+                <TextBlock Text="Enter the period for fertilizing (optional)"
+                   Foreground="#F0F0EE"
+                   FontSize="18"
+                   FontWeight="SemiBold"
+                   Margin="0, 0, 0, 12" />
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                     Width="80"
+                     Background="#2C2C2E"
+                     Foreground="#F0F0EE"
+                     CaretBrush="#F0F0EE"
+                     BorderThickness="1"
+                     BorderBrush="#3A3D47"
+                     Padding="8"
+                     FontSize="14" />
+
+                    <ComboBox ItemsSource="{Binding AvailableUnits}"
+                      DisplayMemberPath="Value"
+                      SelectedValuePath="Key"
+                      SelectedValue="{Binding SelectedUnit}"
+                      Width="140"
+                      Margin="10, 0, 0, 0"
+                      Padding="8" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
     </Window.Resources>
 
     <Grid Margin="20">
@@ -80,7 +111,7 @@
                 Command="{Binding CancelCommand}" />
 
             <Button Style="{StaticResource MediumDarkButton}"
-                Content="Next"
+                Content="{Binding CurrentStep.NextButtonLabel}"
                 Margin="10, 0, 0, 0"
                 Padding="10"
                 Command="{Binding NextCommand}" />

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
 {
-    public abstract class ActiveStepViewModel
+    public abstract class ActiveStepViewModel : IWizardStepViewModel
     {
         private string _amountText = string.Empty;
 
@@ -24,6 +24,7 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
                 _amountText = value;
                 OnPropertyChanged(nameof(AmountText));
                 OnPropertyChanged(nameof(CanProceed));
+                OnPropertyChanged(nameof(NextButtonLabel));
             }
         }
 
