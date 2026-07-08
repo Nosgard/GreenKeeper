@@ -135,6 +135,11 @@
                       Margin="10, 0, 0, 0"
                       Padding="8" />
                 </StackPanel>
+
+                <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
+                   Foreground="#6A6A66"
+                   FontSize="12"
+                   Margin="0, 6, 0, 0" />
             </StackPanel>
         </DataTemplate>
     </Window.Resources>
