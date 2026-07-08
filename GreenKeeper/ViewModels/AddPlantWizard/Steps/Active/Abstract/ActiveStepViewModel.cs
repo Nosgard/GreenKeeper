@@ -40,6 +40,12 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
                 }
                 _selectedUnit = value;
                 OnPropertyChanged(nameof(SelectedUnit));
+                OnPropertyChanged(nameof(MaxAmount));
+
+                // An entered amount can be invalid with the new unit (e.g 300 for days is valid but not for years).
+                // Therefore CanProceed and NextButtonLabel are indespensable when changing the unit
+                OnPropertyChanged(nameof(CanProceed));
+                OnPropertyChanged(nameof(NextButtonLabel));
             }
         }
 
@@ -60,11 +66,32 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
             };
 
         /// <summary>
+        /// Every available unit has a maximum amount to prevent misuse.
+        /// The limits for all active steps (for watering and fertilizing)
+        /// can be set from here
+        /// </summary>
+        private static readonly Dictionary<TimeUnit, int> MaxAmountsByUnit = new()
+        {
+            { TimeUnit.Hours, 168 },    // 168 Hours = 1 Week
+            { TimeUnit.Days, 365 },     // 365 Days = 1 Year
+            { TimeUnit.Weeks, 52 },     // 52 Weeks = 1 Year
+            { TimeUnit.Months, 24 },    // 24 Months = 2 Years
+            { TimeUnit.Years, 10 },
+        };
+
+        // Set the limit for the selected unit
+        public int MaxAmount => MaxAmountsByUnit[SelectedUnit];
+
+        /// <summary>
         /// The amount needs to have a positive number.
         /// In the context of watering it has the same meaning as CanProceed (mandatory).
         /// Fertilizing is optional is used as a help value (for more info go to NextButtonLabel)
+        /// 
+        /// Important!
+        /// The amount is only valid, when it's positive (as mentioned before) and
+        /// is underneath the maximum of the selected unit (for more go to MaxAmountsByUnit)
         /// </summary>
-        protected bool HasValidAmount => int.TryParse(AmountText, out int amount) && amount > 0;
+        protected bool HasValidAmount => int.TryParse(AmountText, out int amount) && amount > 0 && amount <= MaxAmount;
 
         // Mandatory for watering + optional for fertilizing.
         // Will be implemented by the affected class
