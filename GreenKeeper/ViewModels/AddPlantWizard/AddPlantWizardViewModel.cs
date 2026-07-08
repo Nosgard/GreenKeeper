@@ -44,6 +44,10 @@ namespace GreenKeeper.ViewModels
                 execute: _ => GoNext(),
                 canExecute: _ => CurrentStep.CanProceed);
 
+            BackCommand = new RelayCommand(
+                execute: _ => GoBack(),
+                canExecute: _ => _currentStepIndex > 0);
+
             CancelCommand = new RelayCommand(
                 execute: _ => Cancel());
         }
@@ -58,10 +62,12 @@ namespace GreenKeeper.ViewModels
                 _currentStep = value;
                 OnPropertyChanged(nameof(CurrentStep));
                 (NextCommand as RelayCommand)?.RaiseCanExecuteChanged();
+                (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
             }
         }
 
         public ICommand NextCommand { get; }
+        public ICommand BackCommand { get; }
         public ICommand CancelCommand { get; }
 
         // Signalize the View, that the Wizard will be closed
@@ -78,6 +84,17 @@ namespace GreenKeeper.ViewModels
             {
                 // Last step completed? Close the Wizard
                 Finish();
+            }
+        }
+
+        private void GoBack()
+        {
+            // Usually canExecute makes sure the Index never gets called at 0,
+            // but once GoBack() will be called elsewhere in the future, cover this case
+            if (_currentStepIndex > 0)
+            {
+                _currentStepIndex--;
+                CurrentStep = _steps[_currentStepIndex];
             }
         }
 
