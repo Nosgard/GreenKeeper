@@ -9,6 +9,8 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
 {
     public class PlantNameStepViewModel : IWizardStepViewModel
     {
+        private const int MAXNAMELENGTH = 50;
+
         private string _plantName = string.Empty;
 
         public string PlantName {
@@ -25,11 +27,22 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
                 // CanProceed depends on PlantName.
                 // Notify so that the Next-Button can be activated/deactivated
                 OnPropertyChanged(nameof(CanProceed));
+
+                // Update the UI on every change so that a Live-Counter
+                // for the remaining characters can follow along
+                OnPropertyChanged(nameof(CharactersRemaining));
+
+
             }
         }
 
-        // Mandatory: Only active, when there is no empty name
-        public bool CanProceed => !string.IsNullOrWhiteSpace(PlantName);
+        // Helper that is used to show the remaining characters in the UI
+        public int CharactersRemaining => MAXNAMELENGTH - PlantName.Length;
+
+
+        // Mandatory: Only active, when the name is not empty and is underneath
+        // the maximum length
+        public bool CanProceed => !string.IsNullOrWhiteSpace(PlantName) && PlantName.Length <= MAXNAMELENGTH;
 
         // Because the step is mandatory, the button always shows "Next"
         public string NextButtonLabel => "Next";

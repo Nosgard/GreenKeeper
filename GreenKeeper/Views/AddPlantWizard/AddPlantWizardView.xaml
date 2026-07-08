@@ -23,13 +23,19 @@
                        Margin="0, 0, 0, 12" />
 
                 <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}"
-                     Background="#2C2C2E"
-                     Foreground="#F0F0EE"
-                     CaretBrush="#F0F0EE"
-                     BorderThickness="1"
-                     BorderBrush="#3A3D47"
-                     Padding="8"
-                     FontSize="14" />
+                         MaxLength="50"
+                         Background="#2C2C2E"
+                         Foreground="#F0F0EE"
+                         CaretBrush="#F0F0EE"
+                         BorderThickness="1"
+                         BorderBrush="#3A3D47"
+                         Padding="8"
+                         FontSize="14" />
+
+                <TextBlock Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}"
+                           Foreground="#6A6A66"
+                           FontSize="12"
+                           Margin="0, 6, 0, 0" />
             </StackPanel>
         </DataTemplate>
 
