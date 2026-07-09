@@ -60,13 +60,13 @@
                          Padding="8"
                          FontSize="14" />
 
-                    <ComboBox ItemsSource="{Binding AvailableUnits}"
-                          DisplayMemberPath="Value"
-                          SelectedValuePath="Key"
-                          SelectedValue="{Binding SelectedUnit}"
-                          Width="140"
-                          Margin="10, 0, 0, 0"
-                          Padding="8" />
+                    <ComboBox Style="{StaticResource DarkComboBox}"
+                              ItemsSource="{Binding AvailableUnits}"
+                              SelectedValuePath="Key"
+                              SelectedValue="{Binding SelectedUnit}"
+                              Width="140"
+                              Margin="10, 0, 0, 0"
+                              Padding="8" />
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
@@ -95,13 +95,13 @@
                      Padding="8"
                      FontSize="14" />
 
-                    <ComboBox ItemsSource="{Binding AvailableUnits}"
-                      DisplayMemberPath="Value"
-                      SelectedValuePath="Key"
-                      SelectedValue="{Binding SelectedUnit}"
-                      Width="140"
-                      Margin="10, 0, 0, 0"
-                      Padding="8" />
+                    <ComboBox Style="{StaticResource DarkComboBox}"
+                              ItemsSource="{Binding AvailableUnits}"
+                              SelectedValuePath="Key"
+                              SelectedValue="{Binding SelectedUnit}"
+                              Width="140"
+                              Margin="10, 0, 0, 0"
+                              Padding="8" />
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
@@ -135,13 +135,13 @@
                        VerticalAlignment="Center"
                        Margin="8, 0, 0, 0" />
 
-                    <ComboBox ItemsSource="{Binding AvailablePeriods}"
-                      DisplayMemberPath="Value"
-                      SelectedValuePath="Key"
-                      SelectedValue="{Binding SelectedPeriod}"
-                      Width="140"
-                      Margin="10, 0, 0, 0"
-                      Padding="8" />
+                    <ComboBox Style="{StaticResource DarkComboBox}"
+                              ItemsSource="{Binding AvailablePeriods}"
+                              SelectedValuePath="Key"
+                              SelectedValue="{Binding SelectedPeriod}"
+                              Width="140"
+                              Margin="10, 0, 0, 0"
+                              Padding="8" />
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
