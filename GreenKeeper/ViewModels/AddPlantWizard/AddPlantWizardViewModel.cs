@@ -21,12 +21,19 @@ namespace GreenKeeper.ViewModels
         private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
         private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
         private readonly SunlightStepViewModel _sunlightStepViewModel = new SunlightStepViewModel();
+        private readonly SummaryStepViewModel _summaryStepViewModel;
 
         private readonly List<IWizardStepViewModel> _steps;
         private int _currentStepIndex;
 
         public AddPlantWizardViewModel()
         {
+            _summaryStepViewModel = new SummaryStepViewModel(
+                _plantNameStepViewModel,
+                _wateringStepViewModel,
+                _fertilizingStepViewModel,
+                _sunlightStepViewModel);
+
             // Order of the steps (ViewModels)
             _steps = new List<IWizardStepViewModel>
             {
@@ -34,6 +41,7 @@ namespace GreenKeeper.ViewModels
                 _wateringStepViewModel,
                 _fertilizingStepViewModel,
                 _sunlightStepViewModel,
+                _summaryStepViewModel,
             };
 
             // Make the current step ready
@@ -63,6 +71,13 @@ namespace GreenKeeper.ViewModels
                 OnPropertyChanged(nameof(CurrentStep));
                 (NextCommand as RelayCommand)?.RaiseCanExecuteChanged();
                 (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
+
+                // Once you reach the summary step, all values from the prior properties
+                // must be read (e.g. in case the user presses the Back-Button an changes the values)
+                if (value is SummaryStepViewModel summary)
+                {
+                    summary.Refresh();
+                }
             }
         }
 
@@ -82,7 +97,6 @@ namespace GreenKeeper.ViewModels
             }
             else
             {
-                // Last step completed? Close the Wizard
                 Finish();
             }
         }

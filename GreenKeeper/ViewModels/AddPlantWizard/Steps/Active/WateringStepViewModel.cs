@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
 {
-    class WateringStepViewModel : ActiveStepViewModel
+    public class WateringStepViewModel : ActiveStepViewModel
     {
         // Mandatory field: Next will be active, when a valid number was entered
         public override bool CanProceed => HasValidAmount;
