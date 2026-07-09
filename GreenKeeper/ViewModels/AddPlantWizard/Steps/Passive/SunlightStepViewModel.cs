@@ -23,6 +23,7 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive
                 _amountText = value;
                 OnPropertyChanged(nameof(AmountText));
                 OnPropertyChanged(nameof(CanProceed));
+                OnPropertyChanged(nameof(NextButtonLabel));
             }
         }
 
@@ -77,14 +78,21 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive
         // Set the limit for the selected period
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
-        // Special case for sunlighting, which is optional and the last step.
-        // The user must enter a valid number of hours or keep it empty to finish
-        public bool CanProceed =>
-            string.IsNullOrWhiteSpace(AmountText) ||
-            (int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount);
+        /// <summary>
+        /// The amount needs to have a positive number.
+        /// Sunlight is a special case because it's passive.
+        /// You enter a positive amount of hours by period
+        /// that is underneath the maximum
+        /// </summary>
+        private bool HasValidAmount =>
+            int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 
-        // Last step in the Wizard, so "Finish" in the Next-Button is without exception
-        public string NextButtonLabel => "Finish";
+        // Basically the same as for the active steps (watering and fertilizing).
+        // The only difference is that you enter a positive amount of hours by period (as mentioned above) or keep it empty
+        public bool CanProceed => string.IsNullOrWhiteSpace(AmountText) || HasValidAmount;
+
+        // Depending on the entered amount of hours by period show "Next" or "Skip"
+        public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";
 
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
