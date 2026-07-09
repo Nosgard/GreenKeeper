@@ -204,15 +204,15 @@
                     Command="{Binding BackCommand}" />
 
             <Button Style="{StaticResource MediumDarkButton}"
-                Content="Cancel"
-                Padding="10"
-                Command="{Binding CancelCommand}" />
-
-            <Button Style="{StaticResource MediumDarkButton}"
                 Content="{Binding CurrentStep.NextButtonLabel}"
-                Margin="10, 0, 0, 0"
                 Padding="10"
                 Command="{Binding NextCommand}" />
+
+            <Button Style="{StaticResource MediumDarkButton}"
+                    Content="Cancel"
+                    Margin="10, 0, 0, 0"
+                    Padding="10"
+                    Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>
 </Window>
