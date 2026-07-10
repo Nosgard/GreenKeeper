@@ -1,4 +1,5 @@
-﻿using GreenKeeper.ViewModels;
+﻿using GreenKeeper.Models;
+using GreenKeeper.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,10 @@ namespace GreenKeeper.Views.AddPlantWizard
             _addPlantWizardViewModel.RequestClose += AddPlantWizardViewModel_RequestClose;
             this.DataContext = _addPlantWizardViewModel;
         }
+
+        // After the Wizard is finished, read the created Plant-Object from the ViewModel.
+        // The Plant-Object is null if the Wizard was canceled
+        public Plant? CreatedPlant => _addPlantWizardViewModel.CreatedPlant;
 
         private void AddPlantWizardViewModel_RequestClose(object? sender, bool dialogResult)
         {

@@ -15,10 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Converters\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Resource Include="Resources\Icons\Pill.png" />
     <Resource Include="Resources\Icons\Sun.png" />
     <Resource Include="Resources\Icons\Waterdrop.png" />

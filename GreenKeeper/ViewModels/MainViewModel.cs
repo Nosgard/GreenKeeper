@@ -135,6 +135,13 @@ namespace GreenKeeper.ViewModels
         public ICommand AddPlantCommand { get; }
         public event EventHandler? AddPlantRequested;
 
+        // Add a new plant to the ListView that was created in the Wizard.
+        // No manual OnPropertyChanged needed because it's being added to the ObservableCollection
+        public void AddPlant(Plant plant)
+        {
+            Plants.Add(plant);
+        }
+
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
 

@@ -1,4 +1,7 @@
 ﻿using GreenKeeper.Commands;
+using GreenKeeper.Converters;
+using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps.Active;
 using GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive;
@@ -88,6 +91,10 @@ namespace GreenKeeper.ViewModels
         // Signalize the View, that the Wizard will be closed
         public event EventHandler<bool>? RequestClose;
 
+        // After finishing the Wizard, the View reads the property, when RequestClose closed the window.
+        // Only this ViewModel is allowed to set the created plant
+        public Plant? CreatedPlant { get; private set; }
+
         private void GoNext()
         {
             if (_currentStepIndex < _steps.Count - 1)
@@ -114,15 +121,58 @@ namespace GreenKeeper.ViewModels
 
         private void Finish()
         {
-            // Method currently under construction.
-            // This method will take all collected data and create
-            // a new Plant-Object that will be added to the ListView
+            CreatedPlant = BuildPlant();
             RequestClose?.Invoke(this, true);
         }
 
         private void Cancel()
         {
             RequestClose?.Invoke(this, false);
+        }
+
+        // Section for building a plant
+
+        private Plant BuildPlant()
+        {
+            var plant = new Plant
+            {
+                Name = _plantNameStepViewModel.PlantName
+            };
+
+            // Watering: Mandatory field, so no further check is needed.
+            // NextDueAt = now + time span calculated from the amount and unit in the related step
+            plant.CareSchedules.Add(new CareSchedule
+            {
+                Care = CareType.Water,
+                NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
+                    int.Parse(_wateringStepViewModel.AmountText),
+                    _wateringStepViewModel.SelectedUnit))
+            });
+
+            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value
+            if (int.TryParse(_fertilizingStepViewModel.AmountText, out int fertilizingAmount) && fertilizingAmount > 0)
+            {
+                plant.CareSchedules.Add(new CareSchedule
+                {
+                    Care = CareType.Nutrients,
+                    NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
+                        fertilizingAmount,
+                        _fertilizingStepViewModel.SelectedUnit))
+                });
+            }
+
+            // Sunlight: Optional. Unlike Watering/Fertilizing you don't need any calculation.
+            // The Wizard already asks for values in the exact same structure (Hours + Period)
+            if (int.TryParse(_sunlightStepViewModel.AmountText, out int sunlightHours) && sunlightHours > 0)
+            {
+                plant.SunlightRequirement = new SunlightRequirement
+                {
+                    Hours = sunlightHours,
+                    Period = _sunlightStepViewModel.SelectedPeriod
+                };
+            }
+
+            return plant;
         }
 
         // Implementation of INotifyPropertyChanged

@@ -57,7 +57,13 @@ namespace GreenKeeper
             {
                 Owner = this
             };
-            WizardView.ShowDialog();
+
+            bool? hasResult = WizardView.ShowDialog();
+
+            if (hasResult == true && WizardView.CreatedPlant != null)
+            {
+                _mainViewModel.AddPlant(WizardView.CreatedPlant);
+            }
         }
     }
 }
