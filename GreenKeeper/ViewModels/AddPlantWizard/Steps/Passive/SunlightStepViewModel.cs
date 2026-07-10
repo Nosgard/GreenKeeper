@@ -44,6 +44,7 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive
                 // An entered amount can be invalid with the new period (e.g. 100 is valid for weeks but not for days).
                 // Therefore CanProceed is indispensable when changing the unit
                 OnPropertyChanged(nameof(CanProceed));
+                OnPropertyChanged(nameof(NextButtonLabel));
             }
         }
 
@@ -84,12 +85,12 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive
         /// You enter a positive amount of hours by period
         /// that is underneath the maximum
         /// </summary>
-        private bool HasValidAmount =>
+        public bool HasValidAmount =>
             int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 
         // Basically the same as for the active steps (watering and fertilizing).
         // The only difference is that you enter a positive amount of hours by period (as mentioned above) or keep it empty
-        public bool CanProceed => string.IsNullOrWhiteSpace(AmountText) || HasValidAmount;
+        public bool CanProceed => true;
 
         // Depending on the entered amount of hours by period show "Next" or "Skip"
         public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";

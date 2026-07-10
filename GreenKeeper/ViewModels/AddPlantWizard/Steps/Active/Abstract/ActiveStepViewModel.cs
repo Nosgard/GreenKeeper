@@ -91,7 +91,7 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
         /// The amount is only valid, when it's positive (as mentioned before) and
         /// is underneath the maximum of the selected unit (for more go to MaxAmountsByUnit)
         /// </summary>
-        protected bool HasValidAmount => int.TryParse(AmountText, out int amount) && amount > 0 && amount <= MaxAmount;
+        public bool HasValidAmount => int.TryParse(AmountText, out int amount) && amount > 0 && amount <= MaxAmount;
 
         // Mandatory for watering + optional for fertilizing.
         // Will be implemented by the affected class

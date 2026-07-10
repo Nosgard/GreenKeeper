@@ -34,12 +34,12 @@ namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
             $"{_wateringStepViewModel.AmountText} {GetUnit(_wateringStepViewModel)}";
 
         // Fertilizing is optional - only show a value if a value was entered (not skipped)
-        public bool HasFertilizing => !string.IsNullOrEmpty(_fertilizingStepViewModel.AmountText);
+        public bool HasFertilizing => _fertilizingStepViewModel.HasValidAmount;
         public string Fertilizing =>
             $"{_fertilizingStepViewModel.AmountText} {GetUnit(_fertilizingStepViewModel)}";
 
         // Sunlight is optional - the same principle as Fertilizing but with a value by period
-        public bool HasSunlight => !string.IsNullOrEmpty(_sunlightStepViewModel.AmountText);
+        public bool HasSunlight => _sunlightStepViewModel.HasValidAmount;
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
 

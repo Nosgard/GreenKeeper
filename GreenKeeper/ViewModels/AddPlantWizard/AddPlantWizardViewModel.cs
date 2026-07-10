@@ -150,24 +150,24 @@ namespace GreenKeeper.ViewModels
             });
 
             // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value
-            if (int.TryParse(_fertilizingStepViewModel.AmountText, out int fertilizingAmount) && fertilizingAmount > 0)
+            if (_fertilizingStepViewModel.HasValidAmount)
             {
                 plant.CareSchedules.Add(new CareSchedule
                 {
                     Care = CareType.Nutrients,
                     NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                        fertilizingAmount,
-                        _fertilizingStepViewModel.SelectedUnit))
+                        int.Parse(_wateringStepViewModel.AmountText),
+                        _wateringStepViewModel.SelectedUnit))
                 });
             }
 
             // Sunlight: Optional. Unlike Watering/Fertilizing you don't need any calculation.
             // The Wizard already asks for values in the exact same structure (Hours + Period)
-            if (int.TryParse(_sunlightStepViewModel.AmountText, out int sunlightHours) && sunlightHours > 0)
+            if (_sunlightStepViewModel.HasValidAmount)
             {
                 plant.SunlightRequirement = new SunlightRequirement
                 {
-                    Hours = sunlightHours,
+                    Hours = int.Parse(_sunlightStepViewModel.AmountText),
                     Period = _sunlightStepViewModel.SelectedPeriod
                 };
             }
