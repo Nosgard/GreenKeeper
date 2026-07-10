@@ -34,6 +34,7 @@ namespace GreenKeeper.ViewModels.CareStatuses
                     SunlightPeriod.Day => "day",
                     SunlightPeriod.Week => "week",
                     SunlightPeriod.Month => "month",
+                    SunlightPeriod.Year => "year",
                     _ => string.Empty
                 };
 
