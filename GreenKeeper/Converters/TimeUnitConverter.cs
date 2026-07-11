@@ -85,7 +85,14 @@ namespace GreenKeeper.Converters
                 _ => TimeUnit.Years
             };
 
-            int amount = (int)Math.Ceiling(absHours / HoursPerUnit[effectiveUnit]);
+            double rawAmount = absHours / HoursPerUnit[effectiveUnit];
+
+
+            // Given time is overdue -> Ceil the amount of time to make sure delays won't be underestimated
+            // Given time is due -> Round the amount of time to the nearest whole number
+            int amount = isOverdue
+                ? (int)Math.Ceiling(rawAmount)
+                : (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
 
             if (amount == 0)
             {
