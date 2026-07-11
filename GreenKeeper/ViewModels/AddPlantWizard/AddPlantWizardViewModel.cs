@@ -138,12 +138,14 @@ namespace GreenKeeper.ViewModels
             {
                 Name = _plantNameStepViewModel.PlantName
             };
-
+            
             // Watering: Mandatory field, so no further check is needed.
+            // IntervalUnit: Saves the selected time unit for calculating the due date in hours later on (for more go to TimeUnitConverter -> ToDueDateText)
             // NextDueAt = now + time span calculated from the amount and unit in the related step
             plant.CareSchedules.Add(new CareSchedule
             {
                 Care = CareType.Water,
+                IntervalUnit = _wateringStepViewModel.SelectedUnit,
                 NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
                     int.Parse(_wateringStepViewModel.AmountText),
                     _wateringStepViewModel.SelectedUnit))
@@ -155,9 +157,10 @@ namespace GreenKeeper.ViewModels
                 plant.CareSchedules.Add(new CareSchedule
                 {
                     Care = CareType.Nutrients,
+                    IntervalUnit = _fertilizingStepViewModel.SelectedUnit,
                     NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                        int.Parse(_wateringStepViewModel.AmountText),
-                        _wateringStepViewModel.SelectedUnit))
+                        int.Parse(_fertilizingStepViewModel.AmountText),
+                        _fertilizingStepViewModel.SelectedUnit))
                 });
             }
 

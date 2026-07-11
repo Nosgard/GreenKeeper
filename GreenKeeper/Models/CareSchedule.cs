@@ -15,6 +15,8 @@ namespace GreenKeeper.Models
         public DateTime? LastCaredAt { get; set; }
         public DateTime? NextDueAt { get; set; }
 
+        public TimeUnit? IntervalUnit { get; set; }
+
         // Navigation property
         public Plant SelectedPlant { get; set; } = null!;
     }

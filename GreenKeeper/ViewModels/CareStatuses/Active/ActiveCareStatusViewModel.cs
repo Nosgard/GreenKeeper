@@ -1,4 +1,5 @@
-﻿using GreenKeeper.Models;
+﻿using GreenKeeper.Converters;
+using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
 using System;
@@ -19,43 +20,8 @@ namespace GreenKeeper.ViewModels.CareStatuses
             _schedule = schedule;
         }
 
-        // Calculate the next due date in days. The amount of days will be depicted in the card of the care status
-        public int? DaysUntilDue
-        {
-            get
-            {
-                if (_schedule?.NextDueAt == null)
-                {
-                    return null;
-                }
-                return (int)Math.Ceiling((_schedule.NextDueAt.Value - DateTime.Now).TotalDays);
-            }
-        }
-
-        // Depending on the left days, set a specific text
-        public override string StatusText
-        {
-            get
-            {
-                var days = DaysUntilDue;
-
-                if (days == null)
-                {
-                    return string.Empty;
-                }
-
-                if (days == 0)
-                {
-                    return "Today";
-                }
-
-                if (days < 0)
-                {
-                    return $"Overdue for {Math.Abs(days.Value)} day{(Math.Abs(days.Value) > 1 ? "s" : "")}";
-                }
-
-                return $"Due in {days} day{(days > 1 ? "s" : "")}";
-            }
-        }
+        // The whole logic for the conversion of the time units is being controlled by the TimeUnitConverter
+        public override string StatusText =>
+            TimeUnitConverter.ToDueDateText(_schedule?.NextDueAt);
     }
 }
