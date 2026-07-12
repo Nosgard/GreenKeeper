@@ -38,6 +38,7 @@
         <Setter Property="Foreground" Value="#F0F0EE" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="8, 6" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItem}" />
         <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior by WPF -->
         <Setter Property="ItemTemplate">
@@ -56,6 +57,7 @@
                                       Background="{TemplateBinding Background}"
                                       BorderBrush="{TemplateBinding BorderBrush}"
                                       BorderThickness="{TemplateBinding BorderThickness}"
+                                      Padding="{TemplateBinding Padding}"
                                       IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
                                       Focusable="False"
                                       ClickMode="Press">
@@ -64,6 +66,7 @@
                                     <Border Background="{TemplateBinding Background}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
+                                            Padding="{TemplateBinding Padding}"
                                             CornerRadius="4">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -88,7 +91,7 @@
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                           IsHitTestVisible="False"
-                                          Margin="8, 0, 24, 0"
+                                          Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left" />
 

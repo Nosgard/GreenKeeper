@@ -22,7 +22,7 @@
                           ItemsSource="{Binding AvailableCareTypes}"
                           SelectedValuePath="Key"
                           SelectedValue="{Binding SelectedCareType}"
-                          Width="200"
+                          Width="140"
                           HorizontalAlignment="Left"
                           Padding="8" />
             </StackPanel>
