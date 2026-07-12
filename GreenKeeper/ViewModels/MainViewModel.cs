@@ -47,6 +47,9 @@ namespace GreenKeeper.ViewModels
             AddPlantCommand = new RelayCommand(
                 execute: _ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
 
+            AddScheduleCommand = new RelayCommand(
+                execute: _ => AddScheduleRequested?.Invoke(this, SelectedPlant!),
+                canExecute: _ => SelectedPlant != null);
 
             // Notes related Command
             OpenNotesCommand = new RelayCommand(
@@ -140,6 +143,20 @@ namespace GreenKeeper.ViewModels
         public void AddPlant(Plant plant)
         {
             Plants.Add(plant);
+        }
+
+        // Add Schedule Wizard Section
+        public ICommand AddScheduleCommand { get; }
+        public event EventHandler<Plant>? AddScheduleRequested;
+
+        /// <summary>
+        /// Will be called after the AddScheduleWizard successfully applied a Care Schedule / Sunlight Requirement
+        /// on the selected Plant-Object. Because the Change doesn't apply via the ObservableCollection
+        /// (Plant was changed, not swapped) the UI doesn't need to be notified to show the new Status-Card
+        /// </summary>
+        public void RefreshCareStatuses()
+        {
+            OnPropertyChanged(nameof(CareStatuses));
         }
 
         // Implementation of INotifyPropertyChanged
