@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Add Schedule" Height="300" Width="450"
         Background="#1A1C22"
-        WindowStartupLocation="CenterOwner">
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
     <Window.Resources>
         <!-- Step 1: Selection of CareType -->
         <DataTemplate DataType="{x:Type selectionSteps:CareTypeSelectionStepViewModel}">
