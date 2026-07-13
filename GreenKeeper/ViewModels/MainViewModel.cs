@@ -52,6 +52,7 @@ namespace GreenKeeper.ViewModels
             AddPlantCommand = new RelayCommand(
                 execute: _ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
 
+            // Add Schedule Wizard related Command
             AddScheduleCommand = new RelayCommand(
                 execute: _ => AddScheduleRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
