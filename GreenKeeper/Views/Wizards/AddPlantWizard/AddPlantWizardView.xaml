@@ -11,9 +11,8 @@
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
-    
+
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
         <!-- Plant-Name Step -->
         <DataTemplate DataType="{x:Type steps:PlantNameStepViewModel}">

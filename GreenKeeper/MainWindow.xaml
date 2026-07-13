@@ -132,8 +132,9 @@
                     <TextBlock Text="Status"
                                Foreground="#F0F0EE"
                                FontSize="24"
-                               FontWeight="SemiBold" />
-                    
+                               FontWeight="SemiBold"
+                               Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
                     <!-- Status Cards (Watering, Nutrients, Sunlighting (missing)) -->
                     <ItemsControl ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}" />

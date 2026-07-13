@@ -10,6 +10,8 @@
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/AddPlantWizardStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

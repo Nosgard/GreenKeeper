@@ -131,8 +131,13 @@ namespace GreenKeeper.ViewModels
                 _SelectedPlant = value;
                 OnPropertyChanged(nameof(SelectedPlant));
                 OnPropertyChanged(nameof(CareStatuses));
+                OnPropertyChanged(nameof(IsPlantSelected));
             }
         }
+
+        // Check if a plant is selected.
+        // Useful for Visibility-Bindings like the Status-Title in the Dashboard
+        public bool IsPlantSelected => SelectedPlant != null;
 
         // Essential command to be bound to the Notes-Button in MainWIndow.xaml.
         // It is ICommand so that the View only binds the interface and
