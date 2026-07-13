@@ -1,10 +1,11 @@
-﻿using System;
+﻿using GreenKeeper.ViewModels.Wizards.Base.Abstract;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
+namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active
 {
     public class FertilizingStepViewModel : ActiveStepViewModel
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
+namespace GreenKeeper.ViewModels.Wizards.Base
 {
     public interface IWizardStepViewModel : INotifyPropertyChanged
     {

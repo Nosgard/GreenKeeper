@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.CareStatuses
+namespace GreenKeeper.ViewModels.CareStatuses.Passive
 {
     public class SunlightStatusViewModel : CareStatusViewModel
     {

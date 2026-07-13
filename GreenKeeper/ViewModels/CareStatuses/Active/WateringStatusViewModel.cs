@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.CareStatuses
+namespace GreenKeeper.ViewModels.CareStatuses.Active
 {
     public class WateringStatusViewModel : ActiveCareStatusViewModel
     {

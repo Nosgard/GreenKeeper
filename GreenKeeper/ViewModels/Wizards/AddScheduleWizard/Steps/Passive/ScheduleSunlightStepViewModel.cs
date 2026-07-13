@@ -1,5 +1,5 @@
 ﻿using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.AddPlantWizard.Steps;
+using GreenKeeper.ViewModels.Wizards.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddScheduleWizard
+namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive
 {
     /// <summary>
     /// Passive step just like in the AddPlantWizard, but mandatory

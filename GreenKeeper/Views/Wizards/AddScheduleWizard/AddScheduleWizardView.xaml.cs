@@ -1,6 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Services;
-using GreenKeeper.ViewModels.AddScheduleWizard;
+using GreenKeeper.ViewModels.Wizards.AddScheduleWizard;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace GreenKeeper.Views.AddScheduleWizard
+namespace GreenKeeper.Views.Wizards.AddScheduleWizard
 {
     /// <summary>
     /// Interaction logic for AddScheduleWizardView.xaml

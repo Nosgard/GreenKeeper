@@ -1,5 +1,7 @@
-﻿using GreenKeeper.ViewModels.AddPlantWizard.Steps.Active;
-using GreenKeeper.ViewModels.AddPlantWizard.Steps.Passive;
+﻿using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
+using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
+using GreenKeeper.ViewModels.Wizards.Base;
+using GreenKeeper.ViewModels.Wizards.Base.Abstract;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
+namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 {
     public class SummaryStepViewModel : IWizardStepViewModel
     {

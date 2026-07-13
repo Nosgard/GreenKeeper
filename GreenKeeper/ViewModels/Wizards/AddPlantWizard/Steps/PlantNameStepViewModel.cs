@@ -1,11 +1,12 @@
-﻿using System;
+﻿using GreenKeeper.ViewModels.Wizards.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddPlantWizard.Steps
+namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 {
     public class PlantNameStepViewModel : IWizardStepViewModel
     {

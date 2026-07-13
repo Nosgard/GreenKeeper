@@ -3,7 +3,10 @@ using GreenKeeper.Converters;
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Services;
-using GreenKeeper.ViewModels.AddPlantWizard.Steps;
+using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active;
+using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base;
+using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive;
+using GreenKeeper.ViewModels.Wizards.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace GreenKeeper.ViewModels.AddScheduleWizard
+namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 {
     public class AddScheduleWizardViewModel : INotifyPropertyChanged
     {

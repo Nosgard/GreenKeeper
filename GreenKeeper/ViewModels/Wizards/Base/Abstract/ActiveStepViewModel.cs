@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.ViewModels.Wizards.Base;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddPlantWizard.Steps.Active
+namespace GreenKeeper.ViewModels.Wizards.Base.Abstract
 {
     public abstract class ActiveStepViewModel : IWizardStepViewModel
     {

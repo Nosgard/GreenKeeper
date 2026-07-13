@@ -4,6 +4,8 @@ using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
 using GreenKeeper.ViewModels.CareStatuses;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
+using GreenKeeper.ViewModels.CareStatuses.Active;
+using GreenKeeper.ViewModels.CareStatuses.Passive;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

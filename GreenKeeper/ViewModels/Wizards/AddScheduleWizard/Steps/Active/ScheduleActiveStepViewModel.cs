@@ -1,11 +1,11 @@
-﻿using GreenKeeper.ViewModels.AddPlantWizard.Steps.Active;
+﻿using GreenKeeper.ViewModels.Wizards.Base.Abstract;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GreenKeeper.ViewModels.AddScheduleWizard
+namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active
 {
     /// <summary>
     /// Will be used for both Watering and Fertilizing, if the user

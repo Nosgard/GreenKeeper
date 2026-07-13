@@ -2,8 +2,8 @@
 using GreenKeeper.Repositories;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
-using GreenKeeper.Views.AddPlantWizard;
-using GreenKeeper.Views.AddScheduleWizard;
+using GreenKeeper.Views.Wizards.AddPlantWizard;
+using GreenKeeper.Views.Wizards.AddScheduleWizard;
 using GreenKeeper.Views.Notes;
 using System.Text;
 using System.Windows;
