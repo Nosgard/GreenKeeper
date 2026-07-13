@@ -2,6 +2,7 @@
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
+using GreenKeeper.Services;
 using GreenKeeper.ViewModels.CareStatuses;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
 using GreenKeeper.ViewModels.CareStatuses.Active;
@@ -20,6 +21,7 @@ namespace GreenKeeper.ViewModels
     public class MainViewModel : INotifyPropertyChanged
     {
         private readonly IPlantRepository _plantRepository;
+        private readonly IDialogService _dialogService;
         private ObservableCollection<Plant> _plants;
 
         // Set all plants for the ListView
@@ -40,9 +42,10 @@ namespace GreenKeeper.ViewModels
         /// If there is no plant selected, the button remains deactivated.
         /// </summary>
         /// <param name="plantRepository"></param>
-        public MainViewModel(IPlantRepository plantRepository)
+        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService)
         {
             _plantRepository = plantRepository;
+            _dialogService = dialogService;
             _plants = new ObservableCollection<Plant>(_plantRepository.GetPlants());
 
             // Add Plant Wizard related Command
@@ -51,6 +54,11 @@ namespace GreenKeeper.ViewModels
 
             AddScheduleCommand = new RelayCommand(
                 execute: _ => AddScheduleRequested?.Invoke(this, SelectedPlant!),
+                canExecute: _ => SelectedPlant != null);
+
+            // Delete Plant Button related Command
+            DeletePlantCommand = new RelayCommand(
+                execute: _ => DeleteSelectedPlant(),
                 canExecute: _ => SelectedPlant != null);
 
             // Notes related Command
@@ -150,6 +158,32 @@ namespace GreenKeeper.ViewModels
         // Add Schedule Wizard Section
         public ICommand AddScheduleCommand { get; }
         public event EventHandler<Plant>? AddScheduleRequested;
+
+        // Delete Plant Button Section
+        public ICommand DeletePlantCommand { get; }
+
+        private void DeleteSelectedPlant()
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            bool isConfirmed = _dialogService.Confirm(
+                $"Are you sure you want to delete \"{SelectedPlant.Name}\"? This cannot be undone.",
+                "Delete Plant");
+
+            if (!isConfirmed)
+            {
+                return;
+            }
+
+            Plants.Remove(SelectedPlant);
+
+            // After removing a plant, there is no "selected" plant.
+            // Prevent the Dashboard from presenting non-existing data
+            SelectedPlant = null;
+        }
 
         /// <summary>
         /// Will be called after the AddScheduleWizard successfully applied a Care Schedule / Sunlight Requirement

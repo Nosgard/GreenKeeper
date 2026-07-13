@@ -31,7 +31,7 @@ namespace GreenKeeper
         public MainWindow()
         {
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository());
+            _mainViewModel = new MainViewModel(new PlantRepository(), _dialogService);
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
 
