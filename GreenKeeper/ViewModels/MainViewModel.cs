@@ -104,13 +104,17 @@ namespace GreenKeeper.ViewModels
                 var fertilizingSchedule = ScheduleFor(CareType.Nutrients);
                 if (fertilizingSchedule != null)
                 {
-                    yield return new FertilizingStatusViewModel(ScheduleFor(CareType.Nutrients));
+                    yield return new FertilizingStatusViewModel(
+                        fertilizingSchedule,
+                        onRemove: () => RemoveCareSchedule(CareType.Nutrients, "fertilizing schedule"));
                 }
 
                 // The sunlight requirement is optional (only show the status if set to a plant)
                 if (SelectedPlant.SunlightRequirement != null)
                 {
-                    yield return new SunlightStatusViewModel(SelectedPlant.SunlightRequirement);
+                    yield return new SunlightStatusViewModel(
+                        SelectedPlant.SunlightRequirement,
+                        onRemove: RemoveSunlightRequirement);
                 }
             }
         }
@@ -191,6 +195,8 @@ namespace GreenKeeper.ViewModels
             SelectedPlant = null;
         }
 
+        // Care-Status related section
+
         /// <summary>
         /// Will be called after the AddScheduleWizard successfully applied a Care Schedule / Sunlight Requirement
         /// on the selected Plant-Object. Because the Change doesn't apply via the ObservableCollection
@@ -198,6 +204,56 @@ namespace GreenKeeper.ViewModels
         /// </summary>
         public void RefreshCareStatuses()
         {
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+
+        // Removes the optional care schedule from the selected plant once the user confirmed
+        private void RemoveCareSchedule(CareType careType, string displayName)
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            bool isConfirmed = _dialogService.Confirm(
+                $"Are you sure you want to remove the {displayName} for \"{SelectedPlant.Name}\"?",
+                "Remove Schedule");
+
+            if (!isConfirmed)
+            {
+                return;
+            }
+
+            var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
+            if (schedule != null)
+            {
+                SelectedPlant.CareSchedules.Remove(schedule);
+            }
+
+            // CareStatuses doesn't have any Backing-Field and reads from the selected plant (SelectedPlant).
+            // OnProperty is enough to let the removed Status-Card disappear from the ItemsControl
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+
+        // Removes the sunlight requirement from the selected plant once the user confirmed
+        private void RemoveSunlightRequirement()
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            bool isConfirmed = _dialogService.Confirm(
+                $"Are you sure you want to remove the sunlight requirement for \"{SelectedPlant.Name}\"?",
+                "Remove Sunlight Requirement");
+
+            if (!isConfirmed)
+            {
+                return;
+            }
+
+            SelectedPlant.SunlightRequirement = null;
+
             OnPropertyChanged(nameof(CareStatuses));
         }
 
