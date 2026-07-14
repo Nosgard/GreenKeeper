@@ -146,6 +146,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             plant.CareSchedules.Add(new CareSchedule
             {
                 Care = CareType.Water,
+                IntervalAmount = int.Parse(_wateringStepViewModel.AmountText),
                 IntervalUnit = _wateringStepViewModel.SelectedUnit,
                 NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
                     int.Parse(_wateringStepViewModel.AmountText),
@@ -158,6 +159,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
                 plant.CareSchedules.Add(new CareSchedule
                 {
                     Care = CareType.Nutrients,
+                    IntervalAmount = int.Parse(_fertilizingStepViewModel.AmountText),
                     IntervalUnit = _fertilizingStepViewModel.SelectedUnit,
                     NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
                         int.Parse(_fertilizingStepViewModel.AmountText),
