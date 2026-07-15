@@ -1,6 +1,6 @@
 ﻿using GreenKeeper.Converters;
 using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.Wizards.Base.Abstract;
+using GreenKeeper.ViewModels.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
     /// <summary>
     /// Base of the Edit-Option for all active statuses (Watering / Fertilizing).
     /// </summary>
-    public class EditActiveScheduleViewModel : ActiveStepViewModel
+    public class EditActiveScheduleViewModel : AmountAndUnitInputViewModel
     {
         public string Title { get; }
 
@@ -28,20 +28,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             }
 
             SelectedUnit = initialUnit;
-
-            // Little trick: Instead of modifying ActiveStepViewModel itself, this ViewModel is listening
-            // to it's own PropertyChanged event. Use this to keep PreviewText automatically in sync without touching the base class
-            PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName == nameof(AmountText) || e.PropertyName == nameof(SelectedUnit))
-                {
-                    OnPropertyChanged(nameof(PreviewText));
-                }
-            };
         }
 
-        
-        public override bool CanProceed => HasValidAmount;
+        protected override void OnAmountOrUnitChanged()
+        {
+            OnPropertyChanged(nameof(PreviewText));
+        }
 
         /// <summary>
         /// Shows the next expected due date.
