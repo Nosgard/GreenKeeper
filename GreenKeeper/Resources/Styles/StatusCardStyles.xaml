@@ -61,7 +61,8 @@
                     Margin="0, 0, 6, 0" />
             <Button Style="{StaticResource CareActionButton}"
                     Content="Edit"
-                    Padding="10" />
+                    Padding="10"
+                    Command="{Binding EditCommand}" />
         </StackPanel>
     </DataTemplate>
     
@@ -75,7 +76,8 @@
             <Button Style="{StaticResource CareActionButton}"
                     Content="Edit"
                     Padding="10"
-                    Margin="0, 0, 6, 0" />
+                    Margin="0, 0, 6, 0"
+                    Command="{Binding EditCommand}" />
             <Button Style="{StaticResource CareActionButton}"
                     Content="Remove"
                     Padding="10"
@@ -89,7 +91,8 @@
             <Button Style="{StaticResource CareActionButton}"
                     Content="Edit"
                     Padding="10"
-                    Margin="0, 0, 6, 0" />
+                    Margin="0, 0, 6, 0"
+                    Command="{Binding EditCommand}" />
             <Button Style="{StaticResource CareActionButton}"
                     Content="Remove"
                     Padding="10"

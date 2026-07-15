@@ -17,16 +17,20 @@ namespace GreenKeeper.ViewModels.CareStatuses.Passive
 
         /// <summary>
         /// Set the Status-Card for Sunlight via the related sunlight requirement (Passive Care-Status).
+        /// onEdit: Will be given by MainViewModel and encapsulates the EditscheduleView for this Care-Type
         /// onRemove: Will be given by MainViewModel and encapsulates the Confirmation + Removement.
         /// 
-        /// Note: The ViewModel neither knows the Plant-Object nor the IDialogService, it only triggers Action
+        /// Note: The ViewModel neither knows the Plant-Object nor any Window-Class,
+        /// it only triggers the given Action
         /// </summary>
-        /// <param name="schedule"></param>
-        /// <param name="onRemove"></param>
-        public SunlightStatusViewModel(SunlightRequirement sunlightRequirement, Action onRemove)
+        public SunlightStatusViewModel(SunlightRequirement sunlightRequirement, Action onEdit, Action onRemove)
             : base(CareType.Sunlight, "Sunlight", "/Resources/Icons/Sun.png", "#ffcc00")
         {
             _sunlightRequirement = sunlightRequirement;
+
+            EditCommand = new RelayCommand(
+                _ => onEdit());
+
             RemoveCommand = new RelayCommand(
                 _ => onRemove());
         }

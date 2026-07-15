@@ -1,0 +1,120 @@
+﻿<Window x:Class="GreenKeeper.Views.CareStatuses.EditOption.EditScheduleView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:editSchedule="clr-namespace:GreenKeeper.ViewModels.CareStatuses.EditOption"
+        mc:Ignorable="d"
+        Title="Edit Schedule" Height="300" Width="450"
+        Background="#1A1C22"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize">
+    <Window.Resources>
+        <!-- Watering / Fertilizing -->
+        <DataTemplate DataType="{x:Type editSchedule:EditActiveScheduleViewModel}">
+            <StackPanel Margin="20">
+                <TextBlock Text="{Binding Title, StringFormat='Edit period for {0}'}"
+                           Foreground="#F0F0EE"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0, 0, 0, 12" />
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                             Width="80"
+                             Background="#2C2C2E"
+                             Foreground="#F0F0EE"
+                             CaretBrush="#F0F0EE"
+                             BorderThickness="1"
+                             BorderBrush="#3A3D47"
+                             Padding="8"
+                             FontSize="14" />
+
+                    <ComboBox Style="{StaticResource DarkComboBox}"
+                              ItemsSource="{Binding AvailableUnits}"
+                              SelectedValuePath="Key"
+                              SelectedValue="{Binding SelectedUnit}"
+                              Width="140"
+                              Margin="10, 0, 0, 0"
+                              Padding="8" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
+                           Foreground="#6A6A66"
+                           FontSize="12"
+                           Margin="0, 6, 0, 0" />
+
+                <TextBlock Text="{Binding PreviewText}"
+                           Foreground="#8A8A86"
+                           FontSize="13"
+                           Margin="0, 10, 0, 0" />
+            </StackPanel>
+        </DataTemplate>
+        
+        <!-- Sunlight -->
+        <DataTemplate DataType="{x:Type editSchedule:EditSunlightViewModel}">
+            <StackPanel Margin="20">
+                <TextBlock Text="Edit sunlight requirement"
+                           Foreground="#F0F0EE"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Margin="0, 0, 0, 12" />
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                             Width="80"
+                             Background="#2C2C2E"
+                             Foreground="#F0F0EE"
+                             CaretBrush="#F0F0EE"
+                             BorderThickness="1"
+                             BorderBrush="#3A3D47"
+                             Padding="8"
+                             FontSize="14" />
+
+                    <TextBlock Text="Hours"
+                               Foreground="#8A8A86"
+                               VerticalAlignment="Center"
+                               Margin="8, 0, 0, 0" />
+
+                    <ComboBox Style="{StaticResource DarkComboBox}"
+                              ItemsSource="{Binding AvailablePeriods}"
+                              SelectedValuePath="Key"
+                              SelectedValue="{Binding SelectedPeriod}"
+                              Width="140"
+                              Margin="10, 0, 0, 0"
+                              Padding="8" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
+                           Foreground="#6A6A66"
+                           FontSize="12"
+                           Margin="0, 6, 0, 0" />
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" />
+
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0, 12, 0, 0">
+            <Button Style="{StaticResource MediumDarkButton}"
+                    Content="Cancel"
+                    Padding="10"
+                    Command="{Binding CancelCommand}" />
+
+            <Button Style="{StaticResource MediumDarkButton}"
+                    Content="Save"
+                    Margin="10, 0, 0, 0"
+                    Padding="10"
+                    Command="{Binding SaveCommand}" />
+        </StackPanel>
+    </Grid>
+</Window>

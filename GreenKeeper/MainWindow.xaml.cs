@@ -15,6 +15,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using GreenKeeper.Models.Enums;
+using GreenKeeper.Views.CareStatuses.EditOption;
 
 namespace GreenKeeper
 {
@@ -39,6 +41,7 @@ namespace GreenKeeper
             // Opening a new window for the notes (NotesView) does not happen in the ViewModel
             // so that it has no window-references and remains testable
             _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
+            _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
             this.DataContext = _mainViewModel;
         }
 
@@ -76,6 +79,21 @@ namespace GreenKeeper
             };
 
             bool? result = wizardView.ShowDialog();
+
+            if (result == true)
+            {
+                _mainViewModel.RefreshCareStatuses();
+            }
+        }
+
+        private void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
+        {
+            var editView = new EditScheduleView(e.plant, e.care)
+            {
+                Owner = this
+            };
+
+            bool? result = editView.ShowDialog();
 
             if (result == true)
             {

@@ -97,23 +97,27 @@ namespace GreenKeeper.ViewModels
                 CareSchedule? ScheduleFor(CareType type) =>
                     SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-                // The watering schedule is mandatory for every plant
-                yield return new WateringStatusViewModel(ScheduleFor(CareType.Water));
+                // Watering: mandatory for every plant
+                yield return new WateringStatusViewModel(
+                    ScheduleFor(CareType.Water),
+                    onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Water)));
 
-                // The fertilizing schedule is optional (only show the status if set to a plant)
+                // Fertilizing optional, only show the status if set to a plant
                 var fertilizingSchedule = ScheduleFor(CareType.Nutrients);
                 if (fertilizingSchedule != null)
                 {
                     yield return new FertilizingStatusViewModel(
                         fertilizingSchedule,
+                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Nutrients)),
                         onRemove: () => RemoveCareSchedule(CareType.Nutrients, "fertilizing schedule"));
                 }
 
-                // The sunlight requirement is optional (only show the status if set to a plant)
+                // Sunlight: optional
                 if (SelectedPlant.SunlightRequirement != null)
                 {
                     yield return new SunlightStatusViewModel(
                         SelectedPlant.SunlightRequirement,
+                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Sunlight)),
                         onRemove: RemoveSunlightRequirement);
                 }
             }
@@ -206,6 +210,14 @@ namespace GreenKeeper.ViewModels
         {
             OnPropertyChanged(nameof(CareStatuses));
         }
+
+        // Care-Status Edit-Option
+
+        // Notify the View that the Edit-Dialog (EditScheduleView) must be opened for a specific Care-Type of the selected plant
+        public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
+
+
+        // Care-Status Remove-Option
 
         // Removes the optional care schedule from the selected plant once the user confirmed
         private void RemoveCareSchedule(CareType careType, string displayName)

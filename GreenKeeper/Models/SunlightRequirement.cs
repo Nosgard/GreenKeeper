@@ -11,7 +11,7 @@ namespace GreenKeeper.Models
     {
         public int Id { get; set; }
         public int PlantId { get; set; }
-        public double Hours { get; set; }
+        public int Hours { get; set; }
         public SunlightPeriod Period { get; set; }
     }
 }
