@@ -20,9 +20,11 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
     /// </summary>
     public class WateringStatusViewModel : ActiveCareStatusViewModel
     {
-        public WateringStatusViewModel(CareSchedule? schedule, Action onEdit)
+        public WateringStatusViewModel(CareSchedule? schedule, Action onComplete, Action onEdit)
             : base(CareType.Water, schedule, "Watering", "/Resources/Icons/Waterdrop.png", "#4accff")
         {
+            CompleteCommand = new RelayCommand(_ => onComplete());
+
             EditCommand = new RelayCommand(
                 _ => onEdit());
         }

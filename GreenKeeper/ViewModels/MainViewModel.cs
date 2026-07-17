@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Commands;
+using GreenKeeper.Converters;
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
@@ -100,6 +101,7 @@ namespace GreenKeeper.ViewModels
                 // Watering: mandatory for every plant
                 yield return new WateringStatusViewModel(
                     ScheduleFor(CareType.Water),
+                    onComplete: () => CompleteCareSchedule(CareType.Water),
                     onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Water)));
 
                 // Fertilizing optional, only show the status if set to a plant
@@ -108,6 +110,7 @@ namespace GreenKeeper.ViewModels
                 {
                     yield return new FertilizingStatusViewModel(
                         fertilizingSchedule,
+                        onComplete: () => CompleteCareSchedule(CareType.Nutrients),
                         onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Nutrients)),
                         onRemove: () => RemoveCareSchedule(CareType.Nutrients, "fertilizing schedule"));
                 }
@@ -208,6 +211,29 @@ namespace GreenKeeper.ViewModels
         /// </summary>
         public void RefreshCareStatuses()
         {
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+
+        // Care-Status Complete-Option
+        private void CompleteCareSchedule(CareType careType)
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
+            if (schedule?.IntervalAmount == null || schedule.IntervalUnit == null)
+            {
+                // No saved amount or unit -> No calculation of a new interval
+                return;
+            }
+
+            schedule.NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
+                schedule.IntervalAmount.Value,
+                schedule.IntervalUnit.Value));
+            schedule.LastCaredAt = DateTime.Now;
+
             OnPropertyChanged(nameof(CareStatuses));
         }
 

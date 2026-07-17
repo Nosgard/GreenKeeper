@@ -58,7 +58,9 @@
             <Button Style="{StaticResource CareActionButton}"
                     Content="Complete"
                     Padding="10"
-                    Margin="0, 0, 6, 0" />
+                    Margin="0, 0, 6, 0"
+                    Command="{Binding CompleteCommand}"
+                    IsEnabled="{Binding IsCompletable}"/>
             <Button Style="{StaticResource CareActionButton}"
                     Content="Edit"
                     Padding="10"
@@ -72,7 +74,9 @@
             <Button Style="{StaticResource CareActionButton}"
                     Content="Complete"
                     Padding="10"
-                    Margin="0, 0, 6, 0" />
+                    Margin="0, 0, 6, 0"
+                    Command="{Binding CompleteCommand}"
+                    IsEnabled="{Binding IsCompletable}" />
             <Button Style="{StaticResource CareActionButton}"
                     Content="Edit"
                     Padding="10"

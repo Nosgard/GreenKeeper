@@ -20,9 +20,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         /// Note: The ViewModel neither knows the Plant-Object nor any Window-Class,
         /// it only triggers the given Action
         /// </summary>
-        public FertilizingStatusViewModel(CareSchedule? schedule, Action onEdit, Action onRemove)
+        public FertilizingStatusViewModel(CareSchedule? schedule, Action onComplete, Action onEdit, Action onRemove)
             : base(CareType.Nutrients, schedule, "Fertilizing", "/Resources/Icons/Pill.png", "#ff695b")
         {
+            CompleteCommand = new RelayCommand(
+                _ => onComplete());
+
             EditCommand = new RelayCommand(
                 _ => onEdit());
 
