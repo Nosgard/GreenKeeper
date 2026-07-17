@@ -148,6 +148,50 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         Command="{Binding OpenNotesCommand}"/>
+                
+                <!-- Debug-Section -->
+                <Border Grid.Row="2"
+                        Background="#2A1A1A"
+                        BorderBrush="#5A2A2A"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="10"
+                        Margin="16, 0, 16, 80"
+                        VerticalAlignment="Bottom"
+                        Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="DEBUG: Simulate"
+                                   Foreground="#D08080"
+                                   FontSize="12"
+                                   VerticalAlignment="Center"
+                                   Margin="0, 0, 8, 0" />
+                        
+                        <TextBox Text="{Binding SimulationAmountText, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="40"
+                                 Background="#2C2C2E"
+                                 Foreground="#F0F0EE"
+                                 CaretBrush="#F0F0EE"
+                                 BorderThickness="1"
+                                 BorderBrush="#3A3D47"
+                                 Padding="4"
+                                 FontSize="12"
+                                 VerticalAlignment="Center" />
+
+                        <ComboBox Style="{StaticResource DarkComboBox}"
+                                  ItemsSource="{Binding AvailableSimulationUnits}"
+                                  SelectedValuePath="Key"
+                                  SelectedValue="{Binding SimulationUnit}"
+                                  Width="90"
+                                  Margin="6, 0, 0, 0" />
+
+                        <Button Style="{StaticResource CareActionButton}"
+                                Content="Fast-forward"
+                                Margin="6, 0, 0, 0"
+                                Width="100"
+                                Padding="6"
+                                Command="{Binding SimulateTimePassingCommand}" />
+                    </StackPanel>
+                </Border>
             </Grid>
         </Grid>
     </Grid>

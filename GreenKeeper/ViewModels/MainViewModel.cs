@@ -67,6 +67,16 @@ namespace GreenKeeper.ViewModels
             OpenNotesCommand = new RelayCommand(
                 execute: _ => OpenNotesRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
+
+
+
+            // -- Debug-Section --
+
+#if DEBUG
+            SimulateTimePassingCommand = new RelayCommand(
+                execute: _ => SimulateTimePassing(),
+                canExecute: _ => SelectedPlant != null);
+#endif
         }
 
         // All available plants for the ListView (currently only dummy entries)
@@ -302,5 +312,73 @@ namespace GreenKeeper.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        // -- Debug-Section --
+
+#if DEBUG
+        public ICommand SimulateTimePassingCommand { get; }
+
+        // Available jumps in the UI
+        public IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableSimulationUnits { get; } =
+            new List<KeyValuePair<TimeUnit, string>>
+            {
+                new(TimeUnit.Hours, "Hours"),
+                new(TimeUnit.Days, "Days"),
+                new(TimeUnit.Weeks, "Weeks"),
+            };
+
+        private TimeUnit _simulationUnit = TimeUnit.Days;
+        public TimeUnit SimulationUnit
+        {
+            get => _simulationUnit;
+            set {
+                _simulationUnit = value;
+                OnPropertyChanged(nameof(SimulationUnit));
+            }
+        }
+
+        private string _simulationAmountText = "1";
+        public string SimulationAmountText
+        {
+            get => _simulationAmountText;
+            set {
+                _simulationAmountText = value;
+                OnPropertyChanged(nameof(SimulationAmountText));
+            }
+        }
+
+        /// <summary>
+        /// Pulls the Time-Span of NextDueAt (and optionally LastCaredAt, if set)
+        /// for ALL Care-Schedules of the selected plant except the Sunlight-Requirement
+        /// </summary>
+        private void SimulateTimePassing()
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            if (!int.TryParse(SimulationAmountText, out int amount) || amount <= 0)
+            {
+                return;
+            }
+
+            var span = TimeUnitConverter.ToTimeSpan(amount, SimulationUnit);
+
+            foreach (var schedule in SelectedPlant.CareSchedules)
+            {
+                if (schedule.NextDueAt.HasValue)
+                {
+                    schedule.NextDueAt = schedule.NextDueAt.Value.Subtract(span);
+                }
+                if (schedule.LastCaredAt.HasValue)
+                {
+                    schedule.LastCaredAt = schedule.LastCaredAt.Value.Subtract(span);
+                }
+            }
+
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+#endif
     }
 }
