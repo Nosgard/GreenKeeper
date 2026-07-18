@@ -55,13 +55,13 @@
     <!-- Button-Set: Watering -->
     <DataTemplate DataType="{x:Type active:WateringStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Complete"
                     Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding CompleteCommand}"
                     IsEnabled="{Binding IsCompletable}"/>
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Edit"
                     Padding="10"
                     Command="{Binding EditCommand}" />
@@ -71,18 +71,18 @@
     <!-- Button-Set: Fertilizing -->
     <DataTemplate DataType="{x:Type active:FertilizingStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Complete"
                     Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding CompleteCommand}"
                     IsEnabled="{Binding IsCompletable}" />
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Edit"
                     Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Remove"
                     Padding="10"
                     Command="{Binding RemoveCommand}"/>
@@ -92,12 +92,12 @@
     <!-- Button-Set: Sunlight -->
     <DataTemplate DataType="{x:Type passive:SunlightStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Edit"
                     Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource CareActionButton}"
+            <Button Style="{StaticResource StatusCardActionButton}"
                     Content="Remove"
                     Padding="10"
                     Command="{Binding RemoveCommand}"/>

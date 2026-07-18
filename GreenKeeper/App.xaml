@@ -7,6 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/StatusCardButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/AddPlantWizardStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
