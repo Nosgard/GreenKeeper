@@ -9,8 +9,11 @@ namespace GreenKeeper.Converters
 {
     public class TimeUnitConverter
     {
-        // Value to compensate the time span between the calculation of NextDueAt in the Wizard
-        // and the actual presentation in the Status-Card. This is needed to show for example one exact week
+        /// <summary>
+        /// Value to compensate the time span between the calculation of NextDueAt
+        /// and the actual presentation in the Status-Card. This is needed when values are just below a threshold.
+        /// Only affects the upcoming branch from below
+        /// </summary>
         private const double TOLERANCEHOURS = 1.0 / 60.0;
 
         /// <summary>
@@ -70,15 +73,39 @@ namespace GreenKeeper.Converters
                 return string.Empty;
             }
 
-            double totalHours = (nextDueAt.Value - DateTime.Now).TotalHours;
-            bool isOverdue = totalHours < 0;
-            double absHours = Math.Abs(totalHours);
+            var due = nextDueAt.Value;
+            var now = DateTime.Now;
+
+            // The due date "Today" will be determined by the Calendar-Date to prevent a drift
+            if (due.Date == now.Date)
+            {
+                return "Today";
+            }
+
+            bool isOverdue = due.Date < now.Date;
+
+            double absHours;
+            bool isHoursUnitAllowed;
+
+            // Overdue will be calculated in days.
+            // Calculating in hours would cause a Borderline-Case (e.g Due of Watering is today but can be done throughout the day)
+            if (isOverdue)
+            {
+                int daysOverdue = (now.Date - due.Date).Days;
+                absHours = daysOverdue * 24;
+                isHoursUnitAllowed = false;
+            }
+            else
+            {
+                absHours = (due - now).TotalHours;
+                isHoursUnitAllowed = true;
+            }
 
             double thresholdCheck = absHours + TOLERANCEHOURS;
 
             TimeUnit effectiveUnit = thresholdCheck switch
             {
-                < 24 => TimeUnit.Hours,
+                < 24 => isHoursUnitAllowed ? TimeUnit.Hours : TimeUnit.Days,
                 < 24 * 7 => TimeUnit.Days,
                 < 24 * 30 => TimeUnit.Weeks,
                 < 24 * 365 => TimeUnit.Months,
@@ -88,12 +115,13 @@ namespace GreenKeeper.Converters
             double rawAmount = absHours / HoursPerUnit[effectiveUnit];
 
 
-            // Given time is overdue -> Ceil the amount of time to make sure delays won't be underestimated
-            // Given time is due -> Round the amount of time to the nearest whole number
-            int amount = isOverdue
-                ? (int)Math.Ceiling(rawAmount)
-                : (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
+                // Given time is overdue -> Ceil the amount of time to make sure delays won't be underestimated
+                // Given time is due -> Round the amount of time to the nearest whole number
+                int amount = isOverdue
+                    ? (int)Math.Ceiling(rawAmount)
+                    : (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
 
+            // For safety reasons. Shouldn't be possible with the check of the date above
             if (amount == 0)
             {
                 return "Today";
