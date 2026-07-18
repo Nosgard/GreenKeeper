@@ -225,6 +225,7 @@ namespace GreenKeeper.ViewModels
         }
 
         // Care-Status Complete-Option
+        // Marks an active Care-Schedule (Watering / Fertilizing) as "done now" and recalculates NextDueAt based on the exact moment of the click
         private void CompleteCareSchedule(CareType careType)
         {
             if (SelectedPlant == null)

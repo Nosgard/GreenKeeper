@@ -21,9 +21,19 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
             _schedule = schedule;
         }
 
-        // Checks if the Complete-Button can be used or not,
-        // depending on whether the next due date is today, overdue or in the future
-        public bool IsCompletable => _schedule?.NextDueAt != null && _schedule.NextDueAt.Value <= DateTime.Now;
+        // 
+        /// <summary>
+        /// Checks if the Complete-Button can be used or not,
+        /// depending on whether the next due date is today, overdue or in the future.
+        /// 
+        /// Important!
+        /// Compares calendar dates, NOT exact timestamps. This keeps the button consistent with
+        /// the "Today" text shown in the status text. Without this alignment, a Status-Card could
+        /// display "Today" while the Complete-Button stays disabled until the exact due time was reached,
+        /// which felt inconsistent, since "Today" already signals to the user that completion is expected
+        /// on this day
+        /// </summary>
+        public bool IsCompletable => _schedule?.NextDueAt != null && _schedule.NextDueAt.Value <= DateTime.Now.Date;
 
         // Fires the Completion of the care,
         // once it's done, recalculate the new due date for NOW
