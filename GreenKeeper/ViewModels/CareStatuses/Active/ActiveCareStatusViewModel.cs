@@ -33,7 +33,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         /// which felt inconsistent, since "Today" already signals to the user that completion is expected
         /// on this day
         /// </summary>
-        public bool IsCompletable => _schedule?.NextDueAt != null && _schedule.NextDueAt.Value <= DateTime.Now.Date;
+        public bool IsCompletable => _schedule?.NextDueAt != null && _schedule.NextDueAt.Value.Date <= DateTime.Now.Date;
 
         // Fires the Completion of the care,
         // once it's done, recalculate the new due date for NOW
