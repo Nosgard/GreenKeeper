@@ -60,11 +60,4 @@
         <Setter Property="FontSize" Value="14"/>
     </Style>
 
-
-    <!-- Status Card Buttons -->
-    <Style x:Key="CareActionButton" TargetType="Button" BasedOn="{StaticResource SmallDarkButton}">
-        <Setter Property="Width" Value="85" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-    </Style>
-
 </ResourceDictionary>

@@ -184,7 +184,7 @@
                                   Width="90"
                                   Margin="6, 0, 0, 0" />
 
-                        <Button Style="{StaticResource CareActionButton}"
+                        <Button Style="{StaticResource StatusCardActionButton}"
                                 Content="Fast-forward"
                                 Margin="6, 0, 0, 0"
                                 Width="100"
