@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,7 +30,7 @@ namespace GreenKeeper.Converters
         public static TimeSpan ToTimeSpan(int amount, TimeUnit unit)
         {
             double hours = unit switch
-            { 
+            {
                 TimeUnit.Hours => amount,
                 TimeUnit.Days => amount * 24,
                 TimeUnit.Weeks => amount * 24 * 7,
@@ -112,14 +113,22 @@ namespace GreenKeeper.Converters
                 _ => TimeUnit.Years
             };
 
-            double rawAmount = absHours / HoursPerUnit[effectiveUnit];
+            // Calculate the overdue date if present
+            int amount;
 
-
-                // Given time is overdue -> Ceil the amount of time to make sure delays won't be underestimated
-                // Given time is due -> Round the amount of time to the nearest whole number
-                int amount = isOverdue
-                    ? (int)Math.Ceiling(rawAmount)
-                    : (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
+            if (isOverdue && effectiveUnit == TimeUnit.Months)
+            {
+                amount = Math.Max(RoundedCalendarMonthsOverdue(due.Date, now.Date), 1);
+            }
+            else if (isOverdue && effectiveUnit == TimeUnit.Years)
+            {
+                amount = Math.Max(RoundedCalendarYearsOverdue(due.Date, now.Date), 1);
+            }
+            else
+            {
+                double rawAmount = absHours / HoursPerUnit[effectiveUnit];
+                amount = (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
+            }
 
             // For safety reasons. Shouldn't be possible with the check of the date above
             if (amount == 0)
@@ -132,6 +141,67 @@ namespace GreenKeeper.Converters
             return isOverdue
                 ? $"Overdue for {amount} {unitLabel}"
                 : $"{amount} {unitLabel}";
+        }
+
+        // -- Calculation of time differences for calendar months/-years --
+
+        /// <summary>
+        /// Counts the number of FULL calendar months between two dates (floor, not rounded).
+        /// For example: Jan 15 to Mar 10 is 1 full month (Jan 15 to Feb 15), not 2, since
+        /// Mar 10 hasn't reached Feb 15 + 1 month yet
+        /// </summary>
+        private static int CalendarMonthsBetween(DateTime from, DateTime to)
+        {
+            int months = ((to.Year - from.Year) * 12) + (to.Month - from.Month);
+            if (to.Day < from.Day)
+            {
+                months--;
+            }
+            return Math.Max(months, 0);
+        }
+
+        /// <summary>
+        /// Rounds the elapsed time between "due" and "now" to the NEAREST full calendar month,
+        /// respecting the actual (variable) length of each individual month.
+        /// 
+        /// Finds the lower full-month boundary (due.AddMonths(n)) and the next
+        /// one (due.AddMonths(n+1)), calculates the exact midpoint between them,
+        /// and rounds up or down depending on which side "now" falls on. This way,
+        /// for example "just before 2 months" correctly rounds to 2 months even if the specific
+        /// months involved are shorter or longer than 30 days
+        /// </summary>
+        private static int RoundedCalendarMonthsOverdue(DateTime due, DateTime now)
+        {
+            int lowerMonths = CalendarMonthsBetween(due, now);
+            DateTime lowerBound = due.AddMonths(lowerMonths);
+            DateTime upperBound = due.AddMonths(lowerMonths + 1);
+            DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
+
+            return now >= midpoint ? lowerMonths + 1 : lowerMonths;
+        }
+
+        // Counts full calendar years between two dates (floor) analogous to
+        // CalendarMonthsBetween, just for years
+        private static int CalendarYearsBetween(DateTime from, DateTime to)
+        {
+            int years = to.Year - from.Year;
+            if (to.Month < from.Month || (to.Month == from.Month && to.Day < from.Day))
+            {
+                years--;
+            }
+            return Math.Max(years, 0);
+        }
+
+        // Rounds to the nearest full calendar year, analogous to
+        // RoundedCalendarMonthsOverdue - accounts for leap years automatically thanks to AddYears/DateTime
+        private static int RoundedCalendarYearsOverdue(DateTime due, DateTime now)
+        {
+            int lowerYears = CalendarYearsBetween(due, now);
+            DateTime lowerBound = due.AddYears(lowerYears);
+            DateTime upperBound = due.AddYears(lowerYears + 1);
+            DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
+
+            return now >= midpoint ? lowerYears + 1 : lowerYears;
         }
     }
 }
