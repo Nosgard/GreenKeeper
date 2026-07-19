@@ -240,9 +240,7 @@ namespace GreenKeeper.ViewModels
                 return;
             }
 
-            schedule.NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                schedule.IntervalAmount.Value,
-                schedule.IntervalUnit.Value));
+            schedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, schedule.IntervalAmount.Value, schedule.IntervalUnit.Value);
             schedule.LastCaredAt = DateTime.Now;
 
             OnPropertyChanged(nameof(CareStatuses));

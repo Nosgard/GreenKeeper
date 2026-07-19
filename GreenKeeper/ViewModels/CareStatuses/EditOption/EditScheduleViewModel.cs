@@ -100,7 +100,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
                 // The due date is recalculated starting from NOW, as agreed.
                 // Editing resets the countdown, it does not just change the interval length while keeping the old due date - LastCaredAt as well
-                schedule.NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(amount, step.SelectedUnit));
+                schedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, amount, step.SelectedUnit);
                 schedule.LastCaredAt = DateTime.Now;
             }
 

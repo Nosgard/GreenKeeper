@@ -18,15 +18,10 @@ namespace GreenKeeper.Converters
         private const double TOLERANCEHOURS = 1.0 / 60.0;
 
         /// <summary>
-        /// Calculates the inputs in the Wizard in a TimeSpan.
-        /// This is needed, because CareSchedule doesn't save an interval
-        /// but a due date (Property -> DueDate). Therefore the calculation
-        /// happens singularly
+        /// Debug-only purposes
+        /// Meant for the Debugging-Tool, where a flat TimeSpan is subtracted from
+        /// existing dates rather than added onto a fixed start date
         /// </summary>
-        /// <param name="amount"></param>
-        /// <param name="unit"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static TimeSpan ToTimeSpan(int amount, TimeUnit unit)
         {
             double hours = unit switch
@@ -34,8 +29,6 @@ namespace GreenKeeper.Converters
                 TimeUnit.Hours => amount,
                 TimeUnit.Days => amount * 24,
                 TimeUnit.Weeks => amount * 24 * 7,
-                TimeUnit.Months => amount * 24 * 30,
-                TimeUnit.Years => amount * 24 * 365,
                 _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
             };
 
@@ -66,6 +59,24 @@ namespace GreenKeeper.Converters
             { TimeUnit.Years, "year" },
 
         };
+
+        /// <summary>
+        /// Calculates a concrete due date from a start date,
+        /// an amount and a unit - calendar-exact for Months/Years
+        /// and exact by definition for Hours/Days/Weeks
+        /// </summary>
+        public static DateTime ToDueDate(DateTime start, int amount, TimeUnit unit)
+        {
+            return unit switch
+            {
+                TimeUnit.Hours => start.AddHours(amount),
+                TimeUnit.Days => start.AddDays(amount),
+                TimeUnit.Weeks => start.AddDays(amount * 7),
+                TimeUnit.Months => start.AddMonths(amount),
+                TimeUnit.Years => start.AddYears(amount),
+                _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
+            };
+        }
 
         public static string ToDueDateText(DateTime? nextDueAt)
         {

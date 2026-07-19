@@ -41,7 +41,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         /// The calculation of the next due date takes place NOW and not at the old due date
         /// </summary>
         public string PreviewText => HasValidAmount
-            ? $"New due date: {TimeUnitConverter.ToDueDateText(DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(int.Parse(AmountText), SelectedUnit)))}"
+            ? $"New due date: {TimeUnitConverter.ToDueDateText(TimeUnitConverter.ToDueDate(DateTime.Now, int.Parse(AmountText), SelectedUnit))}"
             : string.Empty;
     }
 }

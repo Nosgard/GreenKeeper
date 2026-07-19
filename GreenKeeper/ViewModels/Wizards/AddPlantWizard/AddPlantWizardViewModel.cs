@@ -139,31 +139,29 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             {
                 Name = _plantNameStepViewModel.PlantName
             };
-            
+
             // Watering: Mandatory field, so no further check is needed.
             // IntervalUnit: Saves the selected time unit for calculating the due date in hours later on (for more go to TimeUnitConverter -> ToDueDateText)
             // NextDueAt = now + time span calculated from the amount and unit in the related step
+            int wateringAmount = int.Parse(_wateringStepViewModel.AmountText);
             plant.CareSchedules.Add(new CareSchedule
             {
                 Care = CareType.Water,
-                IntervalAmount = int.Parse(_wateringStepViewModel.AmountText),
+                IntervalAmount = wateringAmount,
                 IntervalUnit = _wateringStepViewModel.SelectedUnit,
-                NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                    int.Parse(_wateringStepViewModel.AmountText),
-                    _wateringStepViewModel.SelectedUnit))
+                NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, wateringAmount, _wateringStepViewModel.SelectedUnit)
             });
 
             // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value
             if (_fertilizingStepViewModel.HasValidAmount)
             {
+                int fertilizingAmount = int.Parse(_fertilizingStepViewModel.AmountText);
                 plant.CareSchedules.Add(new CareSchedule
                 {
                     Care = CareType.Nutrients,
-                    IntervalAmount = int.Parse(_fertilizingStepViewModel.AmountText),
+                    IntervalAmount = fertilizingAmount,
                     IntervalUnit = _fertilizingStepViewModel.SelectedUnit,
-                    NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                        int.Parse(_fertilizingStepViewModel.AmountText),
-                        _fertilizingStepViewModel.SelectedUnit))
+                    NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, fertilizingAmount, _fertilizingStepViewModel.SelectedUnit)
                 });
             }
 

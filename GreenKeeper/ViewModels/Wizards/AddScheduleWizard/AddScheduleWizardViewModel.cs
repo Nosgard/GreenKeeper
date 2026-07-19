@@ -135,14 +135,13 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
                 _plant.CareSchedules.Remove(existing);
             }
 
+            int amount = int.Parse(step.AmountText);
             _plant.CareSchedules.Add(new CareSchedule
             {
                 Care = careType,
                 IntervalAmount = int.Parse(step.AmountText),
                 IntervalUnit = step.SelectedUnit,
-                NextDueAt = DateTime.Now.Add(TimeUnitConverter.ToTimeSpan(
-                    int.Parse(step.AmountText),
-                    step.SelectedUnit))
+                NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, amount, step.SelectedUnit)
             });
 
             return true;
