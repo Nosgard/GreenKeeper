@@ -14,7 +14,6 @@ namespace GreenKeeper.Converters
         {
             double hours = unit switch
             {
-                TimeUnit.Hours => amount,
                 TimeUnit.Days => amount * 24,
                 TimeUnit.Weeks => amount * 24 * 7,
                 _ => throw new ArgumentOutOfRangeException(nameof(unit), unit, null)
@@ -25,7 +24,6 @@ namespace GreenKeeper.Converters
 
         private static readonly Dictionary<TimeUnit, string> UnitLabels = new()
         {
-            { TimeUnit.Hours, "hour" },
             { TimeUnit.Days, "day" },
             { TimeUnit.Weeks, "week" },
             { TimeUnit.Months, "month" },
@@ -42,7 +40,6 @@ namespace GreenKeeper.Converters
         {
             return unit switch
             {
-                TimeUnit.Hours => start.AddHours(amount),
                 TimeUnit.Days => start.AddDays(amount),
                 TimeUnit.Weeks => start.AddDays(amount * 7),
                 TimeUnit.Months => start.AddMonths(amount),

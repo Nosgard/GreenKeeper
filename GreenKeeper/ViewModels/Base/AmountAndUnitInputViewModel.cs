@@ -54,7 +54,6 @@ namespace GreenKeeper.ViewModels.Base
         public IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableUnits { get; } =
             new List<KeyValuePair<TimeUnit, string>>
             {
-                new(TimeUnit.Hours, "Hours"),
                 new(TimeUnit.Days, "Days"),
                 new(TimeUnit.Weeks, "Weeks"),
                 new(TimeUnit.Months, "Months"),
@@ -68,7 +67,6 @@ namespace GreenKeeper.ViewModels.Base
         /// </summary>
         private static readonly Dictionary<TimeUnit, int> MaxAmountsByUnit = new()
         {
-            { TimeUnit.Hours, 168 },
             { TimeUnit.Days, 365 },
             { TimeUnit.Weeks, 52 },
             { TimeUnit.Months, 24 },

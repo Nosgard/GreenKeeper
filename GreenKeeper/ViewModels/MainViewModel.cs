@@ -321,7 +321,6 @@ namespace GreenKeeper.ViewModels
         public IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableSimulationUnits { get; } =
             new List<KeyValuePair<TimeUnit, string>>
             {
-                new(TimeUnit.Hours, "Hours"),
                 new(TimeUnit.Days, "Days"),
                 new(TimeUnit.Weeks, "Weeks"),
             };

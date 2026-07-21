@@ -8,7 +8,6 @@ namespace GreenKeeper.Models.Enums
 {
     public enum TimeUnit
     {
-        Hours,
         Days,
         Weeks,
         Months,
