@@ -51,6 +51,8 @@ namespace GreenKeeper
             // Stops the periodic Status-Card refresh once this window (and therefore the application)
             // is closed, so the timer doesn't keep firing after the app is meant to shut down
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
+
+            PreviewMouseDown += Window_PreviewMouseDown;
             this.DataContext = _mainViewModel;
         }
 
@@ -108,6 +110,36 @@ namespace GreenKeeper
             {
                 _mainViewModel.RefreshCareStatuses();
             }
+        }
+
+        private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!SearchTextBox.IsFocused)
+            {
+                return;
+            }
+
+            if (e.OriginalSource is DependencyObject clickedElement && IsDescendantOf(clickedElement, SearchTextBox))
+            {
+                return;
+            }
+
+            Keyboard.ClearFocus();
+        }
+
+        private static bool IsDescendantOf(DependencyObject child, DependencyObject parent)
+        {
+            DependencyObject? current = child;
+
+            while (current != null)
+            {
+                if (current == parent)
+                {
+                    return true;
+                }
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return false;
         }
     }
 }

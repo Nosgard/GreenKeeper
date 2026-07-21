@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -51,6 +52,12 @@ namespace GreenKeeper.ViewModels
             _dialogService = dialogService;
             _timerService = timerService;
             _plants = new ObservableCollection<Plant>(_plantRepository.GetPlants());
+
+
+            // Register FilterPlants as the filter predicate for the default view of plants.
+            // Since both the ListView and the operation are on the same underlying collection instance,
+            // the ListView picks up this filter automatically, without needing to be changed itself
+            CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
             // Periodically refreshes the Status-Cards, so due date texts and Complete-Button's
             // enabled state (IsCompletable) stay up to date automatically
@@ -177,6 +184,62 @@ namespace GreenKeeper.ViewModels
         // Code-Behind opens the window (View), while the ViewModel does not know any Window-Class
         public event EventHandler<Plant>? OpenNotesRequested;
 
+
+        // Search Plant Section
+
+        private string _searchText = string.Empty;
+
+        /// <summary>
+        /// Bound to the search option (TextBox in MainWindow.xaml).
+        /// The setter fires on every single keystroke - not just when the
+        /// TextBox loses focus. Combined with the Refresh() call, it produces
+        /// the live search behavior (similar to a search engine).
+        /// If a plant was selected, the selected plant will be set to null
+        /// as no selected plant that doesn't appear in the ListView during
+        /// the search should keep it's selected state
+        /// </summary>
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (_searchText == value)
+                {
+                    return;
+                }
+
+                _searchText = value;
+                SelectedPlant = null;
+                OnPropertyChanged(nameof(SearchText));
+
+                // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText
+                CollectionViewSource.GetDefaultView(Plants).Refresh();
+            }
+        }
+
+        /// <summary>
+        /// Filter predicate for the Plants CollectionView (see constructor above).
+        /// Called once per plant every time Refresh() runs - returning true keeps
+        /// the plant visible in the ListView, false hides it.
+        /// 
+        /// Empty/whitespace-only search text -> every plant is shown
+        /// (no filtering applied)
+        /// Text entered: case-insensitive substring match against the plant's name
+        /// </summary>
+        private bool FilterPlants(object item)
+        {
+            if (item is not Plant plant)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                return true;
+            }
+
+            return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        }
 
         // Add Plant Wizard Section
         public ICommand AddPlantCommand { get; }

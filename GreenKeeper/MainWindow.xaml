@@ -44,14 +44,38 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="1"
+                             x:Name="SearchTextBox"
+                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
                              Foreground="#C8C8C4"
                              CaretBrush="#C8C8C4"
                              FontSize="13"
                              VerticalContentAlignment="Center"
-                             Padding="0, 8, 10, 8">
+                             Padding="10, 8, 10, 8">
                     </TextBox>
+                    <TextBlock Grid.Column="1"
+                               Text="Search..."
+                               Foreground="#6A6A66"
+                               FontSize="13"
+                               Margin="10, 0, 0, 0"
+                               VerticalAlignment="Center"
+                               IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding Text, ElementName=SearchTextBox}" Value="" />
+                                            <Condition Binding="{Binding IsKeyboardFocused, ElementName=SearchTextBox}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </Grid>
             </Border>
 
