@@ -1,21 +1,9 @@
 ﻿using GreenKeeper.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Converters
 {
     public class TimeUnitConverter
     {
-        /// <summary>
-        /// Value to compensate the time span between the calculation of NextDueAt
-        /// and the actual presentation in the Status-Card. This is needed when values are just below a threshold.
-        /// Only affects the upcoming branch from below
-        /// </summary>
-        private const double TOLERANCEHOURS = 1.0 / 60.0;
 
         /// <summary>
         /// Debug-only purposes
@@ -34,21 +22,6 @@ namespace GreenKeeper.Converters
 
             return TimeSpan.FromHours(hours);
         }
-
-        /// <summary>
-        /// The opposite direction of calculating a time span.
-        /// This is used to get a "readable" amount of time.
-        /// Uses the same values (30/365 Days) as ToTimeSpan,
-        /// so that calculating forward and backwards remains
-        /// </summary>
-        private static readonly Dictionary<TimeUnit, int> HoursPerUnit = new()
-        {
-            { TimeUnit.Hours, 1 },
-            { TimeUnit.Days, 24 },
-            { TimeUnit.Weeks, 24 * 7 },
-            { TimeUnit.Months, 24 * 30 },
-            { TimeUnit.Years, 24 * 365 },
-        };
 
         private static readonly Dictionary<TimeUnit, string> UnitLabels = new()
         {
@@ -85,67 +58,38 @@ namespace GreenKeeper.Converters
                 return string.Empty;
             }
 
-            var due = nextDueAt.Value;
-            var now = DateTime.Now;
+            var due = nextDueAt.Value.Date;
+            var today = DateTime.Now.Date;
 
             // The due date "Today" will be determined by the Calendar-Date to prevent a drift
-            if (due.Date == now.Date)
+            if (due == today)
             {
                 return "Today";
             }
 
-            bool isOverdue = due.Date < now.Date;
+            bool isOverdue = due < today;
 
-            double absHours;
-            bool isHoursUnitAllowed;
+            DateTime earlier = isOverdue ? due : today;
+            DateTime later = isOverdue ? today : due;
 
-            // Overdue will be calculated in days.
-            // Calculating in hours would cause a Borderline-Case (e.g Due of Watering is today but can be done throughout the day)
-            if (isOverdue)
+            int daysDiff = (later - earlier).Days;
+
+            TimeUnit effectiveUnit = daysDiff switch
             {
-                int daysOverdue = (now.Date - due.Date).Days;
-                absHours = daysOverdue * 24;
-                isHoursUnitAllowed = false;
-            }
-            else
-            {
-                absHours = (due - now).TotalHours;
-                isHoursUnitAllowed = true;
-            }
-
-            double thresholdCheck = absHours + TOLERANCEHOURS;
-
-            TimeUnit effectiveUnit = thresholdCheck switch
-            {
-                < 24 => isHoursUnitAllowed ? TimeUnit.Hours : TimeUnit.Days,
-                < 24 * 7 => TimeUnit.Days,
-                < 24 * 30 => TimeUnit.Weeks,
-                < 24 * 365 => TimeUnit.Months,
+                < 7 => TimeUnit.Days,
+                < 30 => TimeUnit.Weeks,
+                < 365 => TimeUnit.Months,
                 _ => TimeUnit.Years
             };
 
-            // Calculate the overdue date if present
-            int amount;
-
-            if (isOverdue && effectiveUnit == TimeUnit.Months)
+            int amount = effectiveUnit switch
             {
-                amount = Math.Max(RoundedCalendarMonthsOverdue(due.Date, now.Date), 1);
-            }
-            else if (isOverdue && effectiveUnit == TimeUnit.Years)
-            {
-                amount = Math.Max(RoundedCalendarYearsOverdue(due.Date, now.Date), 1);
-            }
-            else
-            {
-                double rawAmount = absHours / HoursPerUnit[effectiveUnit];
-                amount = (int)Math.Round(rawAmount, MidpointRounding.AwayFromZero);
-            }
-
-            // For safety reasons. Shouldn't be possible with the check of the date above
-            if (amount == 0)
-            {
-                return "Today";
-            }
+                TimeUnit.Days => daysDiff,
+                TimeUnit.Weeks => Math.Max((int)Math.Round(daysDiff / 7.0, MidpointRounding.AwayFromZero), 1),
+                TimeUnit.Months => Math.Max(RoundedCalendarMonthsBetween(earlier, later), 1),
+                TimeUnit.Years => Math.Max(RoundedCalendarYearsBetween(earlier, later), 1),
+                _ => daysDiff
+            };
 
             string unitLabel = UnitLabels[effectiveUnit] + (amount == 1 ? "" : "s");
 
@@ -181,14 +125,14 @@ namespace GreenKeeper.Converters
         /// for example "just before 2 months" correctly rounds to 2 months even if the specific
         /// months involved are shorter or longer than 30 days
         /// </summary>
-        private static int RoundedCalendarMonthsOverdue(DateTime due, DateTime now)
+        private static int RoundedCalendarMonthsBetween(DateTime earlier, DateTime later)
         {
-            int lowerMonths = CalendarMonthsBetween(due, now);
-            DateTime lowerBound = due.AddMonths(lowerMonths);
-            DateTime upperBound = due.AddMonths(lowerMonths + 1);
+            int lowerMonths = CalendarMonthsBetween(earlier, later);
+            DateTime lowerBound = earlier.AddMonths(lowerMonths);
+            DateTime upperBound = earlier.AddMonths(lowerMonths + 1);
             DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
 
-            return now >= midpoint ? lowerMonths + 1 : lowerMonths;
+            return later >= midpoint ? lowerMonths + 1 : lowerMonths;
         }
 
         // Counts full calendar years between two dates (floor) analogous to
@@ -205,14 +149,14 @@ namespace GreenKeeper.Converters
 
         // Rounds to the nearest full calendar year, analogous to
         // RoundedCalendarMonthsOverdue - accounts for leap years automatically thanks to AddYears/DateTime
-        private static int RoundedCalendarYearsOverdue(DateTime due, DateTime now)
+        private static int RoundedCalendarYearsBetween(DateTime earlier, DateTime later)
         {
-            int lowerYears = CalendarYearsBetween(due, now);
-            DateTime lowerBound = due.AddYears(lowerYears);
-            DateTime upperBound = due.AddYears(lowerYears + 1);
+            int lowerYears = CalendarYearsBetween(earlier, later);
+            DateTime lowerBound = earlier.AddYears(lowerYears);
+            DateTime upperBound = earlier.AddYears(lowerYears + 1);
             DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
 
-            return now >= midpoint ? lowerYears + 1 : lowerYears;
+            return later >= midpoint ? lowerYears + 1 : lowerYears;
         }
     }
 }
