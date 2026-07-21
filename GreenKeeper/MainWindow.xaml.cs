@@ -30,10 +30,14 @@ namespace GreenKeeper
         // One instance to be passed on from everywhere.
         // This DialogService is primarily served for Yes/No-Warnings
         private readonly IDialogService _dialogService = new MessageBoxDialogService();
+
+        // Concrete, implementation of ITimerService. Created and owned here and then injected
+        // into the MainViewModel via its constructor
+        private readonly ITimerService _timerService = new DispatcherTimerService();
         public MainWindow()
         {
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository(), _dialogService);
+            _mainViewModel = new MainViewModel(new PlantRepository(), _dialogService, _timerService);
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
 
@@ -41,7 +45,12 @@ namespace GreenKeeper
             // Opening a new window for the notes (NotesView) does not happen in the ViewModel
             // so that it has no window-references and remains testable
             _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
+
             _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
+
+            // Stops the periodic Status-Card refresh once this window (and therefore the application)
+            // is closed, so the timer doesn't keep firing after the app is meant to shut down
+            Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
             this.DataContext = _mainViewModel;
         }
 

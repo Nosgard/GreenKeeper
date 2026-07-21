@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace GreenKeeper.ViewModels
 {
@@ -23,6 +24,7 @@ namespace GreenKeeper.ViewModels
     {
         private readonly IPlantRepository _plantRepository;
         private readonly IDialogService _dialogService;
+        private readonly ITimerService _timerService;
         private ObservableCollection<Plant> _plants;
 
         // Set all plants for the ListView
@@ -43,11 +45,16 @@ namespace GreenKeeper.ViewModels
         /// If there is no plant selected, the button remains deactivated.
         /// </summary>
         /// <param name="plantRepository"></param>
-        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService)
+        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService)
         {
             _plantRepository = plantRepository;
             _dialogService = dialogService;
+            _timerService = timerService;
             _plants = new ObservableCollection<Plant>(_plantRepository.GetPlants());
+
+            // Periodically refreshes the Status-Cards, so due date texts and Complete-Button's
+            // enabled state (IsCompletable) stay up to date automatically
+            _timerService.Start(TimeSpan.FromMinutes(5), RefreshCareStatuses);
 
             // Add Plant Wizard related Command
             AddPlantCommand = new RelayCommand(
@@ -302,6 +309,17 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.SunlightRequirement = null;
 
             OnPropertyChanged(nameof(CareStatuses));
+        }
+
+        /// <summary>
+        /// Stop the periodic Status-Card refresh (see _timerService.Start in the constructor).
+        /// Called by MainWindow.xaml.cs when the main window is closed, so the timer doesn't
+        /// keep running (and referencing this ViewModel) after the application would otherwise
+        /// be shutting down
+        /// </summary>
+        public void StopCareStatusRefreshTimer()
+        {
+            _timerService.Stop();
         }
 
         // Implementation of INotifyPropertyChanged
