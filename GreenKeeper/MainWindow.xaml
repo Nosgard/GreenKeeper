@@ -91,15 +91,20 @@
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Grid.Column="1"
-                                    VerticalAlignment="Center"
-                                    Margin="8, 0, 0, 0">
-                            <TextBlock Text="{Binding Name}"
+                        <Grid Margin="8, 0, 0, 0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Name}"
                                        Foreground="#F0F0EE"
                                        FontSize="24"
-                                       FontWeight="Medium" />
-
-                        </StackPanel>
+                                       FontWeight="Medium"
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap" />
+                        </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
@@ -128,9 +133,19 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" VerticalAlignment="Center" Text="{Binding SelectedPlant.Name}" Foreground="White" FontSize="28" FontWeight="Bold" />
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Top"
+                           Text="{Binding SelectedPlant.Name}"
+                           Foreground="White"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           TextWrapping="NoWrap"
+                           TextTrimming="CharacterEllipsis"
+                           ToolTip="{Binding SelectedPlant.Name}" />
 
-                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
                     <Button Style="{StaticResource MediumDarkButton}"
                             Padding="10"
                             Content="+  Add Schedule"
