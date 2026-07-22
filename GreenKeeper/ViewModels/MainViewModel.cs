@@ -185,7 +185,7 @@ namespace GreenKeeper.ViewModels
         public event EventHandler<Plant>? OpenNotesRequested;
 
 
-        // Search Plant Section
+        // -- Search Plant Section --
 
         private string _searchText = string.Empty;
 
@@ -241,7 +241,7 @@ namespace GreenKeeper.ViewModels
             return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
         }
 
-        // Add Plant Wizard Section
+        // -- Add Plant Wizard Section --
         public ICommand AddPlantCommand { get; }
         public event EventHandler? AddPlantRequested;
 
@@ -252,11 +252,11 @@ namespace GreenKeeper.ViewModels
             Plants.Add(plant);
         }
 
-        // Add Schedule Wizard Section
+        // -- Add Schedule Wizard Section --
         public ICommand AddScheduleCommand { get; }
         public event EventHandler<Plant>? AddScheduleRequested;
 
-        // Delete Plant Button Section
+        // -- Delete Plant Button Section --
         public ICommand DeletePlantCommand { get; }
 
         private void DeleteSelectedPlant()
@@ -282,7 +282,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant = null;
         }
 
-        // Care-Status related section
+        // -- Care-Status related Section --
 
         /// <summary>
         /// Will be called after the AddScheduleWizard successfully applied a Care Schedule / Sunlight Requirement
