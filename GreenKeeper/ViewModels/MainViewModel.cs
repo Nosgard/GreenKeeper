@@ -93,7 +93,7 @@ namespace GreenKeeper.ViewModels
 #endif
         }
 
-        // All available plants for the ListView (currently only dummy entries)
+        // All available plants for the ListView
         public ObservableCollection<Plant> Plants
         {
             get { return _plants; }
@@ -150,7 +150,7 @@ namespace GreenKeeper.ViewModels
             }
         }
 
-        // Selected plant in the ListView (Currently only dummy entries)
+        // Selected plant in the ListView
         /// <summary>
         /// Reminder:
         /// An explicit "Requery" of OpenNotesCommand is not necessary.

@@ -10,40 +10,10 @@ namespace GreenKeeper.Repositories
 {
     public class PlantRepository : IPlantRepository
     {
-        // This Repository consists of all the plants that will be depicted in the sidebar. Currently contains dummy plants
+        // This Repository consists of all the plants that will be depicted in the sidebar
         public IEnumerable<Plant> GetPlants()
         {
-            return new List<Plant>
-            {
-                new Plant {
-                    Name = "Aloe Vera",
-                    Notes = "Aloe Vera is a succulent plant species that is known for it's medicinal purposes",
-
-                    CareSchedules = new List<CareSchedule>
-                    {
-                        new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(3)},
-                        new CareSchedule { Care = CareType.Nutrients, NextDueAt = DateTime.Now.AddDays(30)},
-                    },
-                    SunlightRequirement = new SunlightRequirement {Hours = 6, Period = SunlightPeriod.Day}
-                },
-                new Plant {
-                    Name = "Snake Plant",
-
-                    CareSchedules = new List<CareSchedule>
-                    {
-                        new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(0)},
-                        new CareSchedule { Care = CareType.Nutrients, NextDueAt = DateTime.Now.AddDays(20)},
-                    }
-                },
-                new Plant {
-                    Name = "Cactus",
-
-                    CareSchedules = new List<CareSchedule>
-                    {
-                        new CareSchedule { Care = CareType.Water, NextDueAt = DateTime.Now.AddDays(-14)}
-                    }
-                },
-            };
+            return new List<Plant>();
         }
     }
 }
