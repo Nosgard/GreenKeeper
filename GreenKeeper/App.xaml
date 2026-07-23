@@ -10,6 +10,7 @@
                 <ResourceDictionary Source="/Resources/Styles/StatusCardButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ComboBoxStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
