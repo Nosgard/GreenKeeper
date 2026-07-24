@@ -15,5 +15,10 @@ namespace GreenKeeper.Services
 
             return result == MessageBoxResult.Yes;
         }
+
+        public void ShowError(string message, string title)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }

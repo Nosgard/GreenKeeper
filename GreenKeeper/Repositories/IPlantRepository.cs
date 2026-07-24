@@ -20,5 +20,15 @@ namespace GreenKeeper.Repositories
         /// even thought it's technically the same object reference here
         /// </summary>
         Task<Plant> AddPlantAsync(Plant plant);
+
+        /// <summary>
+        /// Persists the "completed now" state of an existing Care-Schedule:
+        /// Updates it's next due date (NextDueAt) to the given values.
+        /// The actual calculation of these new values (via TimeUnitConverter)
+        /// happens in the MainViewModel. This method is a pure persistence
+        /// operation. It doesn't contain any business logic about HOW the new
+        /// due date is determined
+        /// </summary>
+        Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt);
     }
 }

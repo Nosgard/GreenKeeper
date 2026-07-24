@@ -66,5 +66,30 @@ namespace GreenKeeper.Repositories
 
             return plant;
         }
+
+        /// <summary>
+        /// Loads a single Care-Schedule by it's Id, updates it's next due date (NextDueAt) and
+        /// the date of the last care (LastCaredAt), and saves that change back to the database
+        /// </summary>
+        public async Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var schedule = await context.CareSchedules.FindAsync(careScheduleId);
+
+            if (schedule == null)
+            {
+                // The schedule could get deleted in any other way but via the Remove-Button,
+                // so give the user an explaining exception in this case
+                throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
+            }
+
+            schedule.NextDueAt = nextDueAt;
+            schedule.LastCaredAt = lastCaredAt;
+
+            await context.SaveChangesAsync();
+        }
     }
 }

@@ -324,9 +324,13 @@ namespace GreenKeeper.ViewModels
             OnPropertyChanged(nameof(CareStatuses));
         }
 
-        // Care-Status Complete-Option
-        // Marks an active Care-Schedule (Watering / Fertilizing) as "done now" and recalculates NextDueAt based on the exact moment of the click
-        private void CompleteCareSchedule(CareType careType)
+        /// <summary>
+        /// Marks an active Care-Schedule (Watering/Fertilizing) as "done now":
+        /// calculates a new due date starting from the exact moment of the click,
+        /// persists that new due date to the database, and then updates the local,
+        /// in-memory copy so the Status-Card reflects the change immediately
+        /// </summary>
+        private async void CompleteCareSchedule(CareType careType)
         {
             if (SelectedPlant == null)
             {
@@ -340,8 +344,25 @@ namespace GreenKeeper.ViewModels
                 return;
             }
 
-            schedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, schedule.IntervalAmount.Value, schedule.IntervalUnit.Value);
-            schedule.LastCaredAt = DateTime.Now;
+            // Calculated here, so the exact same values that get persisted to the database are
+            // also the ones applied to the local object afterwards
+            var newNextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, schedule.IntervalAmount.Value, schedule.IntervalUnit.Value);
+            var newLastCaredAt = DateTime.Now;
+
+            try
+            {
+                await _plantRepository.CompleteCareScheduleAsync(schedule.Id, newNextDueAt, newLastCaredAt);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError(
+                    $"The Care-Schedule could not be updated:\n{ex.Message}",
+                    "Error");
+                return;
+            }
+
+            schedule.NextDueAt = newNextDueAt;
+            schedule.LastCaredAt = newLastCaredAt;
 
             OnPropertyChanged(nameof(CareStatuses));
         }
