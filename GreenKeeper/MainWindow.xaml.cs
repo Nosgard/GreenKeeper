@@ -17,6 +17,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Views.CareStatuses.EditOption;
+using Microsoft.EntityFrameworkCore;
+using GreenKeeper.Database;
 
 namespace GreenKeeper
 {
@@ -34,10 +36,14 @@ namespace GreenKeeper
         // Concrete, implementation of ITimerService. Created and owned here and then injected
         // into the MainViewModel via its constructor
         private readonly ITimerService _timerService = new DispatcherTimerService();
+
+        // Factory for short-lived DbContext-Instances - willed be passed on to the repository
+        private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
+
         public MainWindow()
         {
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository(), _dialogService, _timerService);
+            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService);
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
 
@@ -53,6 +59,11 @@ namespace GreenKeeper
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             PreviewMouseDown += Window_PreviewMouseDown;
+
+            // The constructor cannot be async so loading the plants will be fired
+            // via the Loaded-Event, once the window is ready
+            Loaded += MainWindow_Loaded;
+
             this.DataContext = _mainViewModel;
         }
 
@@ -140,6 +151,24 @@ namespace GreenKeeper
                 current = VisualTreeHelper.GetParent(current);
             }
             return false;
+        }
+
+        // -- Async Section (Database related) --
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await _mainViewModel.InitializeAsync();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to load the plant:\n{ex.Message}",
+                    "Loading Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
     }
 }

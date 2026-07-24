@@ -9,6 +9,8 @@ namespace GreenKeeper.Repositories
 {
     public interface IPlantRepository
     {
-        IEnumerable<Plant> GetPlants();
+        // Loads all plants including their Care-Schedules and
+        // Sunlight-Requirement from the database.
+        Task<List<Plant>> GetPlantsAsync();
     }
 }

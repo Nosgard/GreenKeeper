@@ -51,7 +51,7 @@ namespace GreenKeeper.ViewModels
             _plantRepository = plantRepository;
             _dialogService = dialogService;
             _timerService = timerService;
-            _plants = new ObservableCollection<Plant>(_plantRepository.GetPlants());
+            _plants = new ObservableCollection<Plant>();
 
 
             // Register FilterPlants as the filter predicate for the default view of plants.
@@ -91,6 +91,20 @@ namespace GreenKeeper.ViewModels
                 execute: _ => SimulateTimePassing(),
                 canExecute: _ => SelectedPlant != null);
 #endif
+        }
+
+        /// <summary>
+        /// Loads all plants from the database und fills it with plants.
+        /// It needs to be called singularly after the constructor was called
+        /// (The constructor cannot use await)
+        /// </summary>
+        public async Task InitializeAsync()
+        {
+            var plants = await _plantRepository.GetPlantsAsync();
+            foreach (var plant in plants)
+            {
+                Plants.Add(plant);
+            }
         }
 
         // All available plants for the ListView
