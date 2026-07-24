@@ -78,21 +78,6 @@ namespace GreenKeeper
             notesView.ShowDialog();
         }
 
-        private void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
-        {
-            var WizardView = new AddPlantWizardView
-            {
-                Owner = this
-            };
-
-            bool? hasResult = WizardView.ShowDialog();
-
-            if (hasResult == true && WizardView.CreatedPlant != null)
-            {
-                _mainViewModel.AddPlant(WizardView.CreatedPlant);
-            }
-        }
-
         private void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
             var wizardView = new AddScheduleWizardView(plant, _dialogService)
@@ -168,6 +153,38 @@ namespace GreenKeeper
                     "Loading Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Opens the Add-Plant-Wizard as a modal dialog. If the user
+        /// completed it and a Plant-Object was built, that plant is
+        /// handed off to the ViewModel to be persisted to the database.
+        /// </summary>
+        private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
+        {
+            var WizardView = new AddPlantWizardView
+            {
+                Owner = this
+            };
+
+            bool? hasResult = WizardView.ShowDialog();
+
+            if (hasResult == true && WizardView.CreatedPlant != null)
+            {
+                try
+                {
+                    // Await the database save before doing anything else
+                    await _mainViewModel.AddPlantAsync(WizardView.CreatedPlant);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Failed to save the plant:\n{ex.Message}",
+                        "Saving Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
     }

@@ -107,6 +107,22 @@ namespace GreenKeeper.ViewModels
             }
         }
 
+        /// <summary>
+        /// Persists a newly created plant (built by the Add-Plant-Wizard)
+        /// to the database via the repository, and only THEN adds it to
+        /// the ObervableCollection that the sidebar's ListView is bound to.
+        /// 
+        /// Doing it in this order matters: if AddPlantAsync (the repository call)
+        /// were to fail - e.g. a database error - the new plant would never reach
+        /// the UI either. This avoids a situation where the UI shows a plant that,
+        /// in reality, was never actually saved
+        /// </summary>
+        public async Task AddPlantAsync(Plant plant)
+        {
+            var savedPlant = await _plantRepository.AddPlantAsync(plant);
+            Plants.Add(savedPlant);
+        }
+
         // All available plants for the ListView
         public ObservableCollection<Plant> Plants
         {
