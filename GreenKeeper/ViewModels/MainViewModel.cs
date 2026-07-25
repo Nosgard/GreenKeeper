@@ -289,7 +289,9 @@ namespace GreenKeeper.ViewModels
         // -- Delete Plant Button Section --
         public ICommand DeletePlantCommand { get; }
 
-        private void DeleteSelectedPlant()
+        
+        // Deletes the currently selected plant, after the user confirms.
+        private async void DeleteSelectedPlant()
         {
             if (SelectedPlant == null)
             {
@@ -302,6 +304,18 @@ namespace GreenKeeper.ViewModels
 
             if (!isConfirmed)
             {
+                return;
+            }
+
+            try
+            {
+                await _plantRepository.DeletePlantAsync(SelectedPlant.Id);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError(
+                    $"The plant could not be deleted:\n{ex.Message}",
+                    "Delete Error");
                 return;
             }
 

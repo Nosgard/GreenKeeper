@@ -30,5 +30,16 @@ namespace GreenKeeper.Repositories
         /// due date is determined
         /// </summary>
         Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt);
+
+        /// <summary>
+        /// Permanently deletes a Plant-Object identified by it's Id.
+        /// 
+        /// It's Care-Schedules and Sunlight-Requirement do NOT need to be deleted
+        /// separately or even loaded here - the database itself removes them
+        /// automatically as soon as the Plant-Object is deleted, thanks to the
+        /// ON DELETE CASCADE foreign key behavior
+        /// (for more info go to GreenKeeperDbContext.OnModelCreating)
+        /// </summary>
+        Task DeletePlantAsync(int plantId);
     }
 }

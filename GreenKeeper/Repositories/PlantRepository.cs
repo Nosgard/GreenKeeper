@@ -91,5 +91,29 @@ namespace GreenKeeper.Repositories
 
             await context.SaveChangesAsync();
         }
+
+        /// <summary>
+        /// Deletes the Plant-Object identified by the Id (plantId), along with everything
+        /// the database's cascading foreign keys automatically remove with it
+        /// (Care-Schedules and Sunlight-Requirement)
+        /// </summary>
+        public async Task DeletePlantAsync(int plantId)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var plant = await context.Plants.FindAsync(plantId);
+
+            if (plant == null)
+            {
+                // It can happen that the plant was already deleted through some
+                // other means in the meantime
+                throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
+            }
+
+            context.Plants.Remove(plant);
+            await context.SaveChangesAsync();
+        }
     }
 }
