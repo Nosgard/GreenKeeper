@@ -115,5 +115,53 @@ namespace GreenKeeper.Repositories
             context.Plants.Remove(plant);
             await context.SaveChangesAsync();
         }
+
+        public async Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var existing = await context.CareSchedules
+                .FirstOrDefaultAsync(cs => cs.PlantId == plantId && cs.Care == careSchedule.Care);
+
+            if (existing != null)
+            {
+                // Remove + own SaveChangesAsync BEFORE the Add:
+                // guarantees the old row is gone
+                // before the new one is inserted, avoiding a brief clash with the unique index on (PlantId, Care)
+                context.CareSchedules.Remove(existing);
+                await context.SaveChangesAsync();
+            }
+
+            careSchedule.PlantId = plantId;
+            context.CareSchedules.Add(careSchedule);
+            await context.SaveChangesAsync();
+
+            return careSchedule;
+        }
+
+        public async Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var existing = await context.SunlightRequirements
+                .FirstOrDefaultAsync(sr => sr.PlantId == plantId);
+
+            if (existing != null)
+            {
+                // Remove + save first, then insert, same as AddOrReplaceCareScheduleAsync
+                context.SunlightRequirements.Remove(existing);
+                await context.SaveChangesAsync();
+            }
+
+            sunlightRequirement.PlantId = plantId;
+            context.SunlightRequirements.Add(sunlightRequirement);
+            await context.SaveChangesAsync();
+
+            return sunlightRequirement;
+        }
     }
 }

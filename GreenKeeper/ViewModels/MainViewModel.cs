@@ -286,6 +286,53 @@ namespace GreenKeeper.ViewModels
         public ICommand AddScheduleCommand { get; }
         public event EventHandler<Plant>? AddScheduleRequested;
 
+        /// <summary>
+        /// Calculates NextDueAt/LastCaredAt for a new//replacing Care-Schedule,
+        /// persists it via the repository, then updates the local Care-Schedules
+        /// list so the Status-Card appears immediately without a DB reload.
+        /// Called directly from MainWindow (not via a Command callback), so this
+        /// stays a plain async Task - the caller awaits it in it's own try/catch
+        /// </summary>
+        public async Task AddOrReplaceCareScheduleAsync(CareSchedule newCareSchedule)
+        {
+            if ( (SelectedPlant == null || newCareSchedule.IntervalAmount == null || newCareSchedule.IntervalUnit == null))
+            {
+                return;
+            }
+
+            newCareSchedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, newCareSchedule.IntervalAmount.Value, newCareSchedule.IntervalUnit.Value);
+            newCareSchedule.LastCaredAt = DateTime.Now;
+
+            var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, newCareSchedule);
+
+            // Swap out any old local entry of the same Care-Type for the saved one
+            var existingLocal = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == saved.Care);
+            if (existingLocal != null)
+            {
+                SelectedPlant.CareSchedules.Remove(existingLocal);
+            }
+            SelectedPlant.CareSchedules.Add(saved);
+
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+
+        /// <summary>
+        /// Persists a new/replacing Sunlight-Requirement for the selected plant -
+        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed
+        /// </summary>
+        public async Task AddOrReplaceSunlightRequirementAsync(SunlightRequirement newSunlightRequirement)
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            var saved = await _plantRepository.AddOrReplaceSunlightRequirementAsync(SelectedPlant.Id, newSunlightRequirement);
+            SelectedPlant.SunlightRequirement = saved;
+
+            OnPropertyChanged(nameof(CareStatuses));
+        }
+
         // -- Delete Plant Button Section --
         public ICommand DeletePlantCommand { get; }
 

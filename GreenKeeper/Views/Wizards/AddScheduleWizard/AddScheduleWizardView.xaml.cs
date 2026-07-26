@@ -31,6 +31,10 @@ namespace GreenKeeper.Views.Wizards.AddScheduleWizard
             this.DataContext = _addScheduleWizardViewModel;
         }
 
+        // Exposes the Wizard's result to the caller (MainWindow), analogous to
+        // AddPlantWizard.CreatedPlant - persistence itself happens outside this View, in MainViewModel
+        public CareSchedule? CreatedCareSchedule => _addScheduleWizardViewModel.CreatedCareSchedule;
+        public SunlightRequirement? CreatedSunlightRequirement => _addScheduleWizardViewModel.CreatedSunlightRequirement;
         private void ViewModel_RequestClose(object? sender, bool dialogResult)
         {
             _addScheduleWizardViewModel.RequestClose -= ViewModel_RequestClose;

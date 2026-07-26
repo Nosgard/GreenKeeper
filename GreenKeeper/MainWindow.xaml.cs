@@ -19,6 +19,7 @@ using GreenKeeper.Models.Enums;
 using GreenKeeper.Views.CareStatuses.EditOption;
 using Microsoft.EntityFrameworkCore;
 using GreenKeeper.Database;
+using System.Threading.Tasks;
 
 namespace GreenKeeper
 {
@@ -78,7 +79,16 @@ namespace GreenKeeper
             notesView.ShowDialog();
         }
 
-        private void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
+        /// <summary>
+        /// Opens the Add-Schedule-Wizard. If completed, persists whichever result
+        /// the Wizard produced (CareSchedule or SunlightRequirement, only one is
+        /// ever set) via MainViewModel.
+        /// 
+        /// "async void" required because AddScheduleRequested
+        /// is an Event-Handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this methid
+        /// </summary>
+        private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
             var wizardView = new AddScheduleWizardView(plant, _dialogService)
             {
@@ -87,9 +97,29 @@ namespace GreenKeeper
 
             bool? result = wizardView.ShowDialog();
 
-            if (result == true)
+            if (result != true)
             {
-                _mainViewModel.RefreshCareStatuses();
+                return;
+            }
+
+            try
+            {
+                if (wizardView.CreatedCareSchedule != null)
+                {
+                    await _mainViewModel.AddOrReplaceCareScheduleAsync(wizardView.CreatedCareSchedule);
+                }
+                else if (wizardView.CreatedSunlightRequirement != null)
+                {
+                    await _mainViewModel.AddOrReplaceSunlightRequirementAsync(wizardView.CreatedSunlightRequirement);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Schedule could not be saved:\n{ex.Message}",
+                    "Saving Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 

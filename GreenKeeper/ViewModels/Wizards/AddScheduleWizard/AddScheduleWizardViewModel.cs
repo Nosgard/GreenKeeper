@@ -22,6 +22,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         private readonly Plant _plant;
         private readonly IDialogService _dialogService;
 
+        // Holds the finished result, one of the two ends up set, never both.
+        public CareSchedule? CreatedCareSchedule { get; private set; }
+        public SunlightRequirement? CreatedSunlightRequirement { get; private set; }
+
         private readonly CareTypeSelectionStepViewModel _selectionStep = new();
 
         // Will be instantiated, once the user made his decision on the first step.
@@ -84,7 +88,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             {
                 // "Finish" is trying to apply the status, but can abort
                 // without closing the Wizard e.g. when the user enters "No" in the warning to overwrite
-                if (CanApply())
+                if (TryApply())
                 {
                     RequestClose?.Invoke(this, true);
                 }
@@ -105,18 +109,19 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
         // Handle the entry in the Detail-Step.
         // In case the user refused to overwrite the Wizard remains open, otherwise it will be closed
-        private bool CanApply()
+        private bool TryApply()
         {
             return _selectionStep.SelectedCareType switch
             {
-                CareType.Water => ApplyActiveCareSchedule(CareType.Water, (ScheduleActiveStepViewModel)_detailStep!),
-                CareType.Nutrients => ApplyActiveCareSchedule(CareType.Nutrients, (ScheduleActiveStepViewModel)_detailStep!),
-                CareType.Sunlight => ApplySunlightRequirement((ScheduleSunlightStepViewModel)_detailStep!),
-                _ => false
+                CareType.Water => PrepareCareSchedule(CareType.Water, (ScheduleActiveStepViewModel)_detailStep!),
+                CareType.Nutrients => PrepareCareSchedule(CareType.Nutrients, (ScheduleActiveStepViewModel)_detailStep!),
+                CareType.Sunlight => PrepareSunlightRequirement((ScheduleSunlightStepViewModel)_detailStep!)
             };
         }
 
-        private bool ApplyActiveCareSchedule(CareType careType, ScheduleActiveStepViewModel step)
+        // Overwrite-confirmation stays local (only needs the in-memory _plant),
+        // only the actual "apply" step changed from mutation to data prep
+        private bool PrepareCareSchedule(CareType careType, ScheduleActiveStepViewModel step)
         {
             var existing = _plant.CareSchedules.FirstOrDefault(s => s.Care == careType);
 
@@ -131,23 +136,25 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
                     // Keep the Wizard open
                     return false;
                 }
-
-                _plant.CareSchedules.Remove(existing);
             }
 
-            int amount = int.Parse(step.AmountText);
-            _plant.CareSchedules.Add(new CareSchedule
+            // No NextDueAt/LastCaredAt set here - the calculation stays centralized in MainViewModel
+            CreatedCareSchedule = new CareSchedule
             {
                 Care = careType,
                 IntervalAmount = int.Parse(step.AmountText),
                 IntervalUnit = step.SelectedUnit,
-                NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, amount, step.SelectedUnit)
-            });
+            };
 
             return true;
         }
 
-        private bool ApplySunlightRequirement(ScheduleSunlightStepViewModel step)
+        /// <summary>
+        /// Similar to PrepareCareSchedule. The only difference is that there is no due date
+        /// to be calculated. That's why it will already be filled completely with the
+        /// related data
+        /// </summary>
+        private bool PrepareSunlightRequirement(ScheduleSunlightStepViewModel step)
         {
             if (_plant.SunlightRequirement != null)
             {
@@ -162,7 +169,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
                 }
             }
 
-            _plant.SunlightRequirement = new SunlightRequirement
+            CreatedSunlightRequirement = new SunlightRequirement
             {
                 Hours = int.Parse(step.AmountText),
                 Period = step.SelectedPeriod

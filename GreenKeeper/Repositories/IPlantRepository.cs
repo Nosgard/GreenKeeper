@@ -41,5 +41,19 @@ namespace GreenKeeper.Repositories
         /// (for more info go to GreenKeeperDbContext.OnModelCreating)
         /// </summary>
         Task DeletePlantAsync(int plantId);
+
+        /// <summary>
+        /// Adds a new Care-Schedule for the given plant, or replaces the existing
+        /// one of the same Care-Type if one already exists.
+        /// The passed-in schedule should already have the next due date (NextDueAt)
+        /// and the last date of care (LastCaredAt)
+        /// </summary>
+        Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule);
+
+        /// <summary>
+        /// Adds a new Sunlight-Requirement for the given plant,
+        /// or replaces the existing one if present
+        /// </summary>
+        Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement);
     }
 }
