@@ -55,5 +55,17 @@ namespace GreenKeeper.Repositories
         /// or replaces the existing one if present
         /// </summary>
         Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement);
+
+        /// <summary>
+        /// Permanently deletes a single Care-Schedule row, identified by it's Id.
+        /// Used for the optional schedules (Fertilizing)
+        /// </summary>
+        Task RemoveCareScheduleAsync(int careScheduleId);
+
+        /// <summary>
+        /// Permanently deletes a single Sunlight-Requirement row, identified by
+        /// it's Id
+        /// </summary>
+        Task RemoveSunlightRequirementAsync(int sunlightRequirementId);
     }
 }

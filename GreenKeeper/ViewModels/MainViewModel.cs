@@ -436,8 +436,13 @@ namespace GreenKeeper.ViewModels
 
         // Care-Status Remove-Option
 
-        // Removes the optional care schedule from the selected plant once the user confirmed
-        private void RemoveCareSchedule(CareType careType, string displayName)
+        /// <summary>
+        /// Removes the optional care schedule from the selected plant once the user confirmed.
+        /// "async void" because onRemove is wired up via a synchronous Action delegate
+        /// in CareStatuses, so error handling must happen entirely within this method via try/catch,
+        /// since the caller of an async void method cannot catch exceptions from it
+        /// </summary>
+        private async void RemoveCareSchedule(CareType careType, string displayName)
         {
             if (SelectedPlant == null)
             {
@@ -454,20 +459,37 @@ namespace GreenKeeper.ViewModels
             }
 
             var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
-            if (schedule != null)
+            if (schedule == null)
             {
-                SelectedPlant.CareSchedules.Remove(schedule);
+                return;
             }
+
+            try
+            {
+                await _plantRepository.RemoveCareScheduleAsync(schedule.Id);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError(
+                    $"The {displayName} could not be removed:\n{ex.Message}",
+                    "Error");
+                return;
+            }
+
+            SelectedPlant.CareSchedules.Remove(schedule);
 
             // CareStatuses doesn't have any Backing-Field and reads from the selected plant (SelectedPlant).
             // OnProperty is enough to let the removed Status-Card disappear from the ItemsControl
             OnPropertyChanged(nameof(CareStatuses));
         }
 
-        // Removes the sunlight requirement from the selected plant once the user confirmed
-        private void RemoveSunlightRequirement()
+        /// <summary>
+        /// Removes the sunlight requirement from the selected plant once the user confirmed.
+        /// Same "async void" reasoning as RemoveCareSchedule
+        /// </summary>
+        private async void RemoveSunlightRequirement()
         {
-            if (SelectedPlant == null)
+            if (SelectedPlant?.SunlightRequirement == null)
             {
                 return;
             }
@@ -478,6 +500,18 @@ namespace GreenKeeper.ViewModels
 
             if (!isConfirmed)
             {
+                return;
+            }
+
+            try
+            {
+                await _plantRepository.RemoveSunlightRequirementAsync(SelectedPlant.SunlightRequirement.Id);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError(
+                    $"The Sunlight-Requirement could not be removed:\n{ex.Message}",
+                    "Error");
                 return;
             }
 

@@ -163,5 +163,39 @@ namespace GreenKeeper.Repositories
 
             return sunlightRequirement;
         }
+
+        public async Task RemoveCareScheduleAsync(int careScheduleId)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var schedule = await context.CareSchedules.FindAsync(careScheduleId);
+
+            if (schedule == null)
+            {
+                throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
+            }
+
+            context.CareSchedules.Remove(schedule);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var requirement = await context.SunlightRequirements.FindAsync(sunlightRequirementId);
+
+            if (requirement == null)
+            {
+                throw new InvalidOperationException($"Sunlight-Requirement with Id {sunlightRequirementId} was not found");
+            }
+
+            context.SunlightRequirements.Remove(requirement);
+            await context.SaveChangesAsync();
+        }
     }
 }
