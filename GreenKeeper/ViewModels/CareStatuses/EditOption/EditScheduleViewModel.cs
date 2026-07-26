@@ -24,6 +24,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public object CurrentStep { get; }
 
+        // Provide the result, instead of mutating _plant
+        public CareSchedule? EditedCareSchedule { get; private set; }
+        public SunlightRequirement? EditedSunlightRequirement { get; private set; }
+
         // Either an active (Watering /Fertilizing) or passive (Sunlight) Care-Type
         public EditScheduleViewModel(Plant plant, CareType careType)
         {
@@ -78,30 +82,22 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             {
                 // Create a new Sunlight-Requirement if none exists yet, otherwise update the existing one in place
                 var step = (EditSunlightViewModel)CurrentStep;
-                _plant.SunlightRequirement ??= new SunlightRequirement();
-                _plant.SunlightRequirement.Hours = int.Parse(step.AmountText);
-                _plant.SunlightRequirement.Period = step.SelectedPeriod;
+                EditedSunlightRequirement = new SunlightRequirement
+                {
+                    Hours = int.Parse(step.AmountText),
+                    Period = step.SelectedPeriod
+                };
             }
             else
             {
                 var step = (EditActiveScheduleViewModel)CurrentStep;
-                var schedule = _plant.CareSchedules.FirstOrDefault(s => s.Care == _careType);
 
-                // Create a new Care-Schedule if none exists yet for this Care-Type
-                if (schedule == null)
+                EditedCareSchedule = new CareSchedule
                 {
-                    schedule = new CareSchedule { Care = _careType };
-                    _plant.CareSchedules.Add(schedule);
-                }
-
-                int amount = int.Parse(step.AmountText);
-                schedule.IntervalAmount = amount;
-                schedule.IntervalUnit = step.SelectedUnit;
-
-                // The due date is recalculated starting from NOW, as agreed.
-                // Editing resets the countdown, it does not just change the interval length while keeping the old due date - LastCaredAt as well
-                schedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, amount, step.SelectedUnit);
-                schedule.LastCaredAt = DateTime.Now;
+                    Care = _careType,
+                    IntervalAmount = int.Parse(step.AmountText),
+                    IntervalUnit = step.SelectedUnit
+                };
             }
 
             RequestClose?.Invoke(this, true);

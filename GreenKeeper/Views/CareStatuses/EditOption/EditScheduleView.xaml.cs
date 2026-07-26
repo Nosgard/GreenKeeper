@@ -33,6 +33,9 @@ namespace GreenKeeper.Views.CareStatuses.EditOption
             this.DataContext = _viewModel;
         }
 
+        // Provide the result for either the selected Care-Schedule or the Sunlight-Requirement
+        public CareSchedule? EditedCareSchedule => _viewModel.EditedCareSchedule;
+        public SunlightRequirement? EditedSunlightRequirement => _viewModel.EditedSunlightRequirement;
         private void ViewModel_RequestClose(object? sender, bool dialogResult)
         {
             _viewModel.RequestClose -= ViewModel_RequestClose;

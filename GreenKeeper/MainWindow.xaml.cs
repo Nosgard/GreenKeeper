@@ -123,7 +123,18 @@ namespace GreenKeeper
             }
         }
 
-        private void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
+        /// <summary>
+        /// Opens the Edit-Dialog. If saved, persists whichever result was
+        /// prepared (Care-Schedule or Sunlight-Requirement) by reusing the exact
+        /// same MainViewModel methods the Add-Schedule-Wizard already uses -
+        /// editing a schedule and replacing it with a new one via the Wizard are,
+        /// from database's point of view, the identical operation.
+        /// 
+        /// "async void" required because EditScheduleRequested
+        /// is an Event-Handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this method
+        /// </summary>
+        private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
             var editView = new EditScheduleView(e.plant, e.care)
             {
@@ -132,9 +143,29 @@ namespace GreenKeeper
 
             bool? result = editView.ShowDialog();
 
-            if (result == true)
+            if (result != true)
             {
-                _mainViewModel.RefreshCareStatuses();
+                return;
+            }
+
+            try
+            {
+                if (editView.EditedCareSchedule != null)
+                {
+                    await _mainViewModel.AddOrReplaceCareScheduleAsync(editView.EditedCareSchedule);
+                }
+                else if (editView.EditedSunlightRequirement != null)
+                {
+                    await _mainViewModel.AddOrReplaceSunlightRequirementAsync(editView.EditedSunlightRequirement);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"The change could not be saved:\n{ex.Message}",
+                    "Saving Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
