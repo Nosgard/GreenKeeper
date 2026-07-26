@@ -86,7 +86,7 @@ namespace GreenKeeper
         /// 
         /// "async void" required because AddScheduleRequested
         /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this methid
+        /// Error handling therefore has to happen entirely inside this method
         /// </summary>
         private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
