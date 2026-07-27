@@ -5,7 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper.Views.Notes"
         mc:Ignorable="d"
-        Title="NotesView" Height="450" Width="500"
+        Title="NotesView"
+        MinHeight="350"
+        MinWidth="400"
+        Height="450"
+        Width="500"
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="20">
