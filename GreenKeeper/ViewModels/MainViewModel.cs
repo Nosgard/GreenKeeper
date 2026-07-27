@@ -555,6 +555,12 @@ namespace GreenKeeper.ViewModels
         // -- Debug-Section --
 
 #if DEBUG
+        public bool IsDebugBuild => true;
+#else
+        public bool IsDebugBuild => false;
+#endif
+
+#if DEBUG
         public ICommand SimulateTimePassingCommand { get; }
 
         // Available jumps in the UI
