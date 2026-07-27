@@ -67,5 +67,10 @@ namespace GreenKeeper.Repositories
         /// it's Id
         /// </summary>
         Task RemoveSunlightRequirementAsync(int sunlightRequirementId);
+
+        /// <summary>
+        /// Persists the given text as the notes for the selected plant
+        /// </summary>
+        Task UpdatePlantNotesAsync(int plantId, string notes);
     }
 }

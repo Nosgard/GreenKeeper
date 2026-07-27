@@ -204,6 +204,8 @@ namespace GreenKeeper.ViewModels
         // Useful for Visibility-Bindings like the Status-Title in the Dashboard
         public bool IsPlantSelected => SelectedPlant != null;
 
+        // -- Notes Section --
+
         // Essential command to be bound to the Notes-Button in MainWIndow.xaml.
         // It is ICommand so that the View only binds the interface and
         // the explicit implementation remains exchangeable
@@ -214,6 +216,17 @@ namespace GreenKeeper.ViewModels
         // Code-Behind opens the window (View), while the ViewModel does not know any Window-Class
         public event EventHandler<Plant>? OpenNotesRequested;
 
+        /// <summary>
+        /// Persists new Notes-Text for the given plant, then updates the local,
+        /// in-memory Plant-Object so it reflects the saved state. Called via the
+        /// callback that NotesViewModel receives (see NotesView/MainWindow) -
+        /// not directly bound to a Command, so this stays a plain async Task
+        /// </summary>
+        public async Task UpdatePlantNotesAsync(Plant plant, string notes)
+        {
+            await _plantRepository.UpdatePlantNotesAsync(plant.Id, notes);
+            plant.Notes = notes;
+        }
 
         // -- Search Plant Section --
 

@@ -23,10 +23,10 @@ namespace GreenKeeper.Views.Notes
     public partial class NotesView : Window
     {
         private readonly NotesViewModel _notesViewModel;
-        public NotesView(Plant plant, IDialogService dialogService)
+        public NotesView(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
         {
             InitializeComponent();
-            _notesViewModel = new NotesViewModel(plant, dialogService);
+            _notesViewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
             _notesViewModel.RequestClose += NotesViewModel_RequestClose;
             this.DataContext = _notesViewModel;
         }

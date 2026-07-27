@@ -72,7 +72,10 @@ namespace GreenKeeper
         // It opens a new window and shows the notes of the given plant
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
-            var notesView = new NotesView(plant, _dialogService)
+            var notesView = new NotesView(
+                plant,
+                _dialogService,
+                saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text))
             {
                 Owner = this
             };

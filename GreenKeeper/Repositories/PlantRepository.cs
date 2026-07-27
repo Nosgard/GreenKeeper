@@ -197,5 +197,22 @@ namespace GreenKeeper.Repositories
             context.SunlightRequirements.Remove(requirement);
             await context.SaveChangesAsync();
         }
+
+        public async Task UpdatePlantNotesAsync(int plantId, string notes)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var plant = await context.Plants.FindAsync(plantId);
+
+            if (plant == null)
+            {
+                throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+            }
+
+            plant.Notes = notes;
+            await context.SaveChangesAsync();
+        }
     }
 }
