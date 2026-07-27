@@ -19,7 +19,10 @@ namespace GreenKeeper.Repositories
             _contextFactory = contextFactory;
         }
 
-        // This Repository consists of all the plants that will be depicted in the sidebar
+        /// <summary>
+        /// Loads all plants including their Care-Schedules and
+        /// Sunlight-Requirement from the database, to be depicted in the sidebar
+        /// </summary>
         public async Task<List<Plant>> GetPlantsAsync()
         {
             // Fresh, short-lived Context for this one step.
@@ -116,6 +119,14 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Adds a new Care-Schedule for the given plant, or replaces the existing
+        /// one of the same Care-Type if one already exists. Used both by the
+        /// Add-Schedule-Wizard and the Edit-Dialog - both cases boil down
+        /// to the same database operation. The passed-in schedule should already
+        /// have the next due date (NextDueAt) and the last date of care (LastCaredAt)
+        /// calculated by the caller (MainViewModel), this method only persists it
+        /// </summary>
         public async Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
         {
             // Fresh, short-lived Context for this one step.
@@ -141,6 +152,12 @@ namespace GreenKeeper.Repositories
             return careSchedule;
         }
 
+        /// <summary>
+        /// Adds a new Sunlight-Requirement for the given plant, or replaces the
+        /// existing one if present - analogous to AddOrReplaceCareScheduleAsync,
+        /// just for the 1:1 Sunlight-Requirement relationship instead of the
+        /// 1:many Care-Schedules
+        /// </summary>
         public async Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
             // Fresh, short-lived Context for this one step.
@@ -164,6 +181,10 @@ namespace GreenKeeper.Repositories
             return sunlightRequirement;
         }
 
+        /// <summary>
+        /// Permanently deletes a single Care-Schedule row, identified by it's Id.
+        /// Only ever called for optional Care-Types (Fertilizing)
+        /// </summary>
         public async Task RemoveCareScheduleAsync(int careScheduleId)
         {
             // Fresh, short-lived Context for this one step.
@@ -181,6 +202,10 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Permanently deletes a single Sunlight-Requirement row, identified
+        /// by it's Id
+        /// </summary>
         public async Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
             // Fresh, short-lived Context for this one step.
@@ -198,6 +223,10 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Persists the given text as the notes for the specified plant,
+        /// identified by it's Id
+        /// </summary>
         public async Task UpdatePlantNotesAsync(int plantId, string notes)
         {
             // Fresh, short-lived Context for this one step.
