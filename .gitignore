@@ -361,3 +361,10 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+#GreenKeeper: SQLite-Databases should not get in the Repo
+# (the actual DB is in %LocalAppData%)
+# Safety purposes
+*.db
+*.db-shm
+*.db-wal
