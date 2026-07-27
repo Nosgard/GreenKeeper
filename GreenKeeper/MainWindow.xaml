@@ -5,7 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
         mc:Ignorable="d"
-        Title="GreenKeeper" Height="650" Width="900">
+        Title="GreenKeeper"
+        MinHeight="550"
+        MinWidth="750"
+        Height="650"
+        Width="900">
     
     <!-- Main Grid -->
     <Grid Background="#1A1C22">
