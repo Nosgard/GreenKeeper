@@ -71,13 +71,26 @@ namespace GreenKeeper.Converters
 
             int daysDiff = (later - earlier).Days;
 
-            TimeUnit effectiveUnit = daysDiff switch
+            int calendarMonths = CalendarMonthsBetween(earlier, later);
+
+            TimeUnit effectiveUnit;
+
+            if (daysDiff < 7)
             {
-                < 7 => TimeUnit.Days,
-                < 30 => TimeUnit.Weeks,
-                < 365 => TimeUnit.Months,
-                _ => TimeUnit.Years
-            };
+                effectiveUnit = TimeUnit.Days;
+            }
+            else if (calendarMonths == 0)
+            {
+                effectiveUnit = TimeUnit.Weeks;
+            }
+            else if (calendarMonths < 12)
+            {
+                effectiveUnit = TimeUnit.Months;
+            }
+            else
+            {
+                effectiveUnit = TimeUnit.Years;
+            }
 
             int amount = effectiveUnit switch
             {
