@@ -120,19 +120,6 @@ namespace GreenKeeper.Tests.Converters
             Assert.Equal(expected, result);
         }
 
-        [Fact]
-        public void ToDueDateText_GivenNullDueDates_ReturnsEmptyString()
-        {
-            // Given: no due date is set (null)
-            DateTime? nextDueAt = null;
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should be an empty string, not an exception or "null"
-            Assert.Equal(string.Empty, result);
-        }
-
         [Theory]
         [InlineData(1, "1 day")]
         [InlineData(3, "3 days")]
@@ -200,6 +187,19 @@ namespace GreenKeeper.Tests.Converters
 
             // Then: the result should use the plural form "2 years"
             Assert.Equal("2 years", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenNullDueDates_ReturnsEmptyString()
+        {
+            // Given: no due date is set (null)
+            DateTime? nextDueAt = null;
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should be an empty string, not an exception or "null"
+            Assert.Equal(string.Empty, result);
         }
     }
 }
