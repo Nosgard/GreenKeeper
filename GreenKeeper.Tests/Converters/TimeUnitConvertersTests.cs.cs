@@ -78,6 +78,86 @@ namespace GreenKeeper.Tests.Converters
             Assert.Equal("Overdue for 1 day", result);
         }
 
+        [Fact]
+        public void ToDueDateText_GivenNullDueDates_ReturnsEmptyString()
+        {
+            // Given: no due date is set (null)
+            DateTime? nextDueAt = null;
 
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should be an empty string, not an exception or "null"
+            Assert.Equal(string.Empty, result);
+        }
+
+        [Theory]
+        [InlineData(1, "1 day")]
+        [InlineData(3, "3 days")]
+        [InlineData(7, "1 week")]
+        [InlineData(14, "2 weeks")]
+        public void ToDueDateText_GivenUpcomingDueDateInDaysOrWeeks_UseCorrectSingularOrPluralUnit(int daysFromNow, string expected)
+        {
+            // Given: a due date daysFromNow days in the future
+            var nextDueAt = DateTime.Now.AddDays(daysFromNow);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the unit label should be singular for an amount of 1, plural otherwise
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateOneMonthInFuture_ReturnsOneMonthSingular()
+        {
+            // Given: a due date exactly one calendar month in the future
+            var nextDueAt = DateTime.Now.AddMonths(1);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the singular form "1 month"
+            Assert.Equal("1 month", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateTwoMonthsInFuture_ReturnsTwoMonthsPlural()
+        {
+            // Given: a due date exactly two calendar months in the future
+            var nextDueAt = DateTime.Now.AddMonths(2);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the plural form "2 months"
+            Assert.Equal("2 months", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateOneYearInFuture_ReturnsOneYearSingular()
+        {
+            // Given: a due date exactly one calendar year in the future
+            var nextDueAt = DateTime.Now.AddYears(1);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the singular form "1 year"
+            Assert.Equal("1 year", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateTwoYearsInFuture_ReturnsTwoYearsPlural()
+        {
+            // Given: a due date exactly two calendar years in the future
+            var nextDueAt = DateTime.Now.AddYears(2);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the plural form "2 years"
+            Assert.Equal("2 years", result);
+        }
     }
 }
