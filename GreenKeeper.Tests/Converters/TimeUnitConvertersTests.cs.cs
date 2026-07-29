@@ -26,14 +26,14 @@ namespace GreenKeeper.Tests.Converters
         /// <summary>
         /// Regression test for a historical bug: a due date exactly one calendar day
         /// in the past used to be displayed as "Overdue for 0 days" instead of
-        /// "Overdue for 1 day". The cause was acomparing the full, time-of-day-inclusive
+        /// "Overdue for 1 day". The cause was a comparing the full, time-of-day-inclusive
         /// due date directly against an already Date-truncated "today" value - since
         /// less than 24 full hours had elapsed (due to the leftover time-of-day component),
         /// the day difference was truncated to 0 instead of being calculated on a
         /// pure calendar-day basis.
         /// </summary>
         [Fact]
-        public void ToDueDateText_GivenDueDateOnOneDayOverdue_ReturnsOverdueForOneDay()
+        public void ToDueDateText_GivenDueDateOneDayOverdue_ReturnsOverdueForOneDay()
         {
             // Given: a due date exactly one calendar day in the past
             var nextDueAt = DateTime.Now.AddDays(-1);
@@ -53,7 +53,7 @@ namespace GreenKeeper.Tests.Converters
         /// never silently returns
         /// </summary>
         [Fact]
-        public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForMonth()
+        public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForOneMonth()
         {
             // Given: a due 35 days in the past
             var nextDueAt = DateTime.Now.AddDays(-35);
@@ -138,7 +138,7 @@ namespace GreenKeeper.Tests.Converters
         [InlineData(3, "3 days")]
         [InlineData(7, "1 week")]
         [InlineData(14, "2 weeks")]
-        public void ToDueDateText_GivenUpcomingDueDateInDaysOrWeeks_UseCorrectSingularOrPluralUnit(int daysFromNow, string expected)
+        public void ToDueDateText_GivenUpcomingDueDateInDaysOrWeeks_UsesCorrectSingularOrPluralUnit(int daysFromNow, string expected)
         {
             // Given: a due date daysFromNow days in the future
             var nextDueAt = DateTime.Now.AddDays(daysFromNow);
