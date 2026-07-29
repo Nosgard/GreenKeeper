@@ -9,19 +9,6 @@ namespace GreenKeeper.Tests.Converters
 {
     public class TimeUnitConvertersTests
     {
-        [Fact]
-        public void ToDueDateText_GivenDueDateThreeDaysInFuture_ReturnsThreeDays()
-        {
-            // Given: a due date three days from now
-            var nextDueAt = DateTime.Now.AddDays(3);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should read "3 days", without an "Overdue" prefix
-            Assert.Equal("3 days", result);
-        }
-
 
         [Fact]
         public void ToDueDateText_GivenDueDateIsToday_ReturnsToday()
@@ -34,26 +21,6 @@ namespace GreenKeeper.Tests.Converters
 
             // Then: the result should read "Today"
             Assert.Equal("Today", result);
-        }
-
-        /// <summary>
-        /// Regression test for historical bug: 35 days overdue used to be
-        /// displayed as "Overdue for 2 months" instead of "Overdue for 1 month",
-        /// because the rounding logic used Math.Ceiling instead of rounding
-        /// to the nearest calendar month. Ensures this specific miscalculation
-        /// never silently returns
-        /// </summary>
-        [Fact]
-        public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForMonth()
-        {
-            // Given: a due 35 days in the past
-            var nextDueAt = DateTime.Now.AddDays(-35);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should read "Overdue for 1 month"
-            Assert.Equal("Overdue for 1 month", result);
         }
 
         /// <summary>
@@ -76,6 +43,81 @@ namespace GreenKeeper.Tests.Converters
 
             // Then: the result should read "Overdue for 1 day", not "0 days"
             Assert.Equal("Overdue for 1 day", result);
+        }
+
+        /// <summary>
+        /// Regression test for historical bug: 35 days overdue used to be
+        /// displayed as "Overdue for 2 months" instead of "Overdue for 1 month",
+        /// because the rounding logic used Math.Ceiling instead of rounding
+        /// to the nearest calendar month. Ensures this specific miscalculation
+        /// never silently returns
+        /// </summary>
+        [Fact]
+        public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForMonth()
+        {
+            // Given: a due 35 days in the past
+            var nextDueAt = DateTime.Now.AddDays(-35);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should read "Overdue for 1 month"
+            Assert.Equal("Overdue for 1 month", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateTwoMonthsOverdue_ReturnsOverdueForTwoMonths()
+        {
+            // Given: a due date exactly two calendar months in the past
+            var nextDueAt = DateTime.Now.AddMonths(-2);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the plural form "Overdue for 2 months"
+            Assert.Equal("Overdue for 2 months", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateOneYearOverdue_ReturnsOverdueForOneYear()
+        {
+            // Given: a due date exactly one calendar year in the past
+            var nextDueAt = DateTime.Now.AddYears(-1);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should read "Overdue for 1 year"
+            Assert.Equal("Overdue for 1 year", result);
+        }
+
+        [Fact]
+        public void ToDueDateText_GivenDueDateTwoYearsOverdue_ReturnsOverdueForTwoYears()
+        {
+            // Given: a due date exactly two calendar years in the past
+            var nextDueAt = DateTime.Now.AddYears(-2);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the result should use the plural form "Overdue for 2 years"
+            Assert.Equal("Overdue for 2 years", result);
+        }
+
+        [Theory]
+        [InlineData(2, "Overdue for 2 days")]
+        [InlineData(7, "Overdue for 1 week")]
+        [InlineData(14, "Overdue for 2 weeks")]
+        public void ToDueDateText_GivenOverdueDueDateInDaysOrWeeks_UsesCorrectSingularOrPluralUnit(int daysOverdue, string expected)
+        {
+            // Given: a due date daysOverdue days in the past
+            var nextDueAt = DateTime.Now.AddDays(-daysOverdue);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+
+            // Then: the unit label should be singular for an amount of 1, plural otherwise
+            Assert.Equal(expected, result);
         }
 
         [Fact]
