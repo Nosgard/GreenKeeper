@@ -10,7 +10,7 @@ namespace GreenKeeper.Tests.Converters
     public class TimeUnitConvertersTests
     {
         [Fact]
-        public void ToDueDateText_GivenDueDate3DaysInFuture_Returns3Days()
+        public void ToDueDateText_GivenDueDateThreeDaysInFuture_ReturnsThreeDays()
         {
             // Given: a due date three days from now
             var nextDueAt = DateTime.Now.AddDays(3);
