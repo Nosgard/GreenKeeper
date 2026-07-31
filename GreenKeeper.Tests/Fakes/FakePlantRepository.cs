@@ -22,6 +22,8 @@ namespace GreenKeeper.Tests.Fakes
         private readonly List<Plant> _plants = new();
         private int _nextId = 1;
 
+        public bool ShouldThrowOnAdd { get; set; }
+
         public void SeedPlants(params Plant[] plants)
         {
             foreach (var plant in plants)
@@ -41,6 +43,11 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task<Plant> AddPlantAsync(Plant plant)
         {
+            if (ShouldThrowOnAdd)
+            {
+                throw new InvalidOperationException("Simulated database failure");
+            }
+
             plant.Id = _nextId++;
 
             foreach (var schedule in plant.CareSchedules)
