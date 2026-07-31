@@ -71,5 +71,79 @@ namespace GreenKeeper.Tests.ViewModels
 
             Assert.Empty(viewModel.Plants);
         }
+
+        [Fact]
+        public async Task DeletePlantCommand_GivenUserConfirms_RemovesPlantFromRepositoryAndCollection()
+        {
+            // Given: a repository with one plant, currently selected, and the
+            // dialog service configured to simulate the user choosing "Yes"
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: DeletePlantCommand is executed
+            viewModel.DeletePlantCommand.Execute(null);
+
+            // Then: the plant is gone from both the UI collection and the repository and no plant remains selected
+            Assert.Empty(viewModel.Plants);
+            Assert.Empty(await plantRepository.GetPlantsAsync());
+            Assert.Null(viewModel.SelectedPlant);
+        }
+
+        [Fact]
+        public async Task DeletePlantCommand_GivenUserDeclines_KeepsPlantUnchanged()
+        {
+            // Given: a repository with one plant, currently selected, and the
+            // dialog service configured to simulate the user choosing "No"
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            var selectedPlant = viewModel.Plants[0];
+            viewModel.SelectedPlant = selectedPlant;
+
+            // When: DeletePlantCommand is executed
+            viewModel.DeletePlantCommand.Execute(null);
+
+            // Then: nothing changed - the plant remains in both the collection and the repository, and stays selected
+            Assert.Single(viewModel.Plants);
+            Assert.Single(await plantRepository.GetPlantsAsync());
+            Assert.Equal(selectedPlant, viewModel.SelectedPlant);
+        }
+
+        [Fact]
+        public async Task DeletePlantCommand_GivenRepositoryThrows_ShowsErrorAndKeepsPlant()
+        {
+            // Given: a repository configured to fail on delete, one plant selected, and the user confirming the deletion
+            var plantRepository = new FakePlantRepository { ShouldThrowOnDelete = true };
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            var selectedPlant = viewModel.Plants[0];
+            viewModel.SelectedPlant = selectedPlant;
+
+            // When: DeletePlantCommand is executed
+            viewModel.DeletePlantCommand.Execute(null);
+
+            // Then: an error is shown, and the plant stays exactly as it was - still in the UI collection and still selected,
+            // since the deletion never actually succeeded
+            Assert.True(dialogService.ShowErrorWasCalled);
+            Assert.Single(viewModel.Plants);
+            Assert.Equal(selectedPlant, viewModel.SelectedPlant);
+        }
     }
 }

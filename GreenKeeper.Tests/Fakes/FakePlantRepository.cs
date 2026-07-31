@@ -23,6 +23,7 @@ namespace GreenKeeper.Tests.Fakes
         private int _nextId = 1;
 
         public bool ShouldThrowOnAdd { get; set; }
+        public bool ShouldThrowOnDelete { get; set; }
 
         public void SeedPlants(params Plant[] plants)
         {
@@ -84,6 +85,11 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task DeletePlantAsync(int plantId)
         {
+            if (ShouldThrowOnDelete)
+            {
+                throw new InvalidOperationException("Simulated database failure");
+            }
+
             var plant = _plants.FirstOrDefault(p => p.Id == plantId);
 
             if (plant == null)
