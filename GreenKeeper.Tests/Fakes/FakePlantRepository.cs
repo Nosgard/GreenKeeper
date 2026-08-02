@@ -24,6 +24,7 @@ namespace GreenKeeper.Tests.Fakes
 
         public bool ShouldThrowOnAdd { get; set; }
         public bool ShouldThrowOnDelete { get; set; }
+        public int CompleteCareScheduleAsyncCallCount { get; private set; }
 
         public void SeedPlants(params Plant[] plants)
         {
@@ -85,6 +86,8 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
         {
+            CompleteCareScheduleAsyncCallCount++;
+
             var schedule = _plants
                 .SelectMany(p => p.CareSchedules)
                 .FirstOrDefault(s => s.Id == careScheduleId);
