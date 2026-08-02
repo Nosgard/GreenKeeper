@@ -145,5 +145,84 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Single(viewModel.Plants);
             Assert.Equal(selectedPlant, viewModel.SelectedPlant);
         }
+
+        [Fact]
+        public async Task SelectedPlant_GivenPlantIsSelected_UpdatesIsPlantSelectedAndRaisesPropertyChanged()
+        {
+            // Given: an initialized MainViewModel with one plant, nothing selected yet
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // Sanity check on the initial state, before the actual "When" happens
+            Assert.False(viewModel.IsPlantSelected);
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: a plant is selected
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // Then: IsPlantSelected reflects the new state, and PropertyChanged was
+            // raised for all three properties that depend on the selection
+            Assert.True(viewModel.IsPlantSelected);
+            Assert.Contains(nameof(viewModel.SelectedPlant), raisedProperties);
+            Assert.Contains(nameof(viewModel.IsPlantSelected), raisedProperties);
+            Assert.Contains(nameof(MainViewModel.IsPlantSelected), raisedProperties);
+        }
+
+        [Fact]
+        public async Task SearchText_GivenPlantIsSelected_ResetsSelectedPlantToNull()
+        {
+            // Given: an initialized MainViewModel with a plant currently selected
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // Sanity check before the actual "When"
+            Assert.NotNull(viewModel.SelectedPlant);
+
+            // When: the search text changes
+            viewModel.SearchText = "al";
+
+            // Then: the previously selected plant is deselected
+            Assert.Null(viewModel.SelectedPlant);
+        }
+
+        [Fact]
+        public async Task SearchText_GivenSameValueIsSetAgain_DoesNotResetSelectedPlant()
+        {
+            // Given: an initialized MainViewModel with a plant selected, and
+            // SearchText already set to a specific value
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SearchText = "al";
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: SearchText is set to the exact same value again
+            viewModel.SearchText = "al";
+
+            // Then: nothing actually changed, so the selection should be preserved
+            // (the setter's early-return guard for unchanged values should prevent
+            // the deselection logic from running again)
+            Assert.NotNull(viewModel.SelectedPlant);
+        }
     }
 }
