@@ -1,5 +1,9 @@
-﻿using GreenKeeper.Tests.Fakes;
+﻿using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
+using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
+using GreenKeeper.ViewModels.CareStatuses.Active;
+using GreenKeeper.ViewModels.CareStatuses.Passive;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -223,6 +227,89 @@ namespace GreenKeeper.Tests.ViewModels
             // (the setter's early-return guard for unchanged values should prevent
             // the deselection logic from running again)
             Assert.NotNull(viewModel.SelectedPlant);
+        }
+
+        // -- Care-Statuses Tests --
+
+        [Fact]
+        public async Task CareStatuses_GivenPlantWithOnlyWatering_ReturnsOnlyWateringCard()
+        {
+            // Given: a plant with only a Care-Schedule for Watering, no Fertilizing, no Sunlight
+            var plant = new Plant { Name = "Cactus" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: Care-Statuses is read
+            var careStatuses = viewModel.CareStatuses.ToList();
+
+            // Then: exactly one card for Watering
+            Assert.Single(careStatuses);
+            Assert.IsType<WateringStatusViewModel>(careStatuses[0]);
+        }
+
+        [Fact]
+        public async Task CareStatuses_GivenPlantWithAllCareTypes_ReturnsAllThreeStatusCardsInOrder()
+        {
+            // Given: a plant with Watering, Fertilizing and SunlightRequirement all set
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: Care-Statuses is read
+            var careStatuses = viewModel.CareStatuses.ToList();
+
+            // Then: all three cards are present, in the expected order
+            Assert.Equal(3, careStatuses.Count);
+            Assert.IsType<WateringStatusViewModel>(careStatuses[0]);
+            Assert.IsType<FertilizingStatusViewModel>(careStatuses[1]);
+            Assert.IsType<SunlightStatusViewModel>(careStatuses[2]);
+        }
+
+        [Fact]
+        public async Task CareStatuses_GivenPlantWithWateringAndSUnlightButNoFertilizing_ReturnsOnlyThoseTwoStatusCards()
+        {
+            // Given: a plant with Watering and SunlightRequirement, but no Fertilizing
+            var plant = new Plant { Name = "Snake Plant" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 14, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 4, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: Care-Statuses is read
+            var careStatuses = viewModel.CareStatuses.ToList();
+
+            // Then: exactly Watering and SUnlight, no Fertilizing between them
+            Assert.Equal(2, careStatuses.Count);
+            Assert.IsType<WateringStatusViewModel>(careStatuses[0]);
+            Assert.IsType<SunlightStatusViewModel>(careStatuses[1]);
         }
     }
 }
