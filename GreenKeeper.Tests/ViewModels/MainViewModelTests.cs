@@ -410,5 +410,45 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(originalWateringDueDate, persistedWatering.NextDueAt);
             Assert.Null(persistedWatering.LastCaredAt);
         }
+
+        [Fact]
+        public async Task WateringCard_CompleteCommand_GivenMissingIntervalData_DoesNothing()
+        {
+            // Given: a plant with a Watering schedule that has NO IntervalAmount/IntervalUnit set, but the next due date (NextDueAt) is still present
+            var originalDueDate = DateTime.Now.AddDays(-1);
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule
+            {
+                Care = CareType.Water,
+                IntervalAmount = null,
+                IntervalUnit = null,
+                NextDueAt = originalDueDate
+            });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+
+            // When: the Complete Command is executed
+            wateringCard.CompleteCommand!.Execute(null);
+
+            // Then: the repository was never called, and the due date is untouched
+            Assert.Equal(0, plantRepository.CompleteCareScheduleAsyncCallCount);
+
+            var persistedSchedule = (await plantRepository.GetPlantsAsync())
+                .Single()
+                .CareSchedules
+                .Single();
+
+            Assert.Equal(originalDueDate, persistedSchedule.NextDueAt);
+        }
     }
 }
