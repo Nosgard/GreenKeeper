@@ -33,6 +33,22 @@ namespace GreenKeeper.Tests.Fakes
                 {
                     plant.Id = _nextId++;
                 }
+
+                foreach (var schedule in plant.CareSchedules)
+                {
+                    if (schedule.Id == 0)
+                    {
+                        schedule.Id = _nextId++;
+                    }
+                    schedule.PlantId = plant.Id;
+                }
+
+                if (plant.SunlightRequirement != null && plant.SunlightRequirement.Id == 0)
+                {
+                    plant.SunlightRequirement.Id = _nextId++;
+                    plant.SunlightRequirement.PlantId = plant.Id;
+                }
+
                 _plants.Add(plant);
             }
         }
