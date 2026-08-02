@@ -311,5 +311,104 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.IsType<WateringStatusViewModel>(careStatuses[0]);
             Assert.IsType<SunlightStatusViewModel>(careStatuses[1]);
         }
+
+        // -- Complete-Button Tests --
+
+        [Fact]
+        public async Task WateringCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDate()
+        {
+            // Given: a plant with an overdue Watering Care-Schedule
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule
+            {
+                Care = CareType.Water,
+                IntervalAmount = 7,
+                IntervalUnit = TimeUnit.Days,
+                NextDueAt = DateTime.Now.AddDays(-1)
+            });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+
+            var beforeClick = DateTime.Now;
+
+            // When: the Complete Command is executed
+            wateringCard.CompleteCommand!.Execute(null);
+
+            var afterClick = DateTime.Now;
+
+            // Then: the persisted schedule reflects a next due date (NextDueAt) roughly 7 days from now,
+            // and the last date of care (LastCaredAt) roughly now - checked via the repository, not
+            // just the in-memory ViewModel state, to confirm actual persistence
+            var persistedSchedule = (await plantRepository.GetPlantsAsync())
+                .Single()
+                .CareSchedules
+                .Single(s => s.Care == CareType.Water);
+
+            Assert.InRange(persistedSchedule.NextDueAt!.Value, beforeClick.AddDays(7).AddSeconds(-2), afterClick.AddDays(7).AddSeconds(2));
+            Assert.InRange(persistedSchedule.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
+        }
+
+        [Fact]
+        public async Task FertilizingCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDateWithoutAffectingWatering()
+        {
+            // Given: a plant with both a Watering schedule (untouched reference point) and an overdue Fertilizing schedule
+            var plant = new Plant { Name = "Aloe Vera" };
+            var originalWateringDueDate = DateTime.Now.AddDays(3);
+
+            plant.CareSchedules.Add(new CareSchedule
+            {
+                Care = CareType.Water,
+                IntervalAmount = 7,
+                IntervalUnit = TimeUnit.Days,
+                NextDueAt = originalWateringDueDate
+            });
+            plant.CareSchedules.Add(new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = 30,
+                IntervalUnit = TimeUnit.Days,
+                NextDueAt = DateTime.Now.AddDays(-1)
+            });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
+
+            var beforeClick = DateTime.Now;
+
+            // When: the Complete Command is executed on the Fertilizing card
+            fertilizingCard.CompleteCommand!.Execute(null);
+
+            var afterClick = DateTime.Now;
+
+            // Then: only the Fertilizing schedule was recalculated and persisted, while the due date of Watering remains completely untouched
+            var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
+            var persistedFertilizing = persistedSchedules.Single(s => s.Care == CareType.Nutrients);
+            var persistedWatering = persistedSchedules.Single(s => s.Care == CareType.Water);
+
+            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeClick.AddDays(30).AddSeconds(-2), afterClick.AddDays(30).AddSeconds(2));
+            Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
+
+            Assert.Equal(originalWateringDueDate, persistedWatering.NextDueAt);
+            Assert.Null(persistedWatering.LastCaredAt);
+        }
     }
 }
