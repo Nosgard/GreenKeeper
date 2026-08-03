@@ -545,5 +545,105 @@ namespace GreenKeeper.Tests.ViewModels
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.Contains(updatedCareStatuses, c => c is FertilizingStatusViewModel);
         }
+
+        [Fact]
+        public async Task SunlightCard_RemoveCommand_GivenUserConfirms_RemovesFromRepositoryAndCareStatuses()
+        {
+            // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
+            // and the dialog service configured to simulate the user choosing "Yes"
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
+
+            // When: the Remove Command is executed on the Sunlight card
+            sunlightCard.RemoveCommand!.Execute(null);
+
+            // Then: the Sunlight-Requirement is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.Null(persistedPlant.SunlightRequirement);
+            Assert.Contains(viewModel.CareStatuses, s => s is WateringStatusViewModel);
+
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.DoesNotContain(updatedCareStatuses, c => c is SunlightStatusViewModel);
+            Assert.Contains(updatedCareStatuses, c => c is WateringStatusViewModel);
+        }
+
+        [Fact]
+        public async Task SunlightCard_RemoveCommand_GivenUserDeclines_KeepsRequirementUnchanged()
+        {
+            // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
+            // and the dialog service configured to simulate the user choosing "No"
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
+
+            // When: the Remove Command is executed on the Sunlight card
+            sunlightCard.RemoveCommand!.Execute(null);
+
+            // Then: nothing changed - the Sunlight-Requirement remains in the repository and the Sunlight card is still shown among Care-Statuses
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.NotNull(persistedPlant.SunlightRequirement);
+
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(updatedCareStatuses, c => c is SunlightStatusViewModel);
+        }
+
+        [Fact]
+        public async Task SunlightCard_RemoveCommand_GivenRepositoryThrows_ShowsErrorAndKeepsRequirement()
+        {
+            // Given: a plant with a Watering schedule and a Sunlight-Requirement,
+            // the user confirming the removal, but the repository configured to fail
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveSunlightRequirement = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
+
+            // When: the Remove Command is executed on the Sunlight card
+            sunlightCard.RemoveCommand!.Execute(null);
+
+            // Then: an error is shown, and the Sunlight-Requirement remains fully intanct - both in the repository and still shown among Care-Statuses
+            Assert.True(dialogService.ShowErrorWasCalled);
+
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.NotNull(persistedPlant.SunlightRequirement);
+
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(updatedCareStatuses, c => c is SunlightStatusViewModel);
+        }
     }
 }
