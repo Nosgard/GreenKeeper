@@ -26,6 +26,7 @@ namespace GreenKeeper.Tests.Fakes
         public bool ShouldThrowOnDelete { get; set; }
         public int CompleteCareScheduleAsyncCallCount { get; private set; }
         public bool ShouldThrowOnRemoveCareSchedule { get; set; }
+        public bool ShouldThrowOnRemoveSunlightRequirement { get; set; }
 
         public void SeedPlants(params Plant[] plants)
         {
@@ -169,6 +170,11 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
+            if (ShouldThrowOnRemoveSunlightRequirement)
+            {
+                throw new InvalidOperationException("Simulated database failure");
+            }
+
             var plant = _plants.FirstOrDefault(p => p.SunlightRequirement?.Id == sunlightRequirementId)
             ?? throw new InvalidOperationException($"SunlightRequirement with Id {sunlightRequirementId} was not found.");
 
