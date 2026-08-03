@@ -450,5 +450,100 @@ namespace GreenKeeper.Tests.ViewModels
 
             Assert.Equal(originalDueDate, persistedSchedule.NextDueAt);
         }
+
+        // -- Remove-Button Tests --
+
+        [Fact]
+        public async Task FertilizingCard_RemoveCommand_GivenUserConfirms_RemovesFromRepositoryAndCareStatuses()
+        {
+            // given: a plant with both Watering and Fertilizing schedules, and the user
+            // dialog service configured to simulate the user choosing "Yes"
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>();
+
+            // When: the Remove Command is executed on the Fertilizing card
+            fertilizingCard.Single().RemoveCommand!.Execute(null);
+
+            // Then: the Fertilizing schedule is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.DoesNotContain(updatedCareStatuses, c => c is FertilizingStatusViewModel);
+            Assert.Contains(updatedCareStatuses, c => c is WateringStatusViewModel);
+        }
+
+        [Fact]
+        public async Task FertilizingCard_RemoveCommand_GivenUserDeclines_KeepsScheduleUnchanged()
+        {
+            // Given: a plant with Watering and Fertilizing schedules, and the
+            // dialog service configured to simulate the user choosing "No"
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
+
+            // When: the Remove Command is executed on the Fertilizing card
+            fertilizingCard.RemoveCommand!.Execute(null);
+
+            // Then: nothing changed - the Fertilizing schedule remains in the repository and the Fertilizing card is still shown among Care-Statuses
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(updatedCareStatuses, c => c is FertilizingStatusViewModel);
+        }
+
+        [Fact]
+        public async Task FertilizingCard_RemoveCommand_GivenRepositoryThrows_ShowsErrorAndKeepsSchedule()
+        {
+            // Given: a plant with Watering and Fertilizing schedules, the user
+            // confirming the removal, but the repository configured to fail
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveCareSchedule = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
+
+            // When: the Remove Command is executed on the Fertilizing card
+            fertilizingCard.RemoveCommand!.Execute(null);
+
+            // Then: an error is shown, and the Fertilizing schedule remains fully intact - both in the repository and still shown among Care-Statuses
+            Assert.True(dialogService.ShowErrorWasCalled);
+
+            var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
+            Assert.Contains(persistedSchedules, s => s.Care == CareType.Nutrients);
+
+            var updatedCareStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(updatedCareStatuses, c => c is FertilizingStatusViewModel);
+        }
     }
 }
