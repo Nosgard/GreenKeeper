@@ -645,5 +645,156 @@ namespace GreenKeeper.Tests.ViewModels
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.Contains(updatedCareStatuses, c => c is SunlightStatusViewModel);
         }
+
+        // -- Add/Replace Care-Schedules/Sunlight-Requirement Tests --
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenNoSelectedPlant_DoesNothing()
+        {
+            // Given: an initialized MainViewModel with no plant selected
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // Sanity check: nothing selected
+            Assert.Null(viewModel.SelectedPlant);
+
+            var newSchedule = new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = 30,
+                IntervalUnit = TimeUnit.Days
+            };
+
+            // When: AddOrReplaceCareScheduleAsync is called without a selected plant
+            await viewModel.AddOrReplaceCareScheduleAsync(newSchedule);
+
+            // Then: the repository was never touched
+            Assert.Equal(0, plantRepository.AddOrReplaceCareScheduleAsyncCallCount);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenMissingIntervalData_DoesNothing()
+        {
+            // Given: a plant is selected, but the new Care-Schedule has no
+            // IntervalAmount/IntervalUnit set
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var incompleteSchedule = new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = null,
+                IntervalUnit = null
+            };
+
+            // When: AddOrReplaceCareScheduleAsync is called with incomplete data
+            await viewModel.AddOrReplaceCareScheduleAsync(incompleteSchedule);
+
+            // Then: the repository was never touched
+            Assert.Equal(0, plantRepository.AddOrReplaceCareScheduleAsyncCallCount);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceCareSchedulesAsync_GivenNewCareType_PersistsAndAddsToCareStatuses()
+        {
+            // Given: a plant with only a Watering schedule, no Fertilizing yet
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var newFertilizingSchedule = new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = 30,
+                IntervalUnit = TimeUnit.Days
+            };
+
+            var beforeCall = DateTime.Now;
+
+            // When: the new Fertilizing schedule is added
+            await viewModel.AddOrReplaceCareScheduleAsync(newFertilizingSchedule);
+
+            var afterCall = DateTime.Now;
+
+            // Then: it was persisted with a correctly calculated due date and now appears among Care-Statuses, alongside the existing Watering card
+            var persistedFertilizing = (await plantRepository.GetPlantsAsync())
+                .Single()
+                .CareSchedules
+                .Single(s => s.Care == CareType.Nutrients);
+
+            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(30).AddSeconds(-2), afterCall.AddDays(30).AddSeconds(2));
+            Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeCall.AddSeconds(-2), afterCall.AddSeconds(2));
+
+            var careStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(careStatuses, c => c is WateringStatusViewModel);
+            Assert.Contains(careStatuses, c => c is FertilizingStatusViewModel);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenExistingCareType_ReplacesWithoutDuplicating()
+        {
+            // Given: a plant with an existing Fertilizing schedule (30-day interval)
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care= CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // The replacement schedule uses a different interval (14 days instead of 30)
+            var replacementSchedule = new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = 14,
+                IntervalUnit = TimeUnit.Days
+            };
+
+            var beforeCall = DateTime.Now;
+
+            // When: the Fertilizing schedule is replaced
+            await viewModel.AddOrReplaceCareScheduleAsync(replacementSchedule);
+
+            var afterCall = DateTime.Now;
+
+            // Then: exactly ONE Fertilizing entry remains, with the new interval- no duplicate. Watering remains untouched and the Care-Statuses show exactly two cards
+            var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
+            var persistedFertilizing = persistedSchedules.Where(s => s.Care == CareType.Nutrients).Single();
+
+            Assert.Equal(14, persistedFertilizing.IntervalAmount);
+            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(14).AddSeconds(-2), afterCall.AddDays(14).AddSeconds(2));
+
+            Assert.Single(persistedSchedules, s => s.Care == CareType.Water);
+            Assert.Equal(2, viewModel.CareStatuses.Count());
+        }
     }
 }
