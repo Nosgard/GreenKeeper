@@ -796,5 +796,38 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Single(persistedSchedules, s => s.Care == CareType.Water);
             Assert.Equal(2, viewModel.CareStatuses.Count());
         }
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotAddLocally()
+        {
+            // Given: a plant with only Watering, and the repository configured to
+            // fail when adding/replacing a Care-Schedule
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceCareSchedule = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var newFertilizingSchedule = new CareSchedule
+            {
+                Care = CareType.Nutrients,
+                IntervalAmount = 30,
+                IntervalUnit = TimeUnit.Days
+            };
+
+            // When: the call should propagate the exception
+            await Assert.ThrowsAsync<InvalidOperationException>(() => viewModel.AddOrReplaceCareScheduleAsync(newFertilizingSchedule));
+
+            // Then: the plant's local state remains unchanged - still no Fertilizing card
+            var careStatuses = viewModel.CareStatuses.ToList();
+            Assert.DoesNotContain(careStatuses, c => c is FertilizingStatusViewModel);
+        }
     }
 }
