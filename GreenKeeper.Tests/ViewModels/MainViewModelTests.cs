@@ -829,5 +829,102 @@ namespace GreenKeeper.Tests.ViewModels
             var careStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(careStatuses, c => c is FertilizingStatusViewModel);
         }
+
+        [Fact]
+        public async Task AddOrReplaceSunlightRequirementAsync_GivenNoSelectedPlant_DoesNothing()
+        {
+            // Given: an initialized MainViewModel with no plant selected
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // Sanity check: nothing selected
+            Assert.Null(viewModel.SelectedPlant);
+
+            var newRequirement = new SunlightRequirement
+            {
+                Hours = 6,
+                Period = SunlightPeriod.Day
+            };
+            // When: AddOrReplaceSunlightRequirementAsync is called without a selected plant
+            await viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement);
+
+            // Then: the repository was never touched
+            Assert.Equal(0, plantRepository.AddOrReplaceSunlightRequirementAsyncCallCount);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceSunlightRequirementAsync_GivenNoExistingRequirement_PersistsAndAddsToCareStatuses()
+        {
+            // Given: a plant with only a Watering schedule, no Sunlight-Requirement yet
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var newRequirement = new SunlightRequirement
+            {
+                Hours = 6,
+                Period = SunlightPeriod.Day
+            };
+
+            // When: the new Sunlight-Requirement is added
+            await viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement);
+
+            // Then: it was persisted with the correct values and now appears among Care-Statuses, alongside the existing Watering card
+            var persistedRequirement = (await plantRepository.GetPlantsAsync()).Single().SunlightRequirement;
+
+            Assert.NotNull(persistedRequirement);
+            Assert.Equal(6, persistedRequirement!.Hours);
+            Assert.Equal(SunlightPeriod.Day, persistedRequirement.Period);
+
+            var careStatuses = viewModel.CareStatuses.ToList();
+            Assert.Contains(careStatuses, c => c is WateringStatusViewModel);
+            Assert.Contains(careStatuses, c => c is SunlightStatusViewModel);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceSunlightRequirementAsync_GivenExistingRequirement_ReplaceWithNewValues()
+        {
+            // Given: a plant with an existing Sunlight-Requirement (6 hours per day)
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // The replacement uses different values (3 hours per week instead of 6 per day)
+            var replacementRequirement = new SunlightRequirement { Hours = 3, Period = SunlightPeriod.Week };
+
+            // When: the Sunlight-Requirement is replaced
+            await viewModel.AddOrReplaceSunlightRequirementAsync(replacementRequirement);
+
+            // Then: the persisted requirement reflects the new values and Care-Statuses still show two cards (Watering + Sunlight)
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.NotNull(persistedPlant.SunlightRequirement);
+            Assert.Equal(3, persistedPlant.SunlightRequirement!.Hours);
+            Assert.Equal(SunlightPeriod.Week, persistedPlant.SunlightRequirement.Period);
+
+            Assert.Equal(2, viewModel.CareStatuses.Count());
+        }
     }
 }
