@@ -26,6 +26,7 @@ namespace GreenKeeper.Tests.Fakes
         public bool ShouldThrowOnDelete { get; set; }
         public int CompleteCareScheduleAsyncCallCount { get; private set; }
         public int AddOrReplaceCareScheduleAsyncCallCount { get; private set; }
+        public int AddOrReplaceSunlightRequirementAsyncCallCount { get; private set; }
         public bool ShouldThrowOnRemoveCareSchedule { get; set; }
         public bool ShouldThrowOnRemoveSunlightRequirement { get; set; }
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
@@ -151,6 +152,8 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
+            AddOrReplaceCareScheduleAsyncCallCount++;
+
             var plant = _plants.FirstOrDefault(p => p.Id == plantId)
             ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
