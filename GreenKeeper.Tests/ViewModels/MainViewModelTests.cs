@@ -1249,5 +1249,23 @@ namespace GreenKeeper.Tests.ViewModels
             // to RefreshCareStatuses and that the timer actually triggers it
             Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
+
+        [Fact]
+        public async Task StopCareStatusRefreshTimer_WhenCalled_StopsTheTimerService()
+        {
+            // Given: an initialized MainViewModel
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // When: StopCareStatusRefreshTimer is called
+            viewModel.StopCareStatusRefreshTimer();
+
+            // Then: the underlying timer service was stopped
+            Assert.True(timerService.StopWasCalled);
+        }
     }
 }
