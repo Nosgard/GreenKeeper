@@ -1058,6 +1058,128 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(command.CanExecute(null));
         }
 
+        [Fact]
+        public async Task AddPlantCommand_Execute_RaisesAddPlantRequested()
+        {
+            // Given: an initialized MainViewModel
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            int eventRaisedCount = 0;
+            viewModel.AddPlantRequested += (_, _) => eventRaisedCount++;
+
+            // When: AddPlantCommand is executed
+            viewModel.AddPlantCommand.Execute(null);
+
+            // Then: AddPlantRequested was raised exactly once
+            Assert.Equal(1, eventRaisedCount);
+        }
+
+        [Fact]
+        public async Task AddScheduleCommand_Execute_RaisesAddScheduleRequestedWithSelectedPlant()
+        {
+            // Given: an initialized MainViewModel with a plant selected
+            var plant = new Plant { Name = "Aloe Vera" };
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            Plant? raisedPlant = null;
+            int eventRaisedCount = 0;
+            viewModel.AddScheduleRequested += (_, raisedArg) =>
+            {
+                eventRaisedCount++;
+                raisedPlant = raisedArg;
+            };
+
+            // When: AddScheduleCommand is executed
+            viewModel.AddScheduleCommand.Execute(null);
+
+            // Then: AddScheduleRequested was raised exactly once, with the
+            // currently selected plant as the argument
+            Assert.Equal(1, eventRaisedCount);
+            Assert.Same(viewModel.SelectedPlant, raisedPlant);
+        }
+
+        [Fact]
+        public async Task OpenNotesCommand_Execute_RaisesOpenNotesRequestedWithSelectedPlant()
+        {
+            // Given: an initialized MainViewModel with a plant selected
+            var plant = new Plant { Name = "Aloe Vera" };
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            Plant? raisedPlant = null;
+            int eventRaisedCount = 0;
+            viewModel.OpenNotesRequested += (_, raisedArg) =>
+            {
+                eventRaisedCount++;
+                raisedPlant = raisedArg;
+            };
+
+            // When: OpenNotesCommand is executed
+            viewModel.OpenNotesCommand.Execute(null);
+
+            // Then: OpenNotesRequested was raised exactly once, with the currently
+            // selected plant as the argument
+            Assert.Equal(1, eventRaisedCount);
+            Assert.Same(viewModel.SelectedPlant, raisedPlant);
+        }
+
+        [Fact]
+        public async Task WateringCard_EditCommand_RaisesEditScheduleRequestedWithPlantAndCareType()
+        {
+            // Given: an initialized MainViewModel with a plant that has a Watering schedule
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+
+            (Plant plant, CareType care)? raisedArgs = null;
+            int eventRaisedCount = 0;
+            viewModel.EditScheduleRequested += (_, args) =>
+            {
+                eventRaisedCount++;
+                raisedArgs = args;
+            };
+
+            // When: the Edit Command is executed on the Watering card
+            wateringCard.EditCommand!.Execute(null);
+
+            // Then: EditScheduleRequested was raised exactly once, with the
+            // selected plant and the Care-Type "Water" as the arguments
+            Assert.Equal(1, eventRaisedCount);
+            Assert.Same(viewModel.SelectedPlant, raisedArgs!.Value.plant);
+            Assert.Equal(CareType.Water, raisedArgs.Value.care);
+        }
+
         // Help-Method: Maps a simple string identifier to the actual command on the ViewModel -
         // necessary because [InlineData] can only carry constant values, not delegates or direct Command references
         private static ICommand GetCommand(MainViewModel viewModel, string commandName) => commandName switch
