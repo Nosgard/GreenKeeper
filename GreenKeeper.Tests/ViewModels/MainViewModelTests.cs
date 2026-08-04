@@ -955,5 +955,57 @@ namespace GreenKeeper.Tests.ViewModels
             var careStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(careStatuses, c => c is SunlightStatusViewModel);
         }
+
+        // -- Notes Section --
+
+        [Fact]
+        public async Task UpdatePlantNotesAsync_GivenNewNotes_PersistsAndUpdatesPlantObject()
+        {
+            // Given: a plant with existing notes
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            var selectedPlant = viewModel.Plants[0];
+
+            // When: the notes are updated
+            await viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes");
+
+            // Then: the change was persisted via the repository and the in-memory Plant-Object was updates directly too
+            Assert.Equal("New notes", selectedPlant.Notes);
+        }
+
+        [Fact]
+        public async Task UpdatePlantNotesAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotUpdatePlantObject()
+        {
+            // Given: a plant with existing notes, and the repository configured to
+            // fail when saving notes
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnUpdateNotes = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            var selectedPlant = viewModel.Plants[0];
+
+            // When: the call should propagate the exception
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes"));
+
+            // Then: the in-memory Plant-Object was NOT updated
+            Assert.Equal("Old notes", selectedPlant.Notes);
+        }
     }
 }
