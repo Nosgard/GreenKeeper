@@ -32,7 +32,6 @@ namespace GreenKeeper.Tests.Fakes
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
         public bool ShouldThrowOnAddOrReplaceSunlightRequirement { get; set; }
         public bool ShouldThrowOnUpdateNotes { get; set; }
-        public bool StopWasCalled { get; private set; }
 
         public void SeedPlants(params Plant[] plants)
         {
@@ -60,11 +59,6 @@ namespace GreenKeeper.Tests.Fakes
 
                 _plants.Add(plant);
             }
-        }
-
-        public void Stop()
-        {
-            StopWasCalled = true;
         }
 
         public Task<List<Plant>> GetPlantsAsync()

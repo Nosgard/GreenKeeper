@@ -25,6 +25,7 @@ namespace GreenKeeper.Tests.Fakes
         private Action? _callback;
 
         public bool StartWasCalled { get; private set; }
+        public bool StopWasCalled { get; private set; }
         public TimeSpan? LastInterval { get; private set; }
 
         public void Start(TimeSpan interval, Action callback)
@@ -36,7 +37,7 @@ namespace GreenKeeper.Tests.Fakes
 
         public void Stop()
         {
-
+            StopWasCalled = true;
         }
 
         // Allows a test to manually simulate a timer tick, without waiting for
