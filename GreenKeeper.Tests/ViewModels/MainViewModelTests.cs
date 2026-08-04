@@ -926,5 +926,34 @@ namespace GreenKeeper.Tests.ViewModels
 
             Assert.Equal(2, viewModel.CareStatuses.Count());
         }
+
+        [Fact]
+        public async Task AddOrReplaceSunlightRequirementAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotAddLocally()
+        {
+            // Given: a plant with only Watering, and the repository configured to
+            // fail when adding/replacing a Sunlight-Requirement
+            var plant = new Plant { Name = "Aloe Vera" };
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceSunlightRequirement = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var newRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+
+            // When: the call should propagate the exception
+            await Assert.ThrowsAsync<InvalidOperationException>(
+                () => viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement));
+
+            // Then: the plant's local state remains unchanged - still no Sunlight card
+            var careStatuses = viewModel.CareStatuses.ToList();
+            Assert.DoesNotContain(careStatuses, c => c is SunlightStatusViewModel);
+        }
     }
 }
