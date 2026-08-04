@@ -1,5 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
+using GreenKeeper.Repositories;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.CareStatuses.Active;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace GreenKeeper.Tests.ViewModels
 {
@@ -1007,5 +1009,63 @@ namespace GreenKeeper.Tests.ViewModels
             // Then: the in-memory Plant-Object was NOT updated
             Assert.Equal("Old notes", selectedPlant.Notes);
         }
+
+        // -- CanExecute & Event Tests --
+
+        [Theory]
+        [InlineData("AddSchedule")]
+        [InlineData("DeletePlant")]
+        [InlineData("OpenNotes")]
+        public async Task Command_GivenNoSelectedPlant_CanExecuteReturnsFalse(string commandName)
+        {
+            // Given: an initialized MainViewModel with no plant selected
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // When: Command is set
+            var command = GetCommand(viewModel, commandName);
+
+            // Then: CanExecute should be false, since no plant is selected
+            Assert.False(command.CanExecute(null));
+        }
+
+        [Theory]
+        [InlineData("AddSchedule")]
+        [InlineData("DeletePlant")]
+        [InlineData("OpenNotes")]
+        public async Task Command_GivenSelectedPlant_CanExecuteReturnsTrue(string commandName)
+        {
+            // Given: an initialized MainViewModel with a plant selected
+            var plant = new Plant { Name = "Aloe Vera" };
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: Command is set
+            var command = GetCommand(viewModel, commandName);
+
+            // Then: CanExecute should be true, since a plant is selected
+            Assert.True(command.CanExecute(null));
+        }
+
+        // Help-Method: Maps a simple string identifier to the actual command on the ViewModel -
+        // necessary because [InlineData] can only carry constant values, not delegates or direct Command references
+        private static ICommand GetCommand(MainViewModel viewModel, string commandName) => commandName switch
+        {
+            "AddSchedule" => viewModel.AddScheduleCommand,
+            "DeletePlant" => viewModel.DeletePlantCommand,
+            "OpenNotes" => viewModel.OpenNotesCommand,
+            _ => throw new ArgumentOutOfRangeException(nameof(commandName))
+        };
     }
 }
