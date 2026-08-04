@@ -1189,5 +1189,65 @@ namespace GreenKeeper.Tests.ViewModels
             "OpenNotes" => viewModel.OpenNotesCommand,
             _ => throw new ArgumentOutOfRangeException(nameof(commandName))
         };
+
+        // -- Timer Tests --
+
+        [Fact]
+        public void Constructor_GivenTimerService_StartsTimerWithFiveMinuteInterval()
+        {
+            // Given: a fresh FakeTimerService
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            // When: a MainViewModel is constructed with it
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+
+            // Then: Start was called with a 5-minute interval
+            Assert.True(timerService.StartWasCalled);
+            Assert.Equal(TimeSpan.FromMinutes(5), timerService.LastInterval);
+        }
+
+        [Fact]
+        public async Task RefreshCareStatuses_WhenCalled_RaisesPropertyChangedForCareStatuses()
+        {
+            // Given: an initialized MainViewModel
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: RefreshCareStatuses is called directly
+            viewModel.RefreshCareStatuses();
+
+            // Then: PropertyChanged was raised for Care-Statuses
+            Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
+        }
+
+        [Fact]
+        public async Task SimulatedTimerTick_WhenTriggered_RaisesPropertyChangedForCareStatuses()
+        {
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: a timer tick is simulated, without waiting for a real 5-minute interval
+            timerService.TriggerTick();
+
+            // Then: the callback passed to _timerService.Start(...) in the constructor is genuinely wired
+            // to RefreshCareStatuses and that the timer actually triggers it
+            Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
+        }
     }
 }
