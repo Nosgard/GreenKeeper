@@ -7,6 +7,7 @@
         xmlns:activeSteps="clr-namespace:GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active"
         xmlns:passiveSteps="clr-namespace:GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive"
         mc:Ignorable="d"
+        Icon="{StaticResource AppIcon}"
         Title="Add Schedule" Height="300" Width="450"
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner"

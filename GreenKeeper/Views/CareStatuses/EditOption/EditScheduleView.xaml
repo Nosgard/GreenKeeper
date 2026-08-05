@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:editSchedule="clr-namespace:GreenKeeper.ViewModels.CareStatuses.EditOption"
         mc:Ignorable="d"
+        Icon="{StaticResource AppIcon}"
         Title="Edit Schedule" Height="300" Width="450"
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner"

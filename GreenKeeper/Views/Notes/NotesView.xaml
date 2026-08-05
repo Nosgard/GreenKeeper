@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper.Views.Notes"
         mc:Ignorable="d"
+        Icon="{StaticResource AppIcon}"
         Title="NotesView"
         MinHeight="350"
         MinWidth="400"

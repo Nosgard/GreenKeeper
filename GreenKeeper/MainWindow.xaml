@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
         mc:Ignorable="d"
+        Icon="{StaticResource AppIcon}"
         Title="GreenKeeper"
         MinHeight="550"
         MinWidth="750"
@@ -28,7 +29,15 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <StackPanel Grid.Row="0" Margin="16, 20, 16, 12">
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16, 20, 16, 12">
+
+                <Image Source="/Resources/AppIcon.png"
+                       Width="32"
+                       Height="32"
+                       Stretch="Uniform"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+
                 <TextBlock Text="GreenKeeper"
                            Foreground="#F0F0EE"
                            FontSize="24"

@@ -13,6 +13,8 @@
                 <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <BitmapImage x:Key="AppIcon" UriSource="/Resources/AppIcon.ico" />
+
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
