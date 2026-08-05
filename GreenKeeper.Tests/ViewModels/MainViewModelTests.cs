@@ -16,6 +16,8 @@ namespace GreenKeeper.Tests.ViewModels
 {
     public class MainViewModelTests
     {
+        // -- Basics Section --
+
         [Fact]
         public async Task InitializeAsync_GivenRepositoryWithOnePlant_PopulatesPlants()
         {
@@ -35,6 +37,8 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Single(viewModel.Plants);
             Assert.Equal("Aloe Vera", viewModel.Plants[0].Name);
         }
+
+        // -- Add-Plant Section --
 
         [Fact]
         public async Task AddPlantAsync_GivenExistingPlants_AppendsWithoutRemovingExisting()
@@ -77,6 +81,8 @@ namespace GreenKeeper.Tests.ViewModels
 
             Assert.Empty(viewModel.Plants);
         }
+
+        // -- Delete Plant --
 
         [Fact]
         public async Task DeletePlantCommand_GivenUserConfirms_RemovesPlantFromRepositoryAndCollection()
@@ -152,6 +158,8 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(selectedPlant, viewModel.SelectedPlant);
         }
 
+        // -- Plant selected Section --
+
         [Fact]
         public async Task SelectedPlant_GivenPlantIsSelected_UpdatesIsPlantSelectedAndRaisesPropertyChanged()
         {
@@ -181,6 +189,8 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Contains(nameof(viewModel.IsPlantSelected), raisedProperties);
             Assert.Contains(nameof(MainViewModel.IsPlantSelected), raisedProperties);
         }
+
+        // -- Search Section --
 
         [Fact]
         public async Task SearchText_GivenPlantIsSelected_ResetsSelectedPlantToNull()
