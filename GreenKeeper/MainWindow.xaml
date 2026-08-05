@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
         mc:Ignorable="d"
+        Icon="{StaticResource AppIcon}"
         Title="GreenKeeper"
         MinHeight="550"
         MinWidth="750"
