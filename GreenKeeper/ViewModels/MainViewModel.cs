@@ -319,7 +319,7 @@ namespace GreenKeeper.ViewModels
             }
             SelectedPlant.CareSchedules.Add(saved);
 
-            OnPropertyChanged(nameof(CareStatuses));
+            RefreshCareStatuses();
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace GreenKeeper.ViewModels
             var saved = await _plantRepository.AddOrReplaceSunlightRequirementAsync(SelectedPlant.Id, newSunlightRequirement);
             SelectedPlant.SunlightRequirement = saved;
 
-            OnPropertyChanged(nameof(CareStatuses));
+            RefreshCareStatuses();
         }
 
         // -- Delete Plant Button Section --
@@ -382,13 +382,25 @@ namespace GreenKeeper.ViewModels
         // -- Care-Status related Section --
 
         /// <summary>
-        /// Will be called after the AddScheduleWizard successfully applied a Care Schedule / Sunlight Requirement
-        /// on the selected Plant-Object. Because the Change doesn't apply via the ObservableCollection
-        /// (Plant was changed, not swapped) the UI doesn't need to be notified to show the new Status-Card
+        /// Refreshes both the Dashboard and the Sidebar after any change to a plant's Care-Schedules or Sunlight-Requirement,
+        /// e.g. after completing, adding, replacing or removing a schedule.
+        /// 
+        /// Called from multiple places rather than relying on ObservableCollection notifications, because the change happens
+        /// directly on an already-loaded Plant-Object (Plant/CareSchedule don't implement INotifyPropertyChanged).
+        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed
+        /// 
+        /// What both things do:
+        /// 
+        /// OnPropertyChanged: updates the Dashboard's Status-Cards for the currently selected plant
+        /// 
+        /// CollectionViewSource: forces the Sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
+        /// for each plant's status dot - without this, the dot would only ever update by coincidence (e.g. when the ListView happens
+        /// to redraw for an unrelated reason)
         /// </summary>
         public void RefreshCareStatuses()
         {
             OnPropertyChanged(nameof(CareStatuses));
+            CollectionViewSource.GetDefaultView(Plants).Refresh();
         }
 
         /// <summary>
@@ -431,7 +443,7 @@ namespace GreenKeeper.ViewModels
             schedule.NextDueAt = newNextDueAt;
             schedule.LastCaredAt = newLastCaredAt;
 
-            OnPropertyChanged(nameof(CareStatuses));
+            RefreshCareStatuses();
         }
 
         // Care-Status Edit-Option
@@ -485,8 +497,8 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.CareSchedules.Remove(schedule);
 
             // CareStatuses doesn't have any Backing-Field and reads from the selected plant (SelectedPlant).
-            // OnProperty is enough to let the removed Status-Card disappear from the ItemsControl
-            OnPropertyChanged(nameof(CareStatuses));
+            // The call of RefreshCareStatuses is enough to let the removed Status-Card disappear from the ItemsControl
+            RefreshCareStatuses();
         }
 
         /// <summary>
@@ -523,7 +535,7 @@ namespace GreenKeeper.ViewModels
 
             SelectedPlant.SunlightRequirement = null;
 
-            OnPropertyChanged(nameof(CareStatuses));
+            RefreshCareStatuses();
         }
 
         /// <summary>
@@ -614,7 +626,7 @@ namespace GreenKeeper.ViewModels
                 }
             }
 
-            OnPropertyChanged(nameof(CareStatuses));
+            RefreshCareStatuses();
         }
 #endif
     }
