@@ -11,6 +11,9 @@
   <ItemGroup>
     <None Remove="Resources\AppIcon.ico" />
     <None Remove="Resources\AppIcon.png" />
+    <None Remove="Resources\Icons\Dots\GreenDot.png" />
+    <None Remove="Resources\Icons\Dots\RedDot.png" />
+    <None Remove="Resources\Icons\Dots\YellowDot.png" />
     <None Remove="Resources\Icons\Pill.png" />
     <None Remove="Resources\Icons\Sun.png" />
     <None Remove="Resources\Icons\Waterdrop.png" />
@@ -31,6 +34,9 @@
   <ItemGroup>
     <Resource Include="Resources\AppIcon.ico" />
     <Resource Include="Resources\AppIcon.png" />
+    <Resource Include="Resources\Icons\Dots\GreenDot.png" />
+    <Resource Include="Resources\Icons\Dots\RedDot.png" />
+    <Resource Include="Resources\Icons\Dots\YellowDot.png" />
     <Resource Include="Resources\Icons\Pill.png" />
     <Resource Include="Resources\Icons\Sun.png" />
     <Resource Include="Resources\Icons\Waterdrop.png" />
