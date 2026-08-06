@@ -104,13 +104,21 @@
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="8, 0, 0, 0">
+                        <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
+                            <Image Grid.Column="0"
+                                   Source="{Binding Converter={StaticResource PlantStatusDotConverter}}"
+                                   Width="24"
+                                   Height="24"
+                                   Stretch="Uniform"
+                                   VerticalAlignment="Center"
+                                   RenderOptions.BitmapScalingMode="HighQuality" />
 
-                            <TextBlock Grid.Column="0"
+                            <TextBlock Grid.Column="1"
                                        Text="{Binding Name}"
                                        Foreground="#F0F0EE"
                                        FontSize="24"
