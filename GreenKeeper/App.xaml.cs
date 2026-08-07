@@ -37,7 +37,7 @@ namespace GreenKeeper
                 // In case the preparing of the database fails, the app cannot work in any meaningful way.
                 // Every feature depends on the database so the app must shutdown
                 MessageBox.Show(
-                    $"The database could not be prepared: \n\n{ex.Message}The application will now close",
+                    $"The database could not be prepared: \n\n{ex.Message}\n\nThe application will now close",
                     "Database Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
