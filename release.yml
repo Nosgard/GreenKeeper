@@ -1,0 +1,52 @@
+name: Release
+
+# Tags are based on the schema "v1.0.0".
+# Merging alone never creates a Release - only pushing a Tag does
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Important because the Workflow needs permission to create a GitHub Release
+permissions:
+  contents: write
+
+
+jobs:
+  build-and-release:
+    # Windows-Only
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      # The tests are executed AGAIN. A Tag could be put on any Commit, whose tests never ran.
+      # In case something fails, the Workflow aborts and NO Release will be created
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Publish application
+        run: dotnet publish GreenKeeper/GreenKeeper.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:DebugType=none -o publish
+
+      # Wraps the whole Publish-Folder (exe + native DLLs) in
+      # one ZIP-File that can be downloaded by the user
+      - name: Create ZIP archive
+        run: Compress-Archive -Path publish\* -DestinationPath GreenKeeper-${{ github.ref_name }}-win-x64.zip
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: GreenKeeper-${{ github.ref_name }}-win-x64.zip
+          generate_release_notes: true
