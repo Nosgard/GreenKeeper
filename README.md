@@ -77,3 +77,57 @@ Since GreenKeeper doesn't use a system installer, uninstalling is simple:
 
 1. Delete the folder you extracted GreenKeeper into.
 2. *(Optional)* To also remove your saved plant data, delete the folder `%LocalAppData%\GreenKeeper`.
+
+---
+
+### Clone and build from source
+
+#### Prerequisites
+
+| Requirement | Notes |
+|---|---|
+| [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) | Required to build and run the project |
+| [Git](https://git-scm.com/downloads) | To clone the repository |
+| Windows 10 or later | GreenKeeper is Windows-only |
+| Visual Studio 2022 (optional) | Recommended for the best development experience but not required |
+
+#### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/Nosgard/GreenKeeper.git
+cd GreenKeeper
+```
+
+#### Step 2: Run it directly
+
+```bash
+dotnet run --project GreenKeeper
+```
+
+This builds and starts the app in one step - convenient while making
+changes, but requires the .NET 9 SDK to remain installed on the machine.
+
+#### Alternative approach: Build a standalone executable
+
+To produce a self-contained `.exe` that doesn't require the .NET SDK to
+run - the same way the official releases are built:
+
+```bash
+dotnet publish GreenKeeper -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+```
+
+The resulting `GreenKeeper.exe` (plus a few native `.dll` files) will be in
+the `publish` folder and can be run the same way as a downloaded release.
+
+>[!NOTE]
+>Building from source uses the exact same database setup as the prebuilt
+>release: on first launch, GreenKeeper automatically creates its SQLite
+>database at `%LocalAppData%\GreenKeeper`, no manual setup required.
+
+#### Running the tests
+
+GreenKeeper has a full Unit-Test suite covering the core logic. To run it:
+
+```bash
+dotnet test
+```
