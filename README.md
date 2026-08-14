@@ -10,7 +10,7 @@ Does this sound familiar? You find a pretty plant at the supermarket, buy it, an
 
 I wanted to make a change. With GreenKeeper, you get a desktop app that helps you keep track of your plants' care schedules, from watering and fertilizing to sunlight needs, so nothing falls through the cracks again.
 
-## Download & Installation
+## Installation
 
 You have two options to get GreenKeeper running:
 
