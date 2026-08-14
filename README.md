@@ -10,6 +10,31 @@ Does this sound familiar? You find a pretty plant at the supermarket, buy it, an
 
 I wanted to make a change. With GreenKeeper, you get a desktop app that helps you keep track of your plants' care schedules, from watering and fertilizing to sunlight needs, so nothing falls through the cracks again.
 
+## Overview
+
+<p align="center">
+  <img src="docs/screenshots/basics/01-user-interface-demo.png" alt="GreenKeeper main window" width= 800>
+</p>
+
+The interface is split into the following areas:
+
+- **Sidebar** (left) - search your plants and select one to view its details.
+  Each plant shows a colored status dot, so you can spot what needs attention at glance.
+- **Header** (top right) - add a new care schedule or delete the selected plant.
+- **Status area** - see and manage the selected plant's care schedules
+  (watering, fertilizing, sunlight), complete, edit, or remove them, and
+  open its notes
+
+## Built With
+
+| Technology | Used for |
+|---|---|
+| **C# / .NET 9** | Core application language and runtime |
+| **WPF** (Windows Presentation Foundation) | Desktop UI, custom-styled controls, data binding and MVVM |
+| **Entity Framework Core** | Local data persistence - used to store the plants and its data in a database |
+| **SQLite** | The actual database that stores the plants and their care schedules as well as their sunlight requirement |
+| **xUnit** | Unit testing of the application |
+
 ## Installation
 
 You have two options to get GreenKeeper running:
