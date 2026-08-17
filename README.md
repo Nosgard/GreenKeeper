@@ -60,14 +60,14 @@ The next step is mandatory, which means you must enter a value to continue.
 You enter the recurring period for watering.
 
 <p align="center">
-  <img src="docs/screenshots/add-plant-guide/03-enter-watering-options.png" alt="Enter Watering" width="500">
+  <img src="docs/screenshots/add-plant-guide/03-enter-watering.png" alt="Enter Watering" width="500">
 </p>
 
 From a combobox, you can select any time unit you want for your recurring
 period — e.g. setting 3 weeks means the next watering is due in 3 weeks.
 
 <p align="center">
-  <img src="docs/screenshots/add-plant-guide/03-watering-options.png" alt="Select watering time unit" width="500">
+  <img src="docs/screenshots/add-plant-guide/03-enter-watering-options.png" alt="Select watering time unit" width="500">
 </p>
 
 In the next step you can set the recurring period for fertilizing, which is an optional step, so you can skip it.
@@ -93,7 +93,7 @@ Just like the step for fertilizing, this step is optional and can be skipped if 
 Just like the previous steps, you have the option to select any time unit you want from a combobox
 
 <p align="center">
-  <img src="docs/screenshots/add-plant-guide/05-sunlight-options.png" alt="Select sunlight time unit" width="500">
+  <img src="docs/screenshots/add-plant-guide/05-enter-sunlight-options.png" alt="Select sunlight time unit" width="500">
 </p>
 
 In the last step you get a summary of all your entered values. If you are good with everything, simply click **Finish**
