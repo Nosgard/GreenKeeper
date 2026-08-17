@@ -35,6 +35,80 @@ The interface is split into the following areas:
 | **SQLite** | The actual database that stores the plants and their care schedules as well as their sunlight requirement |
 | **xUnit** | Unit testing of the application |
 
+## How to Use
+
+### Adding a Plant
+
+Getting started is simple: click **+ Add Plant** in the bottom left corner
+of the sidebar.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/01-click-add-plant.png" alt="Click Add Plant" width="800">
+</p>
+
+A short wizard will guide you through naming your plant and setting up its
+care schedule, as shown below.
+
+In the first step, you type in the name of your new plant. You have up to
+**50 characters** available.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/02-enter-name.png" alt="Enter Name" width="500">
+</p>
+
+The next step is mandatory, which means you must enter a value to continue.
+You enter the recurring period for watering.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/03-enter-watering-options.png" alt="Enter Watering" width="500">
+</p>
+
+From a combobox, you can select any time unit you want for your recurring
+period — e.g. setting 3 weeks means the next watering is due in 3 weeks.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/03-watering-options.png" alt="Select watering time unit" width="500">
+</p>
+
+In the next step you can set the recurring period for fertilizing, which is an optional step, so you can skip it.
+Entering invalid values will be considered as skip behvarior.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/04-enter-fertilizing.png" alt="Enter Fertilizing" width="500">
+</p>
+
+Just like in the previous step you have the option to select any time unit you want from a combobox.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/04-enter-fertilizing-options.png" alt="Select fertilizing time unit" width="500">
+</p>
+
+In the next step you can set the sunlight requirement, so you enter an amount of sun hours per time unit.
+Just like the step for fertilizing, this step is optional and can be skipped if not needed.
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/05-enter-sunlight.png" alt="Enter Sunlight" width="500">
+</p>
+
+Just like the previous steps, you have the option to select any time unit you want from a combobox
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/05-sunlight-options.png" alt="Select sunlight time unit" width="500">
+</p>
+
+In the last step you get a summary of all your entered values. If you are good with everything, simply click **Finish**
+and your new plant will be processed. If you have to correct any value you can always return to the previous steps
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/06-summary.png" alt="Summary" width="500">
+</p>
+
+That's it. Your new plant is set. Click on the plant in the sidebar to see all set statuses
+
+<p align="center">
+  <img src="docs/screenshots/add-plant-guide/07-result.png" alt="Result" width="800">
+</p>
+
 ## Installation
 
 You have two options to get GreenKeeper running:
