@@ -90,20 +90,20 @@ Just like the step for fertilizing, this step is optional and can be skipped if 
   <img src="docs/screenshots/add-plant-guide/05-enter-sunlight.png" alt="Enter Sunlight" width="500">
 </p>
 
-Just like the previous steps, you have the option to select any time unit you want from a combobox
+Just like the previous steps, you have the option to select any time unit you want from a combobox.
 
 <p align="center">
   <img src="docs/screenshots/add-plant-guide/05-enter-sunlight-options.png" alt="Select sunlight time unit" width="500">
 </p>
 
 In the last step you get a summary of all your entered values. If you are good with everything, simply click **Finish**
-and your new plant will be processed. If you have to correct any value you can always return to the previous steps
+and your new plant will be processed. If you have to correct any value you can always return to the previous steps.
 
 <p align="center">
   <img src="docs/screenshots/add-plant-guide/06-summary.png" alt="Summary" width="500">
 </p>
 
-That's it. Your new plant is set. Click on the plant in the sidebar to see all set statuses
+That's it. Your new plant is set. Click on the plant in the sidebar to see all set statuses.
 
 <p align="center">
   <img src="docs/screenshots/add-plant-guide/07-result.png" alt="Result" width="800">
@@ -118,7 +118,7 @@ by clicking **+ Add Schedule** in the top right corner.
   <img src="docs/screenshots/add-schedule-guide/01-click-add-schedule.png" alt="Click Add Schedule" width="800">
 </p>
 
-A short wizard will then guide you throught all steps to set the new schedule
+A short wizard will then guide you throught all steps to set the new schedule.
 
 <p align="center">
   <img src="docs/screenshots/add-schedule-guide/02-select-schedule.png" alt="Select schedule" width="500">
@@ -126,7 +126,7 @@ A short wizard will then guide you throught all steps to set the new schedule
 
 In the first step you choose the kind of schedule you want from a combobox
 >[!NOTE]
-> You can also set a schedule that already exists for your plant. In this case you will overwrite the previous one
+> You can also set a schedule that already exists for your plant. In this case you will overwrite the previous one.
 
 <p align="center">
   <img src="docs/screenshots/add-schedule-guide/02-select-schedule-options.png" alt="Select schedule options" width="500">
@@ -138,7 +138,13 @@ In the next step you enter a value for the period of the new schedule (similar t
   <img src="docs/screenshots/add-schedule-guide/03-enter-period.png" alt="Enter period" width="500">
 </p>
 
-Once done, click **Finish** and the new schedule will be added to your plant
+For the period, you can select any time unit you want.
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/03-enter-period-options.png" alt="Enter period options" width="500">
+</p>
+
+Once done, click **Finish** and the new schedule will be added to your plant.
 
 <p align="center">
   <img src="docs/screenshots/add-schedule-guide/04-result.png" alt="Result" width="800">
