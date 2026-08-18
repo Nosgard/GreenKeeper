@@ -109,6 +109,41 @@ That's it. Your new plant is set. Click on the plant in the sidebar to see all s
   <img src="docs/screenshots/add-plant-guide/07-result.png" alt="Result" width="800">
 </p>
 
+## Adding a schedule
+
+In case you want to add a schedule to the plant afterwards, you can add one single schedule to your plant
+by clicking **+ Add Schedule** in the top right corner.
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/01-click-add-schedule.png" alt="Click Add Schedule" width="800">
+</p>
+
+A short wizard will then guide you throught all steps to set the new schedule
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/02-select-schedule.png" alt="Select schedule" width="500">
+</p>
+
+In the first step you choose the kind of schedule you want from a combobox
+>[!NOTE]
+> You can also set a schedule that already exists for your plant. In this case you will overwrite the previous one
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/02-select-schedule-options.png" alt="Select schedule options" width="500">
+</p>
+
+In the next step you enter a value for the period of the new schedule (similar to the step for the Add Plant option).
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/03-enter-period.png" alt="Enter period" width="500">
+</p>
+
+Once done, click **Finish** and the new schedule will be added to your plant
+
+<p align="center">
+  <img src="docs/screenshots/add-schedule-guide/04-result.png" alt="Result" width="800">
+</p>
+
 ## Installation
 
 You have two options to get GreenKeeper running:
