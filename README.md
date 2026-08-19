@@ -207,6 +207,45 @@ schedule starts counting how long it's overdue and the dot turns red.
   <img src="docs/screenshots/care-schedule-guide/status-dots/03-status-red-dot.png" alt="Status red dot" width="500">
 </p>
 
+#### Complete Option
+
+Think of the **Complete** option as checking off a task: it tells
+the application that you've just taken care of your plant, and the schedule
+starts counting down again from that moment.
+
+> [!NOTE]
+> The Complete option stays disabled as long as the due date is still in
+> the future. This prevents accidentally completing a task days before
+> it's actually due.
+
+As soon as a schedule comes due, **Complete** becomes available.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/complete-option/01-complete-option-today.png" alt="Complete option today" width="500">
+</p>
+
+The same applies once a schedule is overdue — you can complete it at any
+point afterwards, no matter how much time has passed.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/complete-option/02-complete-option-overdue.png" alt="Complete option overdue" width="500">
+</p>
+
+Once clicked, the schedule restarts immediately: the next due date is
+calculated from the current moment, based on the period you configured —
+not from the original due date.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/complete-option/03-complete-option-result.png" alt="Complete option result" width="500">
+</p>
+
+At the same time, the plant's dot in the sidebar returns to green,
+regardless of whether it was yellow or red before.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/status-dots/01-status-green-dot.png" alt="Status green dot" width="500">
+</p>
+
 ## Installation
 
 You have two options to get GreenKeeper running:
