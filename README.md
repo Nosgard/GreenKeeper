@@ -246,6 +246,17 @@ regardless of whether it was yellow or red before.
   <img src="docs/screenshots/care-schedule-guide/status-dots/01-status-green-dot.png" alt="Status green dot" width="500">
 </p>
 
+### Passive Care Schedules
+
+Unlike active schedules, passive ones (currently only **Sunlight**) don't
+have a due date and require no interaction at all. They simply record how
+much of something a plant needs over a given period. There's no countdown running.
+A passive schedule is purely information and a reminder of your plant's needs.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/care-schedules/03-passive-care-schedule.png" alt="Passive care schedules" width="500">
+</p>
+
 ## Installation
 
 You have two options to get GreenKeeper running:
