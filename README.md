@@ -109,7 +109,7 @@ That's it. Your new plant is set. Click on the plant in the sidebar to see all s
   <img src="docs/screenshots/add-plant-guide/07-result.png" alt="Result" width="800">
 </p>
 
-## Adding a schedule
+## Adding a Schedule
 
 In case you want to add a schedule to the plant afterwards, you can add one single schedule to your plant
 by clicking **+ Add Schedule** in the top right corner.
