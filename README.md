@@ -150,6 +150,63 @@ Once done, click **Finish** and the new schedule will be added to your plant.
   <img src="docs/screenshots/add-schedule-guide/04-result.png" alt="Result" width="800">
 </p>
 
+## Care Schedules
+
+Care schedules are the heart of every plant — they're what actually keep
+track of when your plants need attention. Every schedule falls into one
+of two categories:
+
+### Active Schedules
+Have a concrete due date. They count down, can become overdue, and are marked as done.
+You actively have to interact with them to keep the schedules up to date.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/care-schedules/02-active-care-schedules.png" alt="Active care schedules" width="500">
+</p>
+
+#### Handling Active Schedules
+
+When you set a recurring period for an active care schedule, GreenKeeper
+calculates the next due date and displays the remaining time in the most
+fitting unit — days, weeks, months, or years. Each plant's overall state is
+reflected by a colored dot next to its name in the sidebar, so you can see
+what needs attention without opening anything.
+
+**Upcoming** — as long as the due date lies in the future, the schedule
+simply counts down and the plant is marked with a green dot. The
+**Complete** button stays disabled, since there's nothing to do yet.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/due-state/01-due-state-upcoming.png" alt="Due state upcoming" width="500">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/status-dots/01-status-green-dot.png" alt="Status green dot" width="500">
+</p>
+
+**Due today** — on the day a schedule comes due, the status card shows
+*Today* and the dot turns yellow. The **Complete** button is now enabled,
+ready for you to mark the task as done.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/due-state/02-due-state-today.png" alt="Due state today" width="500">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/status-dots/02-status-yellow-dot.png" alt="Status yellow dot" width="500">
+</p>
+
+**Overdue** — if the due date passes without the task being completed, the
+schedule starts counting how long it's overdue and the dot turns red.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/due-state/03-due-state-overdue.png" alt="Due state overdue" width="500">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/status-dots/03-status-red-dot.png" alt="Status red dot" width="500">
+</p>
+
 ## Installation
 
 You have two options to get GreenKeeper running:
