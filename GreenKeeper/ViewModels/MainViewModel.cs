@@ -138,19 +138,19 @@ namespace GreenKeeper.ViewModels
 
                 // Watering: mandatory for every plant
                 yield return new WateringStatusViewModel(
-                    ScheduleFor(CareType.Water),
-                    onComplete: () => CompleteCareSchedule(CareType.Water),
-                    onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Water)));
+                    ScheduleFor(CareType.Watering),
+                    onComplete: () => CompleteCareSchedule(CareType.Watering),
+                    onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Watering)));
 
                 // Fertilizing optional, only show the status if set to a plant
-                var fertilizingSchedule = ScheduleFor(CareType.Nutrients);
+                var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
                 if (fertilizingSchedule != null)
                 {
                     yield return new FertilizingStatusViewModel(
                         fertilizingSchedule,
-                        onComplete: () => CompleteCareSchedule(CareType.Nutrients),
-                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Nutrients)),
-                        onRemove: () => RemoveCareSchedule(CareType.Nutrients, "fertilizing schedule"));
+                        onComplete: () => CompleteCareSchedule(CareType.Fertilizing),
+                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Fertilizing)),
+                        onRemove: () => RemoveCareSchedule(CareType.Fertilizing, "fertilizing schedule"));
                 }
 
                 // Sunlight: optional

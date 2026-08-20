@@ -27,7 +27,7 @@ namespace GreenKeeper.Converters
             }
 
             var relevantSchedules = plant.CareSchedules
-                .Where(s => s.Care == Models.Enums.CareType.Water || s.Care == Models.Enums.CareType.Nutrients)
+                .Where(s => s.Care == Models.Enums.CareType.Watering || s.Care == Models.Enums.CareType.Fertilizing)
                 .Where(s => s.NextDueAt.HasValue);
 
             var today = DateTime.Now.Date;

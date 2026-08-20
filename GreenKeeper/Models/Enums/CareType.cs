@@ -8,8 +8,8 @@ namespace GreenKeeper.Models.Enums
 {
     public enum CareType
     {
-        Water,
-        Nutrients,
+        Watering,
+        Fertilizing,
         Sunlight
     }
 }
