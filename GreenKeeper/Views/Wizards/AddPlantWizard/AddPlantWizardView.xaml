@@ -215,9 +215,10 @@
 
             <!-- Next -->
             <Button Style="{StaticResource MediumDarkButton}"
-                Content="{Binding CurrentStep.NextButtonLabel}"
-                Padding="10"
-                Command="{Binding NextCommand}" />
+                    Content="{Binding CurrentStep.NextButtonLabel}"
+                    Padding="10"
+                    IsDefault="True"
+                    Command="{Binding NextCommand}" />
 
             <!-- Cancel -->
             <Button Style="{StaticResource MediumDarkButton}"
