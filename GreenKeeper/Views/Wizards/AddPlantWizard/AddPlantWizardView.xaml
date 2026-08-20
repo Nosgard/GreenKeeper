@@ -8,7 +8,7 @@
         xmlns:passiveSteps="clr-namespace:GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive"
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
-        Title="Add Plant" Height="300" Width="450"
+        Title="Add Plant" Height="330" Width="450"
         Background="#1A1C22"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
