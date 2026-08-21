@@ -77,8 +77,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
                 // Set the next step depending on the selection in the previous step
                 _detailStep = _selectionStep.SelectedCareType switch
                 {
-                    CareType.Water => new ScheduleActiveStepViewModel("Watering"),
-                    CareType.Nutrients => new ScheduleActiveStepViewModel("Fertilizing"),
+                    CareType.Watering => new ScheduleActiveStepViewModel("Watering"),
+                    CareType.Fertilizing => new ScheduleActiveStepViewModel("Fertilizing"),
                     CareType.Sunlight => new ScheduleSunlightStepViewModel(),
                     _ => throw new ArgumentOutOfRangeException()
                 };
@@ -113,8 +113,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         {
             return _selectionStep.SelectedCareType switch
             {
-                CareType.Water => PrepareCareSchedule(CareType.Water, (ScheduleActiveStepViewModel)_detailStep!),
-                CareType.Nutrients => PrepareCareSchedule(CareType.Nutrients, (ScheduleActiveStepViewModel)_detailStep!),
+                CareType.Watering => PrepareCareSchedule(CareType.Watering, (ScheduleActiveStepViewModel)_detailStep!),
+                CareType.Fertilizing => PrepareCareSchedule(CareType.Fertilizing, (ScheduleActiveStepViewModel)_detailStep!),
                 CareType.Sunlight => PrepareSunlightRequirement((ScheduleSunlightStepViewModel)_detailStep!)
             };
         }

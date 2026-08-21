@@ -47,7 +47,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
                 // Pre-fill from the matching IntervalAmount/IntervalUnit, if one
                 // already exists for this plant and Care-Type
                 var schedule = plant.CareSchedules.FirstOrDefault(s => s.Care == careType);
-                string title = careType == CareType.Water ? "Watering" : "Fertilizing";
+                string title = careType == CareType.Watering ? "Watering" : "Fertilizing";
                 CurrentStep = new EditActiveScheduleViewModel(
                     title,
                     schedule?.IntervalAmount,

@@ -21,7 +21,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         /// it only triggers the given Action
         /// </summary>
         public FertilizingStatusViewModel(CareSchedule? schedule, Action onComplete, Action onEdit, Action onRemove)
-            : base(CareType.Nutrients, schedule, "Fertilizing", "/Resources/Icons/Pill.png", "#ff695b")
+            : base(CareType.Fertilizing, schedule, "Fertilizing", "/Resources/Icons/Pill.png", "#ff695b")
         {
             CompleteCommand = new RelayCommand(
                 _ => onComplete());

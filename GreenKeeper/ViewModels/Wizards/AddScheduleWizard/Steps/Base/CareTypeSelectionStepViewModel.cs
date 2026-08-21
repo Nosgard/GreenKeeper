@@ -19,7 +19,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base
     /// </summary>
     public class CareTypeSelectionStepViewModel : IWizardStepViewModel
     {
-        private CareType _selectedCareType = CareType.Water;
+        private CareType _selectedCareType = CareType.Watering;
         public CareType SelectedCareType
         {
             get => _selectedCareType;
@@ -37,8 +37,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base
         public IReadOnlyList<KeyValuePair<CareType, string>> AvailableCareTypes { get; } =
             new List<KeyValuePair<CareType, string>>
             {
-                new(CareType.Water, "Watering"),
-                new(CareType.Nutrients, "Fertilizing"),
+                new(CareType.Watering, "Watering"),
+                new(CareType.Fertilizing, "Fertilizing"),
                 new(CareType.Sunlight, "Sunlight"),
             };
 

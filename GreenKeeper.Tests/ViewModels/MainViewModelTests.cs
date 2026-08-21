@@ -248,7 +248,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with only a Care-Schedule for Watering, no Fertilizing, no Sunlight
             var plant = new Plant { Name = "Cactus" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -273,8 +273,8 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with Watering, Fertilizing and SunlightRequirement all set
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository();
@@ -302,7 +302,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with Watering and SunlightRequirement, but no Fertilizing
             var plant = new Plant { Name = "Snake Plant" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 14, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 14, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 4, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository();
@@ -333,7 +333,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule
             {
-                Care = CareType.Water,
+                Care = CareType.Watering,
                 IntervalAmount = 7,
                 IntervalUnit = TimeUnit.Days,
                 NextDueAt = DateTime.Now.AddDays(-1)
@@ -364,7 +364,7 @@ namespace GreenKeeper.Tests.ViewModels
             var persistedSchedule = (await plantRepository.GetPlantsAsync())
                 .Single()
                 .CareSchedules
-                .Single(s => s.Care == CareType.Water);
+                .Single(s => s.Care == CareType.Watering);
 
             Assert.InRange(persistedSchedule.NextDueAt!.Value, beforeClick.AddDays(7).AddSeconds(-2), afterClick.AddDays(7).AddSeconds(2));
             Assert.InRange(persistedSchedule.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
@@ -379,14 +379,14 @@ namespace GreenKeeper.Tests.ViewModels
 
             plant.CareSchedules.Add(new CareSchedule
             {
-                Care = CareType.Water,
+                Care = CareType.Watering,
                 IntervalAmount = 7,
                 IntervalUnit = TimeUnit.Days,
                 NextDueAt = originalWateringDueDate
             });
             plant.CareSchedules.Add(new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = 30,
                 IntervalUnit = TimeUnit.Days,
                 NextDueAt = DateTime.Now.AddDays(-1)
@@ -413,8 +413,8 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: only the Fertilizing schedule was recalculated and persisted, while the due date of Watering remains completely untouched
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
-            var persistedFertilizing = persistedSchedules.Single(s => s.Care == CareType.Nutrients);
-            var persistedWatering = persistedSchedules.Single(s => s.Care == CareType.Water);
+            var persistedFertilizing = persistedSchedules.Single(s => s.Care == CareType.Fertilizing);
+            var persistedWatering = persistedSchedules.Single(s => s.Care == CareType.Watering);
 
             Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeClick.AddDays(30).AddSeconds(-2), afterClick.AddDays(30).AddSeconds(2));
             Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
@@ -431,7 +431,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule
             {
-                Care = CareType.Water,
+                Care = CareType.Watering,
                 IntervalAmount = null,
                 IntervalUnit = null,
                 NextDueAt = originalDueDate
@@ -471,8 +471,8 @@ namespace GreenKeeper.Tests.ViewModels
             // given: a plant with both Watering and Fertilizing schedules, and the user
             // dialog service configured to simulate the user choosing "Yes"
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -501,8 +501,8 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant with Watering and Fertilizing schedules, and the
             // dialog service configured to simulate the user choosing "No"
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -530,8 +530,8 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant with Watering and Fertilizing schedules, the user
             // confirming the removal, but the repository configured to fail
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveCareSchedule = true };
             plantRepository.SeedPlants(plant);
@@ -552,7 +552,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(dialogService.ShowErrorWasCalled);
 
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
-            Assert.Contains(persistedSchedules, s => s.Care == CareType.Nutrients);
+            Assert.Contains(persistedSchedules, s => s.Care == CareType.Fertilizing);
 
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.Contains(updatedCareStatuses, c => c is FertilizingStatusViewModel);
@@ -564,7 +564,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
             // and the dialog service configured to simulate the user choosing "Yes"
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository();
@@ -598,7 +598,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
             // and the dialog service configured to simulate the user choosing "No"
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository();
@@ -630,7 +630,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant with a Watering schedule and a Sunlight-Requirement,
             // the user confirming the removal, but the repository configured to fail
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveSunlightRequirement = true };
@@ -676,7 +676,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var newSchedule = new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = 30,
                 IntervalUnit = TimeUnit.Days
             };
@@ -694,7 +694,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant is selected, but the new Care-Schedule has no
             // IntervalAmount/IntervalUnit set
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -708,7 +708,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var incompleteSchedule = new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = null,
                 IntervalUnit = null
             };
@@ -725,7 +725,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with only a Watering schedule, no Fertilizing yet
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -739,7 +739,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var newFertilizingSchedule = new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = 30,
                 IntervalUnit = TimeUnit.Days
             };
@@ -755,7 +755,7 @@ namespace GreenKeeper.Tests.ViewModels
             var persistedFertilizing = (await plantRepository.GetPlantsAsync())
                 .Single()
                 .CareSchedules
-                .Single(s => s.Care == CareType.Nutrients);
+                .Single(s => s.Care == CareType.Fertilizing);
 
             Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(30).AddSeconds(-2), afterCall.AddDays(30).AddSeconds(2));
             Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeCall.AddSeconds(-2), afterCall.AddSeconds(2));
@@ -770,8 +770,8 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with an existing Fertilizing schedule (30-day interval)
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care= CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Nutrients, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care= CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -786,7 +786,7 @@ namespace GreenKeeper.Tests.ViewModels
             // The replacement schedule uses a different interval (14 days instead of 30)
             var replacementSchedule = new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = 14,
                 IntervalUnit = TimeUnit.Days
             };
@@ -800,12 +800,12 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: exactly ONE Fertilizing entry remains, with the new interval- no duplicate. Watering remains untouched and the Care-Statuses show exactly two cards
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
-            var persistedFertilizing = persistedSchedules.Where(s => s.Care == CareType.Nutrients).Single();
+            var persistedFertilizing = persistedSchedules.Where(s => s.Care == CareType.Fertilizing).Single();
 
             Assert.Equal(14, persistedFertilizing.IntervalAmount);
             Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(14).AddSeconds(-2), afterCall.AddDays(14).AddSeconds(2));
 
-            Assert.Single(persistedSchedules, s => s.Care == CareType.Water);
+            Assert.Single(persistedSchedules, s => s.Care == CareType.Watering);
             Assert.Equal(2, viewModel.CareStatuses.Count());
         }
 
@@ -815,7 +815,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant with only Watering, and the repository configured to
             // fail when adding/replacing a Care-Schedule
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceCareSchedule = true };
             plantRepository.SeedPlants(plant);
@@ -829,7 +829,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var newFertilizingSchedule = new CareSchedule
             {
-                Care = CareType.Nutrients,
+                Care = CareType.Fertilizing,
                 IntervalAmount = 30,
                 IntervalUnit = TimeUnit.Days
             };
@@ -873,7 +873,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with only a Watering schedule, no Sunlight-Requirement yet
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -911,7 +911,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with an existing Sunlight-Requirement (6 hours per day)
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
             var plantRepository = new FakePlantRepository();
@@ -945,7 +945,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant with only Watering, and the repository configured to
             // fail when adding/replacing a Sunlight-Requirement
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceSunlightRequirement = true };
             plantRepository.SeedPlants(plant);
@@ -1158,7 +1158,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: an initialized MainViewModel with a plant that has a Watering schedule
             var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Water, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -1187,7 +1187,7 @@ namespace GreenKeeper.Tests.ViewModels
             // selected plant and the Care-Type "Water" as the arguments
             Assert.Equal(1, eventRaisedCount);
             Assert.Same(viewModel.SelectedPlant, raisedArgs!.Value.plant);
-            Assert.Equal(CareType.Water, raisedArgs.Value.care);
+            Assert.Equal(CareType.Watering, raisedArgs.Value.care);
         }
 
         // Help-Method: Maps a simple string identifier to the actual command on the ViewModel -
