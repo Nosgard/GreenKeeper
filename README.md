@@ -257,6 +257,84 @@ A passive schedule is purely information and a reminder of your plant's needs.
   <img src="docs/screenshots/care-schedule-guide/care-schedules/03-passive-care-schedule.png" alt="Passive care schedules" width="500">
 </p>
 
+### Options for Both Types of Schedules
+
+Beyond viewing your care schedules, you get two ways to keep them up to date:
+adjusting an existing schedule's values, or removing it entirely. Both options
+work identically whether the schedule is active or passive — you'll find them right
+on each schedule's status card.
+
+#### Edit Option
+
+Made a typo, or does your plant simply need a different period now?
+The **Edit** option lets you update an existing schedule's value and time
+unit without having to remove and recreate it from scratch.
+
+Click **Edit** on the status card of the schedule you want to change.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/edit-option/01-care-schedules-select-edit-option.png" alt="Care schedules select edit option" width="500">
+</p>
+
+A small dialog opens, pre-filled with the schedule's current value and
+time unit — so you always see exactly what you're about to change.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/edit-option/02-edit-option-old-value.png" alt="Edit option old value" width="500">
+</p>
+
+Enter the new value you want to set.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/edit-option/03-edit-option-new-value.png" alt="Edit option new value" width="500">
+</p>
+
+Just like when the schedule was created, you can pick a different time unit from the combobox.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/edit-option/03-edit-option-new-value-options.png" alt="Edit option new value options" width="500">
+</p>
+
+Click **Save**, and the status card updates immediately to reflect your new value.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/edit-option/04-care-schedules-new-value-applied.png" alt="Care schedules new value applied" width="500">
+</p>
+
+> [!NOTE]
+> Saving always recalculates the due date from the exact moment you click **Save** —
+> even if you enter the same value the schedule already had.
+> There's no way to keep the original due date unchanged; every save
+> restarts the period. If you are unsure, press **Cancel**.
+
+
+#### Remove Option
+
+Sometimes a care schedule isn't needed anymore. The **Remove Option** lets you delete
+such a schedule permanently.
+
+> [!NOTE]
+> Remove is only available for **Fertilizing** and **Sunlight**. Watering
+> is mandatory for every plant, so its schedule can only be changed via
+> **Edit** - it can never be removed.
+
+Click **Remove** on the schedule's status card. Since this action can't
+be undone, you will be asked to confirm before anything is actually deleted.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/remove-option/01-care-schedules-select-remove-option.png" alt="Care schedules select remove option" width="500">
+</p>
+
+Once done, the status card disappears immediately — the schedule is gone.
+
+<p align="center">
+  <img src="docs/screenshots/care-schedule-guide/remove-option/02-care-schedules-after-remove-sunlight.png" alt="Care schedules after remove sunlight" width="500">
+</p>
+
+> [!TIP]
+> Changed your mind? A removed schedule can always be added again later
+> via **+ Add Schedule**.
+
 ## Installation
 
 You have two options to get GreenKeeper running:
