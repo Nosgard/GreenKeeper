@@ -13,17 +13,17 @@ I wanted to make a change. With GreenKeeper, you get a desktop app that helps yo
 ## Overview
 
 <p align="center">
-  <img src="docs/screenshots/basics/01-user-interface-demo.png" alt="GreenKeeper main window" width= 800>
+  <img src="docs/screenshots/basics/01-user-interface-demo.png" alt="GreenKeeper main window" width="800">
 </p>
 
 The interface is split into the following areas:
 
 - **Sidebar** (left) - search your plants and select one to view its details.
-  Each plant shows a colored status dot, so you can spot what needs attention at glance.
+  Each plant shows a colored status dot, so you can spot what needs attention at a glance.
 - **Header** (top right) - add a new care schedule or delete the selected plant.
 - **Status area** - see and manage the selected plant's care schedules
   (watering, fertilizing, sunlight), complete, edit, or remove them, and
-  open its notes
+  open its notes.
 
 ## Built With
 
@@ -71,7 +71,7 @@ period — e.g. setting 3 weeks means the next watering is due in 3 weeks.
 </p>
 
 In the next step you can set the recurring period for fertilizing, which is an optional step, so you can skip it.
-Entering invalid values will be considered as skip behvarior.
+Entering invalid values will be considered as skip behavior.
 
 <p align="center">
   <img src="docs/screenshots/add-plant-guide/04-enter-fertilizing.png" alt="Enter Fertilizing" width="500">
@@ -118,14 +118,14 @@ by clicking **+ Add Schedule** in the top right corner.
   <img src="docs/screenshots/add-schedule-guide/01-click-add-schedule.png" alt="Click Add Schedule" width="800">
 </p>
 
-A short wizard will then guide you throught all steps to set the new schedule.
+A short wizard will then guide you through all steps to set the new schedule.
 
 <p align="center">
   <img src="docs/screenshots/add-schedule-guide/02-select-schedule.png" alt="Select schedule" width="500">
 </p>
 
 In the first step you choose the kind of schedule you want from a combobox
->[!NOTE]
+> [!NOTE]
 > You can also set a schedule that already exists for your plant. In this case you will overwrite the previous one.
 
 <p align="center">
@@ -360,7 +360,7 @@ Click **Save** to keep your changes, or **Cancel** to discard them.
 
 > [!NOTE]
 > If you try to close the window with unsaved changes — whether via
-> **Cancel** or the window's **X** button — youi will be asked first
+> **Cancel** or the window's **X** button — you will be asked first
 > whether you want to save. Your notes are never lost by an accidental
 > click.
 
@@ -387,21 +387,21 @@ for the latest version, e.g. `GreenKeeper-v1.0.0-win-x64.zip`.
 Right-click the downloaded ZIP file and select **Extract All...**, then
 choose a folder of your choice (e.g. `C:\Programs\GreenKeeper`).
 
->[!NOTE]
->GreenKeeper doesn't need to be installed into `Program Files` - any
->folder works, as long as you keep the extracted files together in one place
+> [!NOTE]
+> GreenKeeper doesn't need to be installed into `Program Files` - any
+> folder works, as long as you keep the extracted files together in one place
 
 #### Step 3: Run GreenKeeper
 
 Open the extracted folder and double-click `GreenKeeper.exe`
 
->[!Warning]
->Since GreenKeeper isn't actually digitally signed, Windows SmartScreen may show a
->**"Windows protected your PC"** warning on first launch. This is expected
->for small, independently published applications - it does not mean the
->app to be unsafe.
+> [!WARNING]
+> Since GreenKeeper isn't actually digitally signed, Windows SmartScreen may show a
+> **"Windows protected your PC"** warning on first launch. This is expected
+> for small, independently published applications - it does not mean the
+> app is unsafe.
 >
->To proceed, click **More info**, then **Run anyway**.
+> To proceed, click **More info**, then **Run anyway**.
 
 That's it - no installer, no .NET Runtime to install separately. Everything
 needed to run the app is already bundled in the download, so you are good to go!
@@ -421,9 +421,9 @@ needed to run the app is already bundled in the download, so you are good to go!
 3. Delete the old version's files if you extracted to a new folder.
 
 >[!NOTE]
->Your plant data is stored separately from the application files, in
->`%LocalAppData%\GreenKeeper`. Updating GreenKeeper - even to a different
->folder - never affects your existing data.
+> Your plant data is stored separately from the application files, in
+> `%LocalAppData%\GreenKeeper`. Updating GreenKeeper - even to a different
+> folder - never affects your existing data.
 
 #### Uninstalling
 
@@ -473,10 +473,10 @@ dotnet publish GreenKeeper -c Release -r win-x64 --self-contained true -p:Publis
 The resulting `GreenKeeper.exe` (plus a few native `.dll` files) will be in
 the `publish` folder and can be run the same way as a downloaded release.
 
->[!NOTE]
->Building from source uses the exact same database setup as the prebuilt
->release: on first launch, GreenKeeper automatically creates its SQLite
->database at `%LocalAppData%\GreenKeeper`, no manual setup required.
+> [!NOTE]
+> Building from source uses the exact same database setup as the prebuilt
+> release: on first launch, GreenKeeper automatically creates its SQLite
+> database at `%LocalAppData%\GreenKeeper`, no manual setup required.
 
 #### Running the tests
 
