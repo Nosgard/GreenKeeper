@@ -335,6 +335,35 @@ Once done, the status card disappears immediately — the schedule is gone.
 > Changed your mind? A removed schedule can always be added again later
 > via **+ Add Schedule**.
 
+
+### Notes
+Not every detail about a plant fits into a care schedule. That's what
+Notes are for — a free-form space attached to each plant, for anything
+you want to remember: where you bought it, how it's been doing, tips a
+friend gave you, or reminders for next season.
+
+Select a plant in the sidebar, then click **View Notes** in the bottom
+right corner.
+
+<p align="center">
+  <img src="docs/screenshots/notes-guide/01-select-view-notes.png" alt="Select view notes" width="800">
+</p>
+
+A window where you can write and edit anything you like — there's
+no format or limit to what you write down.
+
+<p align="center">
+  <img src="docs/screenshots/notes-guide/02-open-notes.png" alt="Open notes" width="500">
+</p>
+
+Click **Save** to keep your changes, or **Cancel** to discard them.
+
+> [!NOTE]
+> If you try to close the window with unsaved changes — whether via
+> **Cancel** or the window's **X** button — youi will be asked first
+> whether you want to save. Your notes are never lost by an accidental
+> click.
+
 ## Installation
 
 You have two options to get GreenKeeper running:
