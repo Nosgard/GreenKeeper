@@ -109,7 +109,7 @@ That's it. Your new plant is set. Click on the plant in the sidebar to see all s
   <img src="docs/screenshots/add-plant-guide/07-result.png" alt="Result" width="800">
 </p>
 
-## Adding a Schedule
+### Adding a Schedule
 
 In case you want to add a schedule to the plant afterwards, you can add one single schedule to your plant
 by clicking **+ Add Schedule** in the top right corner.
@@ -150,13 +150,13 @@ Once done, click **Finish** and the new schedule will be added to your plant.
   <img src="docs/screenshots/add-schedule-guide/04-result.png" alt="Result" width="800">
 </p>
 
-## Care Schedules
+### Care Schedules
 
 Care schedules are the heart of every plant — they're what actually keep
 track of when your plants need attention. Every schedule falls into one
 of two categories:
 
-### Active Schedules
+#### Active Schedules
 Have a concrete due date. They count down, can become overdue, and are marked as done.
 You actively have to interact with them to keep the schedules up to date.
 
@@ -246,7 +246,7 @@ regardless of whether it was yellow or red before.
   <img src="docs/screenshots/care-schedule-guide/status-dots/01-status-green-dot.png" alt="Status green dot" width="500">
 </p>
 
-### Passive Care Schedules
+#### Passive Care Schedules
 
 Unlike active schedules, passive ones (currently only **Sunlight**) don't
 have a due date and require no interaction at all. They simply record how
@@ -257,14 +257,14 @@ A passive schedule is purely information and a reminder of your plant's needs.
   <img src="docs/screenshots/care-schedule-guide/care-schedules/03-passive-care-schedule.png" alt="Passive care schedules" width="500">
 </p>
 
-### Options for Both Types of Schedules
+#### Options for Both Types of Schedules
 
 Beyond viewing your care schedules, you get two ways to keep them up to date:
 adjusting an existing schedule's values, or removing it entirely. Both options
 work identically whether the schedule is active or passive — you'll find them right
 on each schedule's status card.
 
-#### Edit Option
+##### Edit Option
 
 Made a typo, or does your plant simply need a different period now?
 The **Edit** option lets you update an existing schedule's value and time
@@ -308,7 +308,7 @@ Click **Save**, and the status card updates immediately to reflect your new valu
 > restarts the period. If you are unsure, press **Cancel**.
 
 
-#### Remove Option
+##### Remove Option
 
 Sometimes a care schedule isn't needed anymore. The **Remove Option** lets you delete
 such a schedule permanently.
