@@ -82,7 +82,16 @@ namespace GreenKeeper.ViewModels
                 execute: _ => OpenNotesRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
 
-
+            // Rename Plant related Command
+            RenamePlantCommand = new RelayCommand(
+                execute: parameter =>
+                {
+                    if (parameter is Plant plant)
+                    {
+                        RenamePlantRequested?.Invoke(this, plant);
+                    }
+                },
+                canExecute: parameter => parameter is Plant);
 
             // -- Debug-Section --
 
@@ -268,6 +277,37 @@ namespace GreenKeeper.ViewModels
             return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
         }
 
+        // -- Rename Plant Section --
+
+        public ICommand RenamePlantCommand { get; }
+
+        // Notifies the View that the Rename-Dialog should be opened for a specific plant.
+        // Follows the same pattern as EditScheduleRequested: the ViewModel only signals the
+        // intent, while MainWindow.xaml.cs actually opens the window
+        public event EventHandler<Plant>? RenamePlantRequested;
+
+        /// <summary>
+        /// Persists a plant's new name and updates the in-memory object so the
+        /// sidebar reflects the change right away.
+        /// 
+        /// Deliberately touches nothing but the name: care schedules, the sunlight requirement
+        /// and all due dates stay exactly as they are. Renaming is purely cosmetic - it must
+        /// never restart a countdown or otherwise disturb the plant's care state
+        /// </summary>
+        public async Task RenamePlantAsync(Plant plant, string newName)
+        {
+            await _plantRepository.RenamePlantAsync(plant.Id, newName);
+            plant.Name = newName;
+
+            // Plant implements no INotifyPropertyChanged, so the ListView would
+            // never notice the changed name on its own - same reason for RefreshCareStatuses
+            CollectionViewSource.GetDefaultView(Plants).Refresh();
+
+            // The dashboard header binds to SelectedPlant.Name, so it needs an
+            // explicit nudge as well if the renamed plant happens to be selected
+            OnPropertyChanged(nameof(SelectedPlant));
+        }
+        
         // -- Add Plant Wizard Section --
         public ICommand AddPlantCommand { get; }
         public event EventHandler? AddPlantRequested;

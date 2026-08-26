@@ -243,5 +243,22 @@ namespace GreenKeeper.Repositories
             plant.Notes = notes;
             await context.SaveChangesAsync();
         }
+
+        public async Task RenamePlantAsync(int plantId, string newName)
+        {
+            // Fresh, short-lived Context for this one step.
+            // Will be disposed by the end of the "await using"-Block
+            await using var context = await _contextFactory.CreateDbContextAsync();
+
+            var plant = await context.Plants.FindAsync(plantId);
+
+            if (plant == null)
+            {
+                throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+            }
+
+            plant.Name = newName;
+            await context.SaveChangesAsync();
+        }
     }
 }

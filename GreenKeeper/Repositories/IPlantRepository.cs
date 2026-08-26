@@ -72,5 +72,14 @@ namespace GreenKeeper.Repositories
         /// Persists the given text as the notes for the selected plant
         /// </summary>
         Task UpdatePlantNotesAsync(int plantId, string notes);
+
+        /// <summary>
+        /// Persists a new name for the plant identified by plantId.
+        /// 
+        /// Only the name column is touched - care schedules, the sunlight requirement
+        /// and all due dates remain untouched. Renaming is purely cosmetic and must
+        /// never affect a plant's care state
+        /// </summary>
+        Task RenamePlantAsync(int plantId, string newName);
     }
 }

@@ -104,27 +104,38 @@
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid>
+                        <Grid Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
+                            
+                            <!-- Context menu for the right click on a plant entry -->
+                            <Grid.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Rename..."
+                                              Command="{Binding PlacementTarget.Tag.RenamePlantCommand,
+                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                              CommandParameter="{Binding}" />
+                                </ContextMenu>
+                            </Grid.ContextMenu>
 
                             <Image Grid.Column="0"
                                    Source="{Binding Converter={StaticResource PlantStatusDotConverter}}"
-                                   Width="24"
-                                   Height="24"
+                                   Width="20"
+                                   Height="20"
                                    Stretch="Uniform"
                                    VerticalAlignment="Center"
+                                   Margin="0, 0, 4, 0"
                                    RenderOptions.BitmapScalingMode="HighQuality" />
 
                             <TextBlock Grid.Column="1"
-                                       Text="{Binding Name}"
-                                       Foreground="#F0F0EE"
-                                       FontSize="24"
-                                       FontWeight="Medium"
-                                       VerticalAlignment="Center"
-                                       TextWrapping="Wrap" />
+                       Text="{Binding Name}"
+                       Foreground="#F0F0EE"
+                       FontSize="24"
+                       FontWeight="Medium"
+                       VerticalAlignment="Center"
+                       TextWrapping="Wrap" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
