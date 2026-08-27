@@ -29,12 +29,12 @@ namespace GreenKeeper.Views.RenamePlant
             _renamePlantViewModel.RequestClose += ViewModel_RequestClose;
             this.DataContext = _renamePlantViewModel;
 
-            // Puts the cursor straight into the input field and selects the existing name,
+            // Puts the cursor straight into the input field,
             // so the user can just start typing to replace it
             Loaded += (_, _) =>
             {
                 NameTextBox.Focus();
-                NameTextBox.SelectAll();
+                NameTextBox.CaretIndex = NameTextBox.Text.Length;
             };
         }
 

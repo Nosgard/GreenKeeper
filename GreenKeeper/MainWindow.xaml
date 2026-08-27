@@ -97,6 +97,7 @@
                       Background="Transparent"
                       BorderThickness="0"
                       Margin="6, 0, 6, 0"
+                      HorizontalContentAlignment="Stretch"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ItemsSource="{Binding Plants}"
                       SelectedItem="{Binding SelectedPlant, Mode=TwoWay}">
@@ -112,8 +113,9 @@
                             
                             <!-- Context menu for the right click on a plant entry -->
                             <Grid.ContextMenu>
-                                <ContextMenu>
+                                <ContextMenu Style="{StaticResource DarkContextMenu}">
                                     <MenuItem Header="Rename..."
+                                              Style="{StaticResource DarkMenuItem}"
                                               Command="{Binding PlacementTarget.Tag.RenamePlantCommand,
                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding}" />
