@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ComboBoxStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/ContextMenuStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BitmapImage x:Key="AppIcon" UriSource="/Resources/AppIcon.ico" />

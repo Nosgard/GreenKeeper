@@ -32,6 +32,7 @@ namespace GreenKeeper.Tests.Fakes
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
         public bool ShouldThrowOnAddOrReplaceSunlightRequirement { get; set; }
         public bool ShouldThrowOnUpdateNotes { get; set; }
+        public bool ShouldThrowOnRename {  get; set; }
 
         public void SeedPlants(params Plant[] plants)
         {
@@ -213,6 +214,20 @@ namespace GreenKeeper.Tests.Fakes
                 ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found");
 
             plant.Notes = notes;
+            return Task.CompletedTask;
+        }
+
+        public Task RenamePlantAsync(int plantId, string newName)
+        {
+            if (ShouldThrowOnRename)
+            {
+                throw new InvalidOperationException("Simulated database failure");
+            }
+
+            var plant = _plants.FirstOrDefault(p => p.Id == plantId)
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+
+            plant.Name = newName;
             return Task.CompletedTask;
         }
     }

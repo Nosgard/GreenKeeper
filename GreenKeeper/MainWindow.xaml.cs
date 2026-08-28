@@ -1,11 +1,17 @@
-﻿using GreenKeeper.Models;
+﻿using GreenKeeper.Database;
+using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
+using GreenKeeper.Views.CareStatuses.EditOption;
+using GreenKeeper.Views.Notes;
+using GreenKeeper.Views.RenamePlant;
 using GreenKeeper.Views.Wizards.AddPlantWizard;
 using GreenKeeper.Views.Wizards.AddScheduleWizard;
-using GreenKeeper.Views.Notes;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -15,11 +21,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using GreenKeeper.Models.Enums;
-using GreenKeeper.Views.CareStatuses.EditOption;
-using Microsoft.EntityFrameworkCore;
-using GreenKeeper.Database;
-using System.Threading.Tasks;
 
 namespace GreenKeeper
 {
@@ -54,6 +55,8 @@ namespace GreenKeeper
             _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
 
             _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
+
+            _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
             // Stops the periodic Status-Card refresh once this window (and therefore the application)
             // is closed, so the timer doesn't keep firing after the app is meant to shut down
@@ -167,6 +170,43 @@ namespace GreenKeeper
                 MessageBox.Show(
                     $"The change could not be saved:\n{ex.Message}",
                     "Saving Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// Opens the Rename-Dialog for the plant that was right-clicked in the
+        /// sidebar. If the user confirmed a new name, it's handed off to the
+        /// ViewModel to be persisted.
+        /// 
+        /// "async void" required because RenameScheduleRequested
+        /// is an Event-Handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this method
+        /// </summary>
+        private async void MainViewModel_RenamePlantRequested(object? sender, Plant plant)
+        {
+            var renameView = new RenamePlantView(plant)
+            {
+                Owner = this
+            };
+
+            bool? result = renameView.ShowDialog();
+
+            if (result != true || renameView.ConfirmedName == null)
+            {
+                return;
+            }
+
+            try
+            {
+                await _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"The plant could not be renamed:\n{ex.Message}",
+                    "Renaming Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
