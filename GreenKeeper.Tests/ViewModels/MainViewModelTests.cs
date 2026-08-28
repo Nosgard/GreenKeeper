@@ -5,6 +5,7 @@ using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
+using GreenKeeper.ViewModels.RenamePlant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1276,6 +1277,118 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: the underlying timer service was stopped
             Assert.True(timerService.StopWasCalled);
+        }
+
+        // -- Rename Plant Tests --
+
+        [Fact]
+        public async Task RenamePlantCommand_GivenPlantParameter_CanExecuteReturnsTrue()
+        {
+            // Given: an initialized MainViewModel and a plant
+            var plant = new Plant { Name = "Aloe Vera" };
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // When: CanExecute is evaluated with a plant as parameter
+            var canExecute = viewModel.RenamePlantCommand.CanExecute(viewModel.Plants[0]);
+
+            // Then: the command is executable
+            Assert.True(canExecute);
+        }
+
+        [Fact]
+        public async Task RenamePlantCommand_GivenNullParameter_CanExecuteReturnsFalse()
+        {
+            // Given: an initialized MainViewModel
+            var plantRepository = new FakePlantRepository();
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            // When: CanExecute is evaluated without a plant
+            var canExecute = viewModel.RenamePlantCommand.CanExecute(null);
+
+            // Then: there's nothing to rename, so the command is blocked
+            Assert.False(canExecute);
+        }
+
+        [Fact]
+        public async Task RenamePlantAsync_GivenRepositoryThrows_PropagatesExceptionAndKeepsOldName()
+        {
+            // Given: a plant and a repository configured to fail on rename
+            var plant = new Plant { Name = "Aloe Vera" };
+            var plantRepository = new FakePlantRepository { ShouldThrowOnRename = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+            var timerService = new FakeTimerService();
+
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+
+            var selectedPlant = viewModel.Plants[0];
+
+            // When: renaming is attempted
+            var exception = await Record.ExceptionAsync(
+                () => viewModel.RenamePlantAsync(selectedPlant, "Basil"));
+
+            // Then: the exception is propagated to the caller (MainWindow catches it
+            // and shows an error dialog), and the in-memory name stays untouched
+            Assert.IsType<InvalidOperationException>(exception);
+            Assert.Equal("Aloe Vera", selectedPlant.Name);
+        }
+
+        [Fact]
+        public void SaveCommand_GivenValidName_CanExecuteReturnsTrue()
+        {
+            // Given: a ViewModel with a non-empty name
+            var plant = new Plant { Name = "Aloe Vera" };
+            var viewModel = new RenamePlantViewModel(plant);
+
+            // When: CanExecute is evaluated
+            var canExecute = viewModel.SaveCommand.CanExecute(null);
+
+            // Then: saving is possible
+            Assert.True(canExecute);
+        }
+
+        [Fact]
+        public void SaveCommand_GivenEmptyName_CanExecuteReturnsFalse()
+        {
+            // Given: a ViewModel whose name was cleared entirely
+            var plant = new Plant { Name = "Aloe Vera" };
+            var viewModel = new RenamePlantViewModel(plant);
+            viewModel.NewName = string.Empty;
+
+            // When: CanExecute is evaluated
+            var canExecute = viewModel.SaveCommand.CanExecute(null);
+
+            // Then: saving is blocked - a plant without a name would show up as an
+            // empty entry in the sidebar
+            Assert.False(canExecute);
+        }
+
+        [Fact]
+        public void SaveCommand_GivenWhitespaceOnlyName_CanExecuteReturnsFalse()
+        {
+            // Given: a ViewModel whose name consists only of spaces
+            var plant = new Plant { Name = "Aloe Vera" };
+            var viewModel = new RenamePlantViewModel(plant);
+            viewModel.NewName = "   ";
+
+            // When: CanExecute is evaluated
+            var canExecute = viewModel.SaveCommand.CanExecute(null);
+
+            // Then: saving is blocked just like for an empty name
+            Assert.False(canExecute);
         }
     }
 }
