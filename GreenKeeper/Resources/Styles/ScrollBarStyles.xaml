@@ -1,10 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- ScrollBar -->
-    
+
     <!-- ScrollBar Thumb -->
     <Style x:Key="DarkScrollBarThumb" TargetType="Thumb">
-        <Setter Property="Background" Value="#3A3D47" />
+        <Setter Property="Background" Value="{DynamicResource ControlBorder}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Thumb">
@@ -13,17 +13,15 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#4A4D57" />
+                <Setter Property="Background" Value="{DynamicResource SeparatorBrush}" />
             </Trigger>
             <Trigger Property="IsDragging" Value="True">
-                <Setter Property="Background" Value="#5A5D67" />
+                <Setter Property="Background" Value="{DynamicResource ScrollBarThumbPressed}" />
             </Trigger>
         </Style.Triggers>
     </Style>
-
     <!-- RepeatButton (Area between Thumb and ScrollBar-End) -->
     <Style x:Key="DarkScrollBarPageButton" TargetType="RepeatButton">
         <Setter Property="Background" Value="Transparent" />
@@ -37,7 +35,6 @@
             </Setter.Value>
         </Setter>
     </Style>
-
     <!-- Implicit Style for all ScrollBars -->
     <Style TargetType="ScrollBar">
         <Setter Property="Background" Value="Transparent" />
@@ -47,7 +44,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid Background="{TemplateBinding Background}">
-                        
+
                         <!-- Track: Represents the hole scrollable track -->
                         <Track x:Name="PART_Track"
                                IsDirectionReversed="True">
