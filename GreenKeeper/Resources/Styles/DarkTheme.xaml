@@ -18,7 +18,7 @@
     <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#5A5D62" />
 
     <!-- Borders, separators, scrollbar -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#3A3D47" />
+    <SolidColorBrush x:Key="ControlBorder" Color="#3A3D47" />
     <SolidColorBrush x:Key="DividerBrush" Color="#444746" />
     <SolidColorBrush x:Key="SeparatorBrush" Color="#4A4D57" />
     <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#5A5D67" />
