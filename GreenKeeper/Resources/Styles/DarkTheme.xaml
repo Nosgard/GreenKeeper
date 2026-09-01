@@ -1,0 +1,36 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="WindowBackground" Color="#1A1C22" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#22242A" />
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#2C2C2E" />
+    <SolidColorBrush x:Key="SearchBarBackground" Color="#2C2F38" />
+
+    <!-- Buttons -->
+    <SolidColorBrush x:Key="ButtonBackground" Color="#2A2C34" />
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#32343E" />
+    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#1E2028" />
+    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#2A2C32" />
+    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#4A4A48" />
+
+    <!-- Status card buttons -->
+    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#2E3038" />
+    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#5A5D62" />
+
+    <!-- Borders, separators, scrollbar -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#3A3D47" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#444746" />
+    <SolidColorBrush x:Key="SeparatorBrush" Color="#4A4D57" />
+    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#5A5D67" />
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="PrimaryText" Color="#F0F0EE" />
+    <SolidColorBrush x:Key="SecondaryText" Color="#8A8A86" />
+    <SolidColorBrush x:Key="MutedText" Color="#6A6A66" />
+    <SolidColorBrush x:Key="SearchText" Color="#C8C8C4" />
+
+    <!-- Destructive action (Delete Plant) -->
+    <SolidColorBrush x:Key="DangerBackground" Color="#2A1A1A" />
+    <SolidColorBrush x:Key="DangerBorder" Color="#5A2A2A" />
+    <SolidColorBrush x:Key="DangerForeground" Color="#D08080" />
+</ResourceDictionary>
