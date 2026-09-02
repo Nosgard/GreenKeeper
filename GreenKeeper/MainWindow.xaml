@@ -13,14 +13,14 @@
         Width="900">
     
     <!-- Main Grid -->
-    <Grid Background="#1A1C22">
+    <Grid Background="{DynamicResource WindowBackground}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250"/>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <Grid Background="#22242A" Grid.Column="0">
+        <Grid Background="{DynamicResource SidebarBackground}" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -39,7 +39,7 @@
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
                 <TextBlock Text="GreenKeeper"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
                            FontWeight="SemiBold" />
             </StackPanel>
@@ -47,8 +47,8 @@
             <!-- Searchbar -->
             <Border Grid.Row="1"
                     Margin="10, 10, 10, 10"
-                    Background="#2C2F38"
-                    BorderBrush="#3A3D47"
+                    Background="{DynamicResource SearchBarBackground}"
+                    BorderBrush="{DynamicResource ControlBorder}"
                     BorderThickness="1"
                     CornerRadius="6">
                 <Grid>
@@ -61,15 +61,15 @@
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
-                             Foreground="#C8C8C4"
-                             CaretBrush="#C8C8C4"
+                             Foreground="{DynamicResource SearchText}"
+                             CaretBrush="{DynamicResource SearchText}"
                              FontSize="13"
                              VerticalContentAlignment="Center"
                              Padding="10, 8, 10, 8">
                     </TextBox>
                     <TextBlock Grid.Column="1"
                                Text="Search..."
-                               Foreground="#6A6A66"
+                               Foreground="{DynamicResource MutedText}"
                                FontSize="13"
                                Margin="10, 0, 0, 0"
                                VerticalAlignment="Center"
@@ -133,7 +133,7 @@
 
                             <TextBlock Grid.Column="1"
                        Text="{Binding Name}"
-                       Foreground="#F0F0EE"
+                       Foreground="{DynamicResource PrimaryText}"
                        FontSize="24"
                        FontWeight="Medium"
                        VerticalAlignment="Center"
@@ -197,13 +197,13 @@
 
             </Grid>
             
-            <Border Grid.Row="1" Height="1" Background="#444746" />
+            <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerBrush}" />
 
             <!-- Status -->
             <Grid Grid.Row="2">
                 <StackPanel Margin="16, 0, 16, 12">
                     <TextBlock Text="Status"
-                               Foreground="#F0F0EE"
+                               Foreground="{DynamicResource PrimaryText}"
                                FontSize="24"
                                FontWeight="SemiBold"
                                Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -224,8 +224,8 @@
                 
                 <!-- Debug-Section -->
                 <Border Grid.Row="2"
-                        Background="#2A1A1A"
-                        BorderBrush="#5A2A2A"
+                        Background="{DynamicResource DangerBackground}"
+                        BorderBrush="{DynamicResource DangerBorder}"
                         BorderThickness="1"
                         CornerRadius="8"
                         Padding="10"
@@ -234,18 +234,18 @@
                         Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="DEBUG: Simulate"
-                                   Foreground="#D08080"
+                                   Foreground="{DynamicResource DangerForeground}"
                                    FontSize="12"
                                    VerticalAlignment="Center"
                                    Margin="0, 0, 8, 0" />
                         
                         <TextBox Text="{Binding SimulationAmountText, UpdateSourceTrigger=PropertyChanged}"
                                  Width="40"
-                                 Background="#2C2C2E"
-                                 Foreground="#F0F0EE"
-                                 CaretBrush="#F0F0EE"
+                                 Background="{DynamicResource SurfaceBackground}"
+                                 Foreground="{DynamicResource PrimaryText}"
+                                 CaretBrush="{DynamicResource PrimaryText}"
                                  BorderThickness="1"
-                                 BorderBrush="#3A3D47"
+                                 BorderBrush="{DynamicResource ControlBorder}"
                                  Padding="4"
                                  FontSize="12"
                                  VerticalAlignment="Center" />
