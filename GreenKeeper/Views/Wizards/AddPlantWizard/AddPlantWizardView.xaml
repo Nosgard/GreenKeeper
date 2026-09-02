@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
         Title="Add Plant" Height="330" Width="450"
-        Background="#1A1C22"
+        Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
 
@@ -19,23 +19,23 @@
         <DataTemplate DataType="{x:Type steps:PlantNameStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Enter a name for the plant"
-                       Foreground="#F0F0EE"
+                       Foreground="{DynamicResource PrimaryText}"
                        FontSize="18"
                        FontWeight="SemiBold"
                        Margin="0, 0, 0, 12" />
 
                 <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}"
                          MaxLength="50"
-                         Background="#2C2C2E"
-                         Foreground="#F0F0EE"
-                         CaretBrush="#F0F0EE"
+                         Background="{DynamicResource SurfaceBackground}"
+                         Foreground="{DynamicResource PrimaryText}"
+                         CaretBrush="{DynamicResource PrimaryText}"
                          BorderThickness="1"
-                         BorderBrush="#3A3D47"
+                         BorderBrush="{DynamicResource ControlBorder}"
                          Padding="8"
                          FontSize="14" />
 
                 <TextBlock Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>
@@ -45,7 +45,7 @@
         <DataTemplate DataType="{x:Type activeSteps:WateringStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="* Enter the period for watering"
-                       Foreground="#F0F0EE"
+                       Foreground="{DynamicResource PrimaryText}"
                        FontSize="18"
                        FontWeight="SemiBold"
                        Margin="0, 0, 0, 12" />
@@ -53,11 +53,11 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                          Width="80"
-                         Background="#2C2C2E"
-                         Foreground="#F0F0EE"
-                         CaretBrush="#F0F0EE"
+                         Background="{DynamicResource SurfaceBackground}"
+                         Foreground="{DynamicResource PrimaryText}"
+                         CaretBrush="{DynamicResource PrimaryText}"
                          BorderThickness="1"
-                         BorderBrush="#3A3D47"
+                         BorderBrush="{DynamicResource ControlBorder}"
                          Padding="8"
                          FontSize="14" />
 
@@ -71,7 +71,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>
@@ -81,7 +81,7 @@
         <DataTemplate DataType="{x:Type activeSteps:FertilizingStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Enter the period for fertilizing (optional)"
-                   Foreground="#F0F0EE"
+                   Foreground="{DynamicResource PrimaryText}"
                    FontSize="18"
                    FontWeight="SemiBold"
                    Margin="0, 0, 0, 12" />
@@ -89,11 +89,11 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                      Width="80"
-                     Background="#2C2C2E"
-                     Foreground="#F0F0EE"
-                     CaretBrush="#F0F0EE"
+                     Background="{DynamicResource SurfaceBackground}"
+                     Foreground="{DynamicResource PrimaryText}"
+                     CaretBrush="{DynamicResource PrimaryText}"
                      BorderThickness="1"
-                     BorderBrush="#3A3D47"
+                     BorderBrush="{DynamicResource ControlBorder}"
                      Padding="8"
                      FontSize="14" />
 
@@ -107,7 +107,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>
@@ -117,7 +117,7 @@
         <DataTemplate DataType="{x:Type passiveSteps:SunlightStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Enter the amount of sunlight (optional)"
-                   Foreground="#F0F0EE"
+                   Foreground="{DynamicResource PrimaryText}"
                    FontSize="18"
                    FontWeight="SemiBold"
                    Margin="0, 0, 0, 12" />
@@ -125,16 +125,16 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                      Width="80"
-                     Background="#2C2C2E"
-                     Foreground="#F0F0EE"
-                     CaretBrush="#F0F0EE"
+                     Background="{DynamicResource SurfaceBackground}"
+                     Foreground="{DynamicResource PrimaryText}"
+                     CaretBrush="{DynamicResource PrimaryText}"
                      BorderThickness="1"
-                     BorderBrush="#3A3D47"
+                     BorderBrush="{DynamicResource ControlBorder}"
                      Padding="8"
                      FontSize="14" />
 
                     <TextBlock Text="Hours"
-                       Foreground="#8A8A86"
+                       Foreground="{DynamicResource SecondaryText}"
                        VerticalAlignment="Center"
                        Margin="8, 0, 0, 0" />
 
@@ -148,7 +148,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                   Foreground="#6A6A66"
+                   Foreground="{DynamicResource MutedText}"
                    FontSize="12"
                    Margin="0, 6, 0, 0" />
             </StackPanel>
@@ -158,33 +158,33 @@
         <DataTemplate DataType="{x:Type steps:SummaryStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Summary"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
 
                 <!-- Plant-Name Line -->
                 <TextBlock Text="{Binding PlantName}"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="14"
                            Margin="0, 0, 0, 6" />
 
                 <!-- Watering Line -->
                 <TextBlock Text="{Binding Watering, StringFormat='Watering: {0}'}"
-                           Foreground="#8A8A86"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontSize="14"
                            Margin="0, 0, 0, 6" />
 
                 <!-- Fertilizing Line -->
                 <TextBlock Text="{Binding Fertilizing, StringFormat='Fertilizing: {0}'}"
-                           Foreground="#8A8A86"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontSize="14"
                            Margin="0, 0, 0, 6"
                            Visibility="{Binding HasFertilizing, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!-- Sunlight Line -->
                 <TextBlock Text="{Binding Sunlight, StringFormat='Sunlight: {0}'}"
-                           Foreground="#8A8A86"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontSize="14"
                            Margin="0, 0, 0, 6"
                            Visibility="{Binding HasSunlight, Converter={StaticResource BooleanToVisibilityConverter}}" />
