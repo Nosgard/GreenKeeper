@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Context menu -->
     <Style x:Key="DarkContextMenu" TargetType="ContextMenu">
-        <Setter Property="Background" Value="#2C2F38" />
-        <Setter Property="BorderBrush" Value="#3A3D47" />
+        <Setter Property="Background" Value="{DynamicResource SearchBarBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="4" />
         <Setter Property="Template">
@@ -24,7 +24,7 @@
     
     <!-- Context menu entry -->
     <Style x:Key="DarkMenuItem" TargetType="MenuItem">
-        <Setter Property="Foreground" Value="#F0F0EE" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Padding" Value="10, 8, 20, 8" />
@@ -43,7 +43,7 @@
                             <!-- Vertical separator -->
                             <Border Grid.Column="0"
                                     Width="1"
-                                    Background="#4A4D57"
+                                    Background="{DynamicResource SeparatorBrush}"
                                     HorizontalAlignment="Right" />
                             <ContentPresenter Grid.Column="1"
                                               ContentSource="Header"
@@ -53,10 +53,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="#3A3D47" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ControlBorder}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="#6A6A66" />
+                            <Setter Property="Foreground" Value="{DynamicResource MutedText}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
