@@ -4,7 +4,7 @@
                     xmlns:passive="clr-namespace:GreenKeeper.ViewModels.CareStatuses.Passive">
 
     <DataTemplate x:Key="CareStatusCardTemplate">
-        <Border Background="#2C2C2E"
+        <Border Background="{DynamicResource SurfaceBackground}"
             CornerRadius="14"
             Padding="14"
             Margin="0, 14, 0, 0">
@@ -30,13 +30,13 @@
                 <!-- Subtitle container -->
                 <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
                     <TextBlock Text="{Binding Title}"
-                       Foreground="#F0F0EE"
+                       Foreground="{DynamicResource PrimaryText}"
                        FontSize="16"
                        FontWeight="SemiBold" />
 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="{Binding StatusText}"
-                           Foreground="#8A8A86"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontSize="14" />
                     </StackPanel>
                 </StackPanel>
