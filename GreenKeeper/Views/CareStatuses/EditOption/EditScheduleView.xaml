@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
         Title="Edit Schedule" Height="300" Width="450"
-        Background="#1A1C22"
+        Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Window.Resources>
@@ -15,7 +15,7 @@
         <DataTemplate DataType="{x:Type editSchedule:EditActiveScheduleViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="{Binding Title, StringFormat='Edit period for {0}'}"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
@@ -23,11 +23,11 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                              Width="80"
-                             Background="#2C2C2E"
-                             Foreground="#F0F0EE"
-                             CaretBrush="#F0F0EE"
+                             Background="{DynamicResource SurfaceBackground}"
+                             Foreground="{DynamicResource PrimaryText}"
+                             CaretBrush="{DynamicResource PrimaryText}"
                              BorderThickness="1"
-                             BorderBrush="#3A3D47"
+                             BorderBrush="{DynamicResource ControlBorder}"
                              Padding="8"
                              FontSize="14" />
 
@@ -41,12 +41,12 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
 
                 <TextBlock Text="{Binding PreviewText}"
-                           Foreground="#8A8A86"
+                           Foreground="{DynamicResource SecondaryText}"
                            FontSize="13"
                            Margin="0, 10, 0, 0" />
             </StackPanel>
@@ -56,7 +56,7 @@
         <DataTemplate DataType="{x:Type editSchedule:EditSunlightViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Edit sunlight requirement"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
@@ -64,16 +64,16 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                              Width="80"
-                             Background="#2C2C2E"
-                             Foreground="#F0F0EE"
-                             CaretBrush="#F0F0EE"
+                             Background="{DynamicResource SurfaceBackground}"
+                             Foreground="{DynamicResource PrimaryText}"
+                             CaretBrush="{DynamicResource PrimaryText}"
                              BorderThickness="1"
-                             BorderBrush="#3A3D47"
+                             BorderBrush="{DynamicResource ControlBorder}"
                              Padding="8"
                              FontSize="14" />
 
                     <TextBlock Text="Hours"
-                               Foreground="#8A8A86"
+                               Foreground="{DynamicResource SecondaryText}"
                                VerticalAlignment="Center"
                                Margin="8, 0, 0, 0" />
 
@@ -87,7 +87,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>
