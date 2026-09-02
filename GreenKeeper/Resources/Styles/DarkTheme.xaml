@@ -7,10 +7,10 @@
     <SolidColorBrush x:Key="SearchBarBackground" Color="#2C2F38" />
 
     <!-- Buttons -->
-    <SolidColorBrush x:Key="ButtonBackground" Color="#2A2C34" />
-    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#32343E" />
-    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#1E2028" />
-    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#2A2C32" />
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#2A2C34" />
+    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#32343E" />
+    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#1E2028" />
+    <SolidColorBrush x:Key="ButtonDisabledBorder" Color="#2A2C32" />
     <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#4A4A48" />
 
     <!-- Status card buttons -->

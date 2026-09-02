@@ -20,11 +20,11 @@
                     <ControlTemplate.Triggers>
                         <!-- Hover -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonBackground}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <!-- Pressed -->
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
                         <!-- Disabled -->
                         <Trigger Property="IsEnabled" Value="False">
