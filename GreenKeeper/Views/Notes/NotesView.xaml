@@ -11,7 +11,7 @@
         MinWidth="400"
         Height="450"
         Width="500"
-        Background="#1A1C22"
+        Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterOwner">
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -23,7 +23,7 @@
         <!-- Section for the plant name -->
         <TextBlock Grid.Row="0"
                Text="{Binding PlantName}"
-               Foreground="#F0F0EE"
+               Foreground="{DynamicResource PrimaryText}"
                FontSize="20"
                FontWeight="SemiBold"
                Margin="0, 0, 0, 12" />
@@ -31,11 +31,11 @@
         <!-- Notes of the plant -->
         <TextBox Grid.Row="1"
                Text="{Binding EditableNotes, UpdateSourceTrigger=PropertyChanged}"
-               Background="#2C2C2E"
-               Foreground="#F0F0EE"
-               CaretBrush="#F0F0EE"
+               Background="{DynamicResource SurfaceBackground}"
+               Foreground="{DynamicResource PrimaryText}"
+               CaretBrush="{DynamicResource PrimaryText}"
                BorderThickness="1"
-               BorderBrush="#3A3D47"
+               BorderBrush="{DynamicResource ControlBorder}"
                Padding="10"
                FontSize="14"
                AcceptsReturn="True"
