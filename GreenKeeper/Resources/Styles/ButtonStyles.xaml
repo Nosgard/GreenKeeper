@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Big Dark Button -->
-    <Style x:Key="BigDarkButton" TargetType="Button">
+    <!-- Big Button -->
+    <Style x:Key="BigButton" TargetType="Button">
         <!-- Default properties -->
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
@@ -46,18 +46,18 @@
         </Setter>
     </Style>
 
-    <!-- Medium Dark Button -->
-    <Style x:Key="MediumDarkButton"
+    <!-- Medium Button -->
+    <Style x:Key="MediumButton"
        TargetType="Button"
-       BasedOn="{StaticResource BigDarkButton}">
+       BasedOn="{StaticResource BigButton}">
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="MinWidth" Value="80" />
     </Style>
 
-    <!-- Small Dark Button -->
-    <Style x:Key="SmallDarkButton"
+    <!-- Small Button -->
+    <Style x:Key="SmallButton"
        TargetType="Button"
-       BasedOn="{StaticResource BigDarkButton}">
+       BasedOn="{StaticResource BigButton}">
         <Setter Property="FontSize" Value="14"/>
     </Style>
 

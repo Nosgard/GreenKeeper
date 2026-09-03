@@ -61,7 +61,7 @@
                          Padding="8"
                          FontSize="14" />
 
-                    <ComboBox Style="{StaticResource DarkComboBox}"
+                    <ComboBox Style="{StaticResource ThemedComboBox}"
                               ItemsSource="{Binding AvailableUnits}"
                               SelectedValuePath="Key"
                               SelectedValue="{Binding SelectedUnit}"
@@ -97,7 +97,7 @@
                      Padding="8"
                      FontSize="14" />
 
-                    <ComboBox Style="{StaticResource DarkComboBox}"
+                    <ComboBox Style="{StaticResource ThemedComboBox}"
                               ItemsSource="{Binding AvailableUnits}"
                               SelectedValuePath="Key"
                               SelectedValue="{Binding SelectedUnit}"
@@ -138,7 +138,7 @@
                        VerticalAlignment="Center"
                        Margin="8, 0, 0, 0" />
 
-                    <ComboBox Style="{StaticResource DarkComboBox}"
+                    <ComboBox Style="{StaticResource ThemedComboBox}"
                               ItemsSource="{Binding AvailablePeriods}"
                               SelectedValuePath="Key"
                               SelectedValue="{Binding SelectedPeriod}"
@@ -207,21 +207,21 @@
                 Margin="0, 12, 0, 0">
 
             <!-- Back -->
-            <Button Style="{StaticResource MediumDarkButton}"
+            <Button Style="{StaticResource MediumButton}"
                     Content="Back"
                     Padding="10"
                     Margin="0, 0, 10, 0"
                     Command="{Binding BackCommand}" />
 
             <!-- Next -->
-            <Button Style="{StaticResource MediumDarkButton}"
+            <Button Style="{StaticResource MediumButton}"
                     Content="{Binding CurrentStep.NextButtonLabel}"
                     Padding="10"
                     IsDefault="True"
                     Command="{Binding NextCommand}" />
 
             <!-- Cancel -->
-            <Button Style="{StaticResource MediumDarkButton}"
+            <Button Style="{StaticResource MediumButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"
                     Padding="10"

@@ -3,7 +3,7 @@
     <!--ComboBox Style -->
 
     <!-- ComboBox Item -->
-    <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
+    <Style x:Key="ThemedComboBoxItem" TargetType="ComboBoxItem">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Padding" Value="8, 6" />
@@ -31,7 +31,7 @@
     </Style>
 
     <!-- ComboBox Main Part -->
-    <Style x:Key="DarkComboBox" TargetType="ComboBox">
+    <Style x:Key="ThemedComboBox" TargetType="ComboBox">
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -39,7 +39,7 @@
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="8, 6" />
-        <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItem}" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource ThemedComboBoxItem}" />
         <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior by WPF -->
         <Setter Property="ItemTemplate">
             <Setter.Value>

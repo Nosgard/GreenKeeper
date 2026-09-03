@@ -113,9 +113,9 @@
                             
                             <!-- Context menu for the right click on a plant entry -->
                             <Grid.ContextMenu>
-                                <ContextMenu Style="{StaticResource DarkContextMenu}">
+                                <ContextMenu Style="{StaticResource ThemedContextMenu}">
                                     <MenuItem Header="Rename..."
-                                              Style="{StaticResource DarkMenuItem}"
+                                              Style="{StaticResource ThemedMenuItem}"
                                               Command="{Binding PlacementTarget.Tag.RenamePlantCommand,
                                         RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                               CommandParameter="{Binding}" />
@@ -145,7 +145,7 @@
 
             <!-- Add-Button -->
             <Button Grid.Row="3"
-                    Style="{StaticResource BigDarkButton}"
+                    Style="{StaticResource BigButton}"
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
                     Content="+  Add Plant"
@@ -180,14 +180,14 @@
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right">
-                    <Button Style="{StaticResource MediumDarkButton}"
+                    <Button Style="{StaticResource MediumButton}"
                             Padding="10"
                             Content="+  Add Schedule"
                             Command="{Binding AddScheduleCommand}">
 
                     </Button>
 
-                    <Button Style="{StaticResource MediumDarkButton}"
+                    <Button Style="{StaticResource MediumButton}"
                             Margin="10, 0, 0, 0"
                             Padding="10"
                             Content="-  Delete Plant"
@@ -214,7 +214,7 @@
                 </StackPanel>
                 
                 <!-- Notes-Button -->
-                <Button Style="{StaticResource MediumDarkButton}"
+                <Button Style="{StaticResource MediumButton}"
                         Content="View Notes"
                         Padding="10"
                         Margin="0, 0, 16, 16"
@@ -250,7 +250,7 @@
                                  FontSize="12"
                                  VerticalAlignment="Center" />
 
-                        <ComboBox Style="{StaticResource DarkComboBox}"
+                        <ComboBox Style="{StaticResource ThemedComboBox}"
                                   ItemsSource="{Binding AvailableSimulationUnits}"
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding SimulationUnit}"
