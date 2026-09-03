@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
         Title="Add Schedule" Height="300" Width="450"
-        Background="#1A1C22"
+        Background="{DynamicResource WindowBackground}"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize">
     <Window.Resources>
@@ -17,7 +17,7 @@
         <DataTemplate DataType="{x:Type base:CareTypeSelectionStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="What would you like to add?"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
@@ -36,7 +36,7 @@
         <DataTemplate DataType="{x:Type activeSteps:ScheduleActiveStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="{Binding Title, StringFormat='Enter the period for {0}'}"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
@@ -44,11 +44,11 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                              Width="80"
-                             Background="#2C2C2E"
-                             Foreground="#F0F0EE"
-                             CaretBrush="#F0F0EE"
+                             Background="{DynamicResource SurfaceBackground}"
+                             Foreground="{DynamicResource PrimaryText}"
+                             CaretBrush="{DynamicResource PrimaryText}"
                              BorderThickness="1"
-                             BorderBrush="#3A3D47"
+                             BorderBrush="{DynamicResource ControlBorder}"
                              Padding="8"
                              FontSize="14" />
 
@@ -62,7 +62,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>
@@ -72,7 +72,7 @@
         <DataTemplate DataType="{x:Type passiveSteps:ScheduleSunlightStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Text="Enter the amount of sunlight"
-                           Foreground="#F0F0EE"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="18"
                            FontWeight="SemiBold"
                            Margin="0, 0, 0, 12" />
@@ -80,16 +80,16 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBox Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                              Width="80"
-                             Background="#2C2C2E"
-                             Foreground="#F0F0EE"
-                             CaretBrush="#F0F0EE"
+                             Background="{DynamicResource SurfaceBackground}"
+                             Foreground="{DynamicResource PrimaryText}"
+                             CaretBrush="{DynamicResource PrimaryText}"
                              BorderThickness="1"
-                             BorderBrush="#3A3D47"
+                             BorderBrush="{DynamicResource ControlBorder}"
                              Padding="8"
                              FontSize="14" />
 
                     <TextBlock Text="Hours"
-                               Foreground="#8A8A86"
+                               Foreground="{DynamicResource SecondaryText}"
                                VerticalAlignment="Center"
                                Margin="8, 0, 0, 0" />
 
@@ -103,7 +103,7 @@
                 </StackPanel>
 
                 <TextBlock Text="{Binding MaxAmount, StringFormat='max. {0}'}"
-                           Foreground="#6A6A66"
+                           Foreground="{DynamicResource MutedText}"
                            FontSize="12"
                            Margin="0, 6, 0, 0" />
             </StackPanel>

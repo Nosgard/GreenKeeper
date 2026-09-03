@@ -5,7 +5,7 @@
     <!-- ComboBox Item -->
     <Style x:Key="DarkComboBoxItem" TargetType="ComboBoxItem">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="#F0F0EE" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Padding" Value="8, 6" />
         <Setter Property="Template">
             <Setter.Value>
@@ -18,11 +18,11 @@
                     <ControlTemplate.Triggers>
                         <!-- Hover for an entry in the unfolded list -->
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="itemBorder" Property="Background" Value="#2A2C34" />
+                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <!-- Currently selected entry -->
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="itemBorder" Property="Background" Value="#32343E" />
+                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -32,10 +32,10 @@
 
     <!-- ComboBox Main Part -->
     <Style x:Key="DarkComboBox" TargetType="ComboBox">
-        <Setter Property="Background" Value="#2C2C2E" />
-        <Setter Property="BorderBrush" Value="#3A3D47" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="#F0F0EE" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="8, 6" />
@@ -77,7 +77,7 @@
                                             <!-- Dropdown-Arrow -->
                                             <Path Grid.Column="1"
                                                   Data="M 0 0 L 4 4 L 8 0 Z"
-                                                  Fill="#8A8A86"
+                                                  Fill="{DynamicResource SecondaryText}"
                                                   HorizontalAlignment="Center"
                                                   VerticalAlignment="Center" />
                                         </Grid>
@@ -102,8 +102,8 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="Slide">
-                            <Border Background="#2C2C2E"
-                                    BorderBrush="#3A3D47"
+                            <Border Background="{DynamicResource SurfaceBackground}"
+                                    BorderBrush="{DynamicResource ControlBorder}"
                                     BorderThickness="1"
                                     CornerRadius="4"
                                     Margin="0, 2, 0, 0"
@@ -119,13 +119,13 @@
                     <ControlTemplate.Triggers>
                         <!-- Hover over the closed ComboBox -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="toggleButton" Property="Background" Value="#32343E" />
+                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
                         <!-- Disabled-State -->
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="toggleButton" Property="Background" Value="#1E2028" />
-                            <Setter TargetName="toggleButton" Property="BorderBrush" Value="#2A2C32" />
-                            <Setter Property="Foreground" Value="#4A4A48" />
+                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonDisabledBackground}" />
+                            <Setter TargetName="toggleButton" Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

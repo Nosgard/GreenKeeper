@@ -4,9 +4,9 @@
     <Style x:Key="BigDarkButton" TargetType="Button">
         <!-- Default properties -->
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="#3A3D47" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Foreground" Value="#8A8A86"/>
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryText}"/>
         <Setter Property="FontSize" Value="24" />
         <Setter Property="Cursor" Value="Hand" />
 
@@ -26,19 +26,19 @@
                     <ControlTemplate.Triggers>
                         <!-- Hover -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#2A2C34" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
 
                         <!-- Pressed -->
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="#32343E" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
 
                         <!-- Disabled -->
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Background" Value="#1E2028"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="#2A2C32"/>
-                            <Setter Property="Foreground" Value="#4A4A48"/>
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonDisabledBackground}"/>
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
