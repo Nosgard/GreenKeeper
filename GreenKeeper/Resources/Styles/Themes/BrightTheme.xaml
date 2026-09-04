@@ -1,36 +1,36 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Backgrounds -->
-    <SolidColorBrush x:Key="WindowBackground" Color="#F5F6F8" />
-    <SolidColorBrush x:Key="SidebarBackground" Color="#EBEDF0" />
-    <SolidColorBrush x:Key="SurfaceBackground" Color="#FFFFFF" />
-    <SolidColorBrush x:Key="SearchBarBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="WindowBackground" Color="#EDEEF1" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#E2E4E8" />
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#F7F8FA" />
+    <SolidColorBrush x:Key="SearchBarBackground" Color="#F0F1F4" />
 
     <!-- Buttons -->
-    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#E4E6EA" />
-    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#D6D9DE" />
-    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#F0F1F3" />
-    <SolidColorBrush x:Key="ButtonDisabledBorder" Color="#DFE1E5" />
-    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#B0B2B6" />
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#D8DADE" />
+    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#C9CCD1" />
+    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#E6E7EA" />
+    <SolidColorBrush x:Key="ButtonDisabledBorder" Color="#D0D2D7" />
+    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#A3A5AA" />
 
     <!-- Status card buttons -->
-    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#E2E4E8" />
-    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#AEB0B4" />
+    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#D5D7DB" />
+    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#A1A3A8" />
 
     <!-- Borders, separators, scrollbar -->
-    <SolidColorBrush x:Key="ControlBorder" Color="#D2D5DA" />
-    <SolidColorBrush x:Key="DividerBrush" Color="#DCDEE2" />
-    <SolidColorBrush x:Key="SeparatorBrush" Color="#C4C7CC" />
-    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#A8ABB0" />
+    <SolidColorBrush x:Key="ControlBorder" Color="#C2C5CB" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#CDD0D5" />
+    <SolidColorBrush x:Key="SeparatorBrush" Color="#B4B7BD" />
+    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#989BA1" />
 
     <!-- Text -->
     <SolidColorBrush x:Key="PrimaryText" Color="#1C1E22" />
     <SolidColorBrush x:Key="SecondaryText" Color="#5A5D63" />
-    <SolidColorBrush x:Key="MutedText" Color="#8A8D93" />
+    <SolidColorBrush x:Key="MutedText" Color="#82858B" />
     <SolidColorBrush x:Key="SearchText" Color="#3A3D42" />
 
     <!-- Destructive action (Delete Plant) -->
-    <SolidColorBrush x:Key="DangerBackground" Color="#FDECEC" />
-    <SolidColorBrush x:Key="DangerBorder" Color="#E8A0A0" />
-    <SolidColorBrush x:Key="DangerForeground" Color="#B03030" />
+    <SolidColorBrush x:Key="DangerBackground" Color="#F8DEDE" />
+    <SolidColorBrush x:Key="DangerBorder" Color="#DE8F8F" />
+    <SolidColorBrush x:Key="DangerForeground" Color="#A32B2B" />
 </ResourceDictionary>
