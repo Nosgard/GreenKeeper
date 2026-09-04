@@ -170,7 +170,7 @@
                 <TextBlock Grid.Column="0"
                            VerticalAlignment="Top"
                            Text="{Binding SelectedPlant.Name}"
-                           Foreground="White"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="28"
                            FontWeight="Bold"
                            TextWrapping="NoWrap"
