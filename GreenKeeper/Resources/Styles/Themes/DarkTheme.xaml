@@ -6,6 +6,10 @@
     <SolidColorBrush x:Key="SurfaceBackground" Color="#2C2C2E" />
     <SolidColorBrush x:Key="SearchBarBackground" Color="#2C2F38" />
 
+    <!-- Selection -->
+    <SolidColorBrush x:Key="SelectedBackground" Color="#3A3D47" />
+    <SolidColorBrush x:Key="SelectedBorder" Color="#5A5D67" />
+
     <!-- Buttons -->
     <SolidColorBrush x:Key="ButtonHoverBackground" Color="#2A2C34" />
     <SolidColorBrush x:Key="ButtonPressedBackground" Color="#32343E" />
