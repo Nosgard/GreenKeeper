@@ -29,20 +29,33 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16, 20, 16, 12">
+            <Grid Grid.Row="0" Margin="16, 20, 16, 12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <Image Source="/Resources/AppIcon.png"
+                <Image Grid.Column="0"
+                       Source="/Resources/AppIcon.png"
                        Width="32"
                        Height="32"
                        Stretch="Uniform"
                        VerticalAlignment="Center"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
-                <TextBlock Text="GreenKeeper"
+                <TextBlock Grid.Column="1"
+                           Text="GreenKeeper"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
-                           FontWeight="SemiBold" />
-            </StackPanel>
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           Margin="8, 0, 0, 0" />
+
+                <!-- Placeholder for the Theme-Toggle-Button -->
+                <Button Grid.Column="2"
+                        VerticalAlignment="Center" />
+            </Grid>
 
             <!-- Searchbar -->
             <Border Grid.Row="1"
