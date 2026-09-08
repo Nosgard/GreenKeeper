@@ -39,13 +39,19 @@ namespace GreenKeeper
         // into the MainViewModel via its constructor
         private readonly ITimerService _timerService = new DispatcherTimerService();
 
+        // Concrete implementation of IThemeService. Created and owned here and
+        // then injected into the MainViewModel via its constructor - the toggle
+        // button's command calls into it (through MainViewModel) to swap the
+        // active theme dictionary (BrightTheme.xaml / DarkTheme.xaml) at runtime.
+        private readonly IThemeService _themeService = new ThemeService();
+
         // Factory for short-lived DbContext-Instances - willed be passed on to the repository
         private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
 
         public MainWindow()
         {
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService);
+            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService, _themeService);
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
 
