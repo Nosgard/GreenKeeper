@@ -42,6 +42,7 @@
                        Height="32"
                        Stretch="Uniform"
                        VerticalAlignment="Center"
+                       Margin="0, 4, 0, 0"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
                 <TextBlock Grid.Column="1"
@@ -50,11 +51,27 @@
                            FontSize="24"
                            FontWeight="SemiBold"
                            VerticalAlignment="Center"
-                           Margin="8, 0, 0, 0" />
+                           Margin="4, 0, 0, 0" />
 
-                <!-- Placeholder for the Theme-Toggle-Button -->
+                <!-- Theme-Toggle-Button -->
                 <Button Grid.Column="2"
-                        VerticalAlignment="Center" />
+                        VerticalAlignment="Center"
+                        Width="32"
+                        Height="32"
+                        Padding="4"
+                        Margin="0, 6, 0, 0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Cursor="Hand"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
+                        Command="{Binding ToggleThemeCommand}">
+                    <Image Source="{Binding IsDarkTheme, Converter={StaticResource ThemeToggleIconConverter}}"
+                           Stretch="Uniform"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                </Button>
             </Grid>
 
             <!-- Searchbar -->
