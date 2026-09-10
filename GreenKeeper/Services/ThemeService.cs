@@ -18,7 +18,7 @@ namespace GreenKeeper.Services
         private const string DarkThemePath = "/Resources/Styles/Themes/DarkTheme.xaml";
         private const string BrightThemePath = "/Resources/Styles/Themes/BrightTheme.xaml";
 
-        public Theme CurrentTheme { get; private set; } = Theme.Dark;
+        public Theme CurrentTheme { get; private set; } = Theme.Bright;
 
         public void ApplyTheme(Theme theme)
         {
