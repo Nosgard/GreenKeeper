@@ -55,16 +55,12 @@
 
                 <!-- Theme-Toggle-Button -->
                 <Button Grid.Column="2"
+                        Style="{StaticResource IconButton}"
                         VerticalAlignment="Center"
                         Width="32"
                         Height="32"
                         Padding="4"
                         Margin="0, 6, 0, 0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        Cursor="Hand"
-                        VerticalContentAlignment="Center"
-                        HorizontalContentAlignment="Center"
                         Command="{Binding ToggleThemeCommand}">
                     <Image Source="{Binding IsDarkTheme, Converter={StaticResource ThemeToggleIconConverter}}"
                            Stretch="Uniform"
