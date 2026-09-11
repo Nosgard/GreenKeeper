@@ -147,6 +147,7 @@
                                     <Border x:Name="itemBorder"
                                             Background="{TemplateBinding Background}"
                                             CornerRadius="6"
+                                            BorderThickness="1"
                                             Margin="0, 2">
                                         <ContentPresenter />
                                     </Border>
