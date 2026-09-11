@@ -9,10 +9,10 @@ using System.Windows.Data;
 namespace GreenKeeper.Converters
 {
     /// <summary>
-    /// Picks the correct icon file for the theme toggle button based on
-    /// IsDarkTheme. While the dark theme is active, a light-colored sun
-    /// icon is shown (switching TO bright); while bright is active, a
-    /// dark-colored moon icon is shown (switching TO dark).
+    /// Picks the icon shape for the theme toggle button based on IsDarkTheme:
+    /// a sun while the dark theme is active (switching TO bright), a moon while
+    /// bright is active (switching TO dark). Only the shape is used - the view
+    /// takes the image as an opacity mask and tints it with PrimaryText.
     /// </summary>
     public class ThemeToggleIconConverter : IValueConverter
     {

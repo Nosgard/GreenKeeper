@@ -62,11 +62,20 @@
                         Padding="4"
                         Margin="0, 6, 0, 0"
                         Command="{Binding ToggleThemeCommand}">
-                    <Image Source="{Binding IsDarkTheme, Converter={StaticResource ThemeToggleIconConverter}}"
-                           Stretch="Uniform"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"
-                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <!-- The PNG supplies only the shape (its alpha channel), the color comes
+                         from PrimaryText - so the icon fades along on a theme change.
+                         24 = the button's 32 minus its padding. -->
+                    <Rectangle Width="24"
+                               Height="24"
+                               Fill="{DynamicResource PrimaryText}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality">
+                        <Rectangle.OpacityMask>
+                            <ImageBrush ImageSource="{Binding IsDarkTheme, Converter={StaticResource ThemeToggleIconConverter}}"
+                                        Stretch="Uniform" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
                 </Button>
             </Grid>
 

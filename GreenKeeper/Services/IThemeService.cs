@@ -15,10 +15,9 @@ namespace GreenKeeper.Services
         Theme CurrentTheme { get; }
 
         /// <summary>
-        /// Swaps the active theme dictionary in the application's merged
-        /// dictionaries. Because every style references its colors via
-        /// DynamicResource, the whole UI updates immediately - no windows
-        /// need to be recreated or reopened.
+        /// Fades the application over to the given theme. Because every style
+        /// references its colors via DynamicResource, the whole UI transitions
+        /// along with it - no windows need to be recreated or reopened.
         /// </summary>
         void ApplyTheme(Theme theme);
     }
