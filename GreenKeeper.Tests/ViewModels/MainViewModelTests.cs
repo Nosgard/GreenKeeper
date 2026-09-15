@@ -29,7 +29,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
 
             // When: InitializeAsync is called
             await viewModel.InitializeAsync();
@@ -51,7 +51,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // When: a second plant is added
@@ -71,7 +71,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
 
             // When: InitializeAsync is called
             await viewModel.InitializeAsync();
@@ -96,7 +96,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -120,7 +120,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = false };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             var selectedPlant = viewModel.Plants[0];
             viewModel.SelectedPlant = selectedPlant;
@@ -144,7 +144,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             var selectedPlant = viewModel.Plants[0];
             viewModel.SelectedPlant = selectedPlant;
@@ -171,7 +171,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // Sanity check on the initial state, before the actual "When" happens
@@ -203,7 +203,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -228,7 +228,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SearchText = "al";
             viewModel.SelectedPlant = viewModel.Plants[0];
@@ -257,7 +257,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -284,7 +284,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -312,7 +312,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -346,7 +346,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -399,7 +399,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -444,7 +444,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -481,7 +481,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -511,7 +511,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = false };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -540,7 +540,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -574,7 +574,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -608,7 +608,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = false };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -640,7 +640,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService { ConfirmResult = true };
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -669,7 +669,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // Sanity check: nothing selected
@@ -703,7 +703,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -734,7 +734,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -780,7 +780,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -824,7 +824,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -851,7 +851,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // Sanity check: nothing selected
@@ -882,7 +882,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -921,7 +921,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -954,7 +954,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -983,7 +983,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             var selectedPlant = viewModel.Plants[0];
@@ -1008,7 +1008,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             var selectedPlant = viewModel.Plants[0];
@@ -1034,7 +1034,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // When: Command is set
@@ -1058,7 +1058,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -1077,7 +1077,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             int eventRaisedCount = 0;
@@ -1101,7 +1101,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -1133,7 +1133,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -1167,7 +1167,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -1212,7 +1212,7 @@ namespace GreenKeeper.Tests.ViewModels
             var timerService = new FakeTimerService();
 
             // When: a MainViewModel is constructed with it
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
 
             // Then: Start was called with a 5-minute interval
             Assert.True(timerService.StartWasCalled);
@@ -1227,7 +1227,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             var raisedProperties = new List<string>();
@@ -1247,7 +1247,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             var raisedProperties = new List<string>();
@@ -1269,7 +1269,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // When: StopCareStatusRefreshTimer is called
@@ -1292,7 +1292,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // When: CanExecute is evaluated with a plant as parameter
@@ -1310,7 +1310,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             // When: CanExecute is evaluated without a plant
@@ -1331,7 +1331,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService());
+            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
             var selectedPlant = viewModel.Plants[0];
