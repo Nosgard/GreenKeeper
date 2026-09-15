@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Database;
+using GreenKeeper.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using System.Data;
@@ -46,9 +47,17 @@ namespace GreenKeeper
                 return;
             }
 
+            // Restore the theme the user picked last time. This has to happen before
+            // the window is created - applying it afterwards would show the window in
+            // the default theme first and only then switch. Load never throws, so a
+            // missing or damaged settings file simply starts in the default theme
+            var settingsService = new SettingsService();
+            var themeService = new ThemeService();
+            themeService.ApplyTheme(settingsService.Load().Theme);
+
             // Create the main window manually. StartupUri would show the window immediately
             // before the code above had any chance to run
-            var mainWindow = new MainWindow();
+            var mainWindow = new MainWindow(themeService, settingsService);
             mainWindow.Show();
         }
     }

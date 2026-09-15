@@ -27,6 +27,7 @@ namespace GreenKeeper.ViewModels
         private readonly IDialogService _dialogService;
         private readonly ITimerService _timerService;
         private readonly IThemeService _themeService;
+        private readonly ISettingsService _settingsService;
         private ObservableCollection<Plant> _plants;
 
         // Set all plants for the ListView
@@ -47,12 +48,13 @@ namespace GreenKeeper.ViewModels
         /// If there is no plant selected, the button remains deactivated.
         /// </summary>
         /// <param name="plantRepository"></param>
-        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService, IThemeService themeService)
+        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService, IThemeService themeService, ISettingsService settingsService)
         {
             _plantRepository = plantRepository;
             _dialogService = dialogService;
             _timerService = timerService;
             _themeService = themeService;
+            _settingsService = settingsService;
             _plants = new ObservableCollection<Plant>();
 
 
@@ -221,6 +223,13 @@ namespace GreenKeeper.ViewModels
                 : Theme.Dark;
 
             _themeService.ApplyTheme(newTheme);
+
+            // Remember the choice for the next start. Read-modify-write rather than
+            // writing a fresh object, so later settings are not dropped on the way.
+            // Neither call throws - see SettingsService.
+            var settings = _settingsService.Load();
+            settings.Theme = newTheme;
+            _settingsService.Save(settings);
 
             OnPropertyChanged(nameof(IsDarkTheme));
         }
