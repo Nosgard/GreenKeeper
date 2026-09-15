@@ -26,6 +26,8 @@ namespace GreenKeeper.ViewModels
         private readonly IPlantRepository _plantRepository;
         private readonly IDialogService _dialogService;
         private readonly ITimerService _timerService;
+        private readonly IThemeService _themeService;
+        private readonly ISettingsService _settingsService;
         private ObservableCollection<Plant> _plants;
 
         // Set all plants for the ListView
@@ -46,11 +48,13 @@ namespace GreenKeeper.ViewModels
         /// If there is no plant selected, the button remains deactivated.
         /// </summary>
         /// <param name="plantRepository"></param>
-        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService)
+        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService, IThemeService themeService, ISettingsService settingsService)
         {
             _plantRepository = plantRepository;
             _dialogService = dialogService;
             _timerService = timerService;
+            _themeService = themeService;
+            _settingsService = settingsService;
             _plants = new ObservableCollection<Plant>();
 
 
@@ -62,6 +66,10 @@ namespace GreenKeeper.ViewModels
             // Periodically refreshes the Status-Cards, so due date texts and Complete-Button's
             // enabled state (IsCompletable) stay up to date automatically
             _timerService.Start(TimeSpan.FromMinutes(5), RefreshCareStatuses);
+
+            // Theme related Command
+            ToggleThemeCommand = new RelayCommand(
+                execute: _ => ToggleTheme());
 
             // Add Plant Wizard related Command
             AddPlantCommand = new RelayCommand(
@@ -196,6 +204,35 @@ namespace GreenKeeper.ViewModels
         // Check if a plant is selected.
         // Useful for Visibility-Bindings like the Status-Title in the Dashboard
         public bool IsPlantSelected => SelectedPlant != null;
+
+        // -- Theme Section --
+
+        public ICommand ToggleThemeCommand { get; }
+
+        /// <summary>
+        /// True while the dark theme is active. The toggle button binds its icon
+        /// to this property - showing a sun (switch TO bright) while dark is
+        /// active, and a moon (switch TO dark) while bright is active.
+        /// </summary>
+        public bool IsDarkTheme => _themeService.CurrentTheme == Theme.Dark;
+
+        private void ToggleTheme()
+        {
+            var newTheme = _themeService.CurrentTheme == Theme.Dark
+                ? Theme.Bright
+                : Theme.Dark;
+
+            _themeService.ApplyTheme(newTheme);
+
+            // Remember the choice for the next start. Read-modify-write rather than
+            // writing a fresh object, so later settings are not dropped on the way.
+            // Neither call throws - see SettingsService.
+            var settings = _settingsService.Load();
+            settings.Theme = newTheme;
+            _settingsService.Save(settings);
+
+            OnPropertyChanged(nameof(IsDarkTheme));
+        }
 
         // -- Notes Section --
 

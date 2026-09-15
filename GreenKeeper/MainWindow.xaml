@@ -29,20 +29,55 @@
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="16, 20, 16, 12">
+            <Grid Grid.Row="0" Margin="16, 20, 16, 12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                <Image Source="/Resources/AppIcon.png"
+                <Image Grid.Column="0"
+                       Source="/Resources/AppIcon.png"
                        Width="32"
                        Height="32"
                        Stretch="Uniform"
                        VerticalAlignment="Center"
+                       Margin="0, 4, 0, 0"
                        RenderOptions.BitmapScalingMode="HighQuality" />
 
-                <TextBlock Text="GreenKeeper"
+                <TextBlock Grid.Column="1"
+                           Text="GreenKeeper"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
-                           FontWeight="SemiBold" />
-            </StackPanel>
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           Margin="4, 0, 0, 0" />
+
+                <!-- Theme-Toggle-Button -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource IconButton}"
+                        VerticalAlignment="Center"
+                        Width="32"
+                        Height="32"
+                        Padding="4"
+                        Margin="0, 6, 0, 0"
+                        Command="{Binding ToggleThemeCommand}">
+                    <!-- The PNG supplies only the shape (its alpha channel), the color comes
+                         from PrimaryText - so the icon fades along on a theme change.
+                         24 = the button's 32 minus its padding. -->
+                    <Rectangle Width="24"
+                               Height="24"
+                               Fill="{DynamicResource PrimaryText}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               RenderOptions.BitmapScalingMode="HighQuality">
+                        <Rectangle.OpacityMask>
+                            <ImageBrush ImageSource="{Binding IsDarkTheme, Converter={StaticResource ThemeToggleIconConverter}}"
+                                        Stretch="Uniform" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </Button>
+            </Grid>
 
             <!-- Searchbar -->
             <Border Grid.Row="1"
@@ -101,6 +136,35 @@
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ItemsSource="{Binding Plants}"
                       SelectedItem="{Binding SelectedPlant, Mode=TwoWay}">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <Border x:Name="itemBorder"
+                                            Background="{TemplateBinding Background}"
+                                            CornerRadius="6"
+                                            BorderThickness="1"
+                                            Margin="0, 2">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource SurfaceBackground}" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource SelectedBackground}" />
+                                            <Setter TargetName="itemBorder" Property="BorderBrush" Value="{DynamicResource SelectedBorder}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
 
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
@@ -170,7 +234,7 @@
                 <TextBlock Grid.Column="0"
                            VerticalAlignment="Top"
                            Text="{Binding SelectedPlant.Name}"
-                           Foreground="White"
+                           Foreground="{DynamicResource PrimaryText}"
                            FontSize="28"
                            FontWeight="Bold"
                            TextWrapping="NoWrap"

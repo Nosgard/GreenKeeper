@@ -39,13 +39,25 @@ namespace GreenKeeper
         // into the MainViewModel via its constructor
         private readonly ITimerService _timerService = new DispatcherTimerService();
 
+        // Theme and settings are created in App.OnStartup, not here: the stored
+        // theme has to be applied before this window exists, otherwise it would
+        // show one frame in the default theme. Passing the same instances on keeps
+        // ThemeService.CurrentTheme in step with what is actually on screen - a
+        // second instance would report the default and the first toggle would do
+        // nothing visible.
+        private readonly IThemeService _themeService;
+        private readonly ISettingsService _settingsService;
+
         // Factory for short-lived DbContext-Instances - willed be passed on to the repository
         private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
 
-        public MainWindow()
+        public MainWindow(IThemeService themeService, ISettingsService settingsService)
         {
+            _themeService = themeService;
+            _settingsService = settingsService;
+
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService);
+            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService, _themeService, _settingsService);
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
 

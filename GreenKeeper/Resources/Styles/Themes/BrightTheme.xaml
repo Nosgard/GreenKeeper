@@ -1,0 +1,40 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="WindowBackground" Color="#E3E4E7" />
+    <SolidColorBrush x:Key="SidebarBackground" Color="#D5D7DB" />
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#FBFCFE" />
+    <SolidColorBrush x:Key="SearchBarBackground" Color="#F2F3F6" />
+
+    <!-- Selection -->
+    <SolidColorBrush x:Key="SelectedBackground" Color="#B9BCC1" />
+    <SolidColorBrush x:Key="SelectedBorder" Color="#777A7F" />
+
+    <!-- Buttons -->
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#D0D2D6" />
+    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#BEC1C6" />
+    <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#DCDDE0" />
+    <SolidColorBrush x:Key="ButtonDisabledBorder" Color="#C4C6CB" />
+    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#898B90" />
+
+    <!-- Status card buttons -->
+    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#CACCD0" />
+    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#9EA0A5" />
+
+    <!-- Borders, separators, scrollbar -->
+    <SolidColorBrush x:Key="ControlBorder" Color="#B3B6BC" />
+    <SolidColorBrush x:Key="DividerBrush" Color="#C5C8CD" />
+    <SolidColorBrush x:Key="SeparatorBrush" Color="#AEB1B7" />
+    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#83868C" />
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="PrimaryText" Color="#1C1E22" />
+    <SolidColorBrush x:Key="SecondaryText" Color="#4B4E54" />
+    <SolidColorBrush x:Key="MutedText" Color="#606369" />
+    <SolidColorBrush x:Key="SearchText" Color="#3A3D42" />
+
+    <!-- Destructive action (Delete Plant) -->
+    <SolidColorBrush x:Key="DangerBackground" Color="#F1D7D7" />
+    <SolidColorBrush x:Key="DangerBorder" Color="#B96D6E" />
+    <SolidColorBrush x:Key="DangerForeground" Color="#A32B2B" />
+</ResourceDictionary>

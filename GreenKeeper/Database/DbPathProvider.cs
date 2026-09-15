@@ -24,13 +24,33 @@ namespace GreenKeeper.Database
         /// <returns></returns>
         public static string GetDatabasePath()
         {
+            return Path.Combine(GetAppDataFolder(), "greenkeeper.db");
+        }
+
+        /// <summary>
+        /// The settings file lives next to the database, for the same reasons.
+        /// It deliberately stays out of SQLite: these are preferences of the
+        /// installation rather than data, and they have to be readable before the
+        /// database has even been opened.
+        /// </summary>
+        public static string GetSettingsPath()
+        {
+            return Path.Combine(GetAppDataFolder(), "settings.json");
+        }
+
+        /// <summary>
+        /// Creates the folder if it is not there yet and returns it. Both paths go
+        /// through here, so the location is defined in exactly one place.
+        /// </summary>
+        private static string GetAppDataFolder()
+        {
             string folder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "GreenKeeper");
 
             Directory.CreateDirectory(folder);
 
-            return Path.Combine(folder, "greenkeeper.db");
+            return folder;
         }
     }
 }
