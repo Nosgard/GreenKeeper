@@ -33,6 +33,9 @@
     <SolidColorBrush x:Key="MutedText" Color="#606369" />
     <SolidColorBrush x:Key="SearchText" Color="#3A3D42" />
 
+    <!-- Overdue status text -->
+    <SolidColorBrush x:Key="OverdueText" Color="#84342F" />
+
     <!-- Destructive action (Delete Plant) -->
     <SolidColorBrush x:Key="DangerBackground" Color="#F1D7D7" />
     <SolidColorBrush x:Key="DangerBorder" Color="#B96D6E" />

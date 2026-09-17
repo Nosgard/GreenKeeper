@@ -40,6 +40,13 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         // All status cards implement the status text in their own way
         public abstract string StatusText { get; }
 
+        /// <summary>
+        /// Whether the status text should read as overdue. Sits on the base class
+        /// so the shared card template can bind it on every card - Sunlight has no
+        /// due date and stays false.
+        /// </summary>
+        public virtual bool IsOverdue => false;
+
         // Implementation of INotifyPropertyChanged
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged(string propertyName)

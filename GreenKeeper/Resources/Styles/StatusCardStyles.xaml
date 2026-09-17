@@ -37,9 +37,21 @@
                        FontWeight="SemiBold" />
 
                     <StackPanel Orientation="Horizontal">
+                        <!-- Foreground belongs in the style, not on the element: a
+                             local value would outrank the trigger below. -->
                         <TextBlock Text="{Binding StatusText}"
-                           Foreground="{DynamicResource SecondaryText}"
-                           FontSize="14" />
+                           FontSize="14">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource OverdueText}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                     </StackPanel>
                 </StackPanel>
                 
