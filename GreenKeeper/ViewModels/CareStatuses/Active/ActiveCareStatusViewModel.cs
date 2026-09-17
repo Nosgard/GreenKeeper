@@ -42,5 +42,16 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         // The whole logic for the conversion of the time units is being controlled by the TimeUnitConverter
         public override string StatusText =>
             TimeUnitConverter.ToDueDateText(_schedule?.NextDueAt);
+
+        /// <summary>
+        /// True once the due date has passed. Deliberately strict ("before today",
+        /// not "today or earlier") so the text agrees with the plant's status dot,
+        /// which only turns red once a date is actually missed - a card reading
+        /// "Today" in red would contradict the green-to-yellow-to-red ladder.
+        ///
+        /// Compares calendar dates for the same reason IsCompletable does.
+        /// </summary>
+        public override bool IsOverdue =>
+            _schedule?.NextDueAt != null && _schedule.NextDueAt.Value.Date < DateTime.Now.Date;
     }
 }
