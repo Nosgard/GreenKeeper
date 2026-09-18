@@ -40,8 +40,35 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         public ICommand? CompleteCommand { get; protected set; }
 
         // The whole logic for the conversion of the time units is being controlled by the TimeUnitConverter
-        public override string StatusText =>
-            TimeUnitConverter.ToDueDateText(_schedule?.NextDueAt);
+        /// <summary>
+        /// A due date that is still ahead reads as "Due in 3 days" rather than just
+        /// "3 days", so the card states what the number actually means. "Today" and
+        /// "Overdue for ..." already say that themselves and stay as they are.
+        ///
+        /// The prefix sits here and not in TimeUnitConverter on purpose: the converter
+        /// also feeds the edit dialog's preview, which puts its own "New due date:"
+        /// in front of the text - prefixing there would read "New due date: Due in 4 days"
+        /// </summary>
+        public override string StatusText
+        {
+            get
+            {
+                var dueDateText = TimeUnitConverter.ToDueDateText(_schedule?.NextDueAt);
+
+                return IsUpcoming ? $"Due in {dueDateText}" : dueDateText;
+            }
+        }
+
+        /// <summary>
+        /// True while the due date has not been reached yet - the exact counterpart
+        /// of the "today or earlier" that IsCompletable covers, and deliberately
+        /// false when no due date is set at all, so an empty status text never
+        /// turns into a bare "Due in".
+        ///
+        /// Compares calendar dates for the same reason IsCompletable does.
+        /// </summary>
+        private bool IsUpcoming =>
+            _schedule?.NextDueAt != null && _schedule.NextDueAt.Value.Date > DateTime.Now.Date;
 
         /// <summary>
         /// True once the due date has passed. Deliberately strict ("before today",
