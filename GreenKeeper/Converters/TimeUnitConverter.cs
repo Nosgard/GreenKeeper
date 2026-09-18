@@ -50,13 +50,31 @@ namespace GreenKeeper.Converters
 
         public static string ToDueDateText(DateTime? nextDueAt)
         {
+            return ToDueDateText(nextDueAt, DateTime.Now);
+        }
+
+        /// <summary>
+        /// The actual calculation, with the "today" it measures against passed in
+        /// rather than read from the clock.
+        ///
+        /// Why this overload exists: every result here depends on the calendar
+        /// position of the current day - whether a month has 28, 30 or 31 days
+        /// decides which unit a given number of days belongs to. Bound to
+        /// DateTime.Now, entire classes of calendar edge cases (month ends, leap
+        /// days) are only reachable on a handful of days per year and therefore
+        /// cannot be covered by a deterministic test. It stays internal: the
+        /// public surface of the class is unchanged, only the test assembly gets
+        /// to pin the reference date.
+        /// </summary>
+        internal static string ToDueDateText(DateTime? nextDueAt, DateTime reference)
+        {
             if (nextDueAt == null)
             {
                 return string.Empty;
             }
 
             var due = nextDueAt.Value.Date;
-            var today = DateTime.Now.Date;
+            var today = reference.Date;
 
             // The due date "Today" will be determined by the Calendar-Date to prevent a drift
             if (due == today)
@@ -70,37 +88,45 @@ namespace GreenKeeper.Converters
             DateTime later = isOverdue ? today : due;
 
             int daysDiff = (later - earlier).Days;
+            int fullMonths = FullCalendarMonthsBetween(earlier, later);
 
-            int calendarMonths = CalendarMonthsBetween(earlier, later);
-
+            // Nothing is rounded: every unit reports only what has COMPLETELY
+            // elapsed, so the text never claims more time than has actually
+            // passed. "2 weeks" therefore begins on day 14 and not on day 11, and
+            // "2 months" on the second full calendar month and not halfway into it.
+            //
+            // Unit and amount come from the same full count - the branch is chosen
+            // by it and the amount IS it - so the two can no longer disagree. That
+            // also rules out "12 months" by construction: this branch is only
+            // taken below twelve, so the amount can never reach it.
             TimeUnit effectiveUnit;
+            int amount;
 
             if (daysDiff < 7)
             {
                 effectiveUnit = TimeUnit.Days;
+                amount = daysDiff;
             }
-            else if (calendarMonths == 0)
+            else if (fullMonths == 0)
             {
+                // A week is always exactly seven days, so plain integer division
+                // truncates here just as the calendar counts do below.
                 effectiveUnit = TimeUnit.Weeks;
+                amount = daysDiff / 7;
             }
-            else if (calendarMonths < 12)
+            else if (fullMonths < 12)
             {
                 effectiveUnit = TimeUnit.Months;
+                amount = fullMonths;
             }
             else
             {
                 effectiveUnit = TimeUnit.Years;
+                amount = FullCalendarYearsBetween(earlier, later);
             }
 
-            int amount = effectiveUnit switch
-            {
-                TimeUnit.Days => daysDiff,
-                TimeUnit.Weeks => Math.Max((int)Math.Round(daysDiff / 7.0, MidpointRounding.AwayFromZero), 1),
-                TimeUnit.Months => Math.Max(RoundedCalendarMonthsBetween(earlier, later), 1),
-                TimeUnit.Years => Math.Max(RoundedCalendarYearsBetween(earlier, later), 1),
-                _ => daysDiff
-            };
-
+            // Each branch is entered only once its own unit has fully elapsed, so
+            // the amount is always at least 1 and needs no further guarding.
             string unitLabel = UnitLabels[effectiveUnit] + (amount == 1 ? "" : "s");
 
             return isOverdue
@@ -110,63 +136,55 @@ namespace GreenKeeper.Converters
 
         // -- Calculation of time differences for calendar months/-years --
 
+        // How a single calendar step is taken. Passing these around keeps months
+        // and years on one shared implementation instead of two that drift apart.
+        private static readonly Func<DateTime, int, DateTime> MonthStep = (date, count) => date.AddMonths(count);
+        private static readonly Func<DateTime, int, DateTime> YearStep = (date, count) => date.AddYears(count);
+
         /// <summary>
-        /// Counts the number of FULL calendar months between two dates (floor, not rounded).
+        /// Counts the number of FULL calendar units between two dates (floor, not rounded).
         /// For example: Jan 15 to Mar 10 is 1 full month (Jan 15 to Feb 15), not 2, since
-        /// Mar 10 hasn't reached Feb 15 + 1 month yet
+        /// Mar 10 hasn't reached Feb 15 + 1 month yet.
+        ///
+        /// The count is verified by actually stepping the date forward, never by
+        /// comparing day-of-month numbers. Those numbers lie whenever a step lands
+        /// on a shorter month and gets clamped: Jan 31 + 1 month is Feb 28, so Feb
+        /// 28 IS a full month after Jan 31 - a day comparison (28 &lt; 31) would
+        /// count it as zero months and the card would read "4 weeks".
+        ///
+        /// The caller passes a cheap estimate; the loops only correct it by the
+        /// one step it can ever be off by.
         /// </summary>
-        private static int CalendarMonthsBetween(DateTime from, DateTime to)
+        private static int FullCalendarUnitsBetween(
+            DateTime earlier, DateTime later, int estimate, Func<DateTime, int, DateTime> step)
         {
-            int months = ((to.Year - from.Year) * 12) + (to.Month - from.Month);
-            if (to.Day < from.Day)
+            int units = Math.Max(estimate, 0);
+
+            while (units > 0 && step(earlier, units) > later)
             {
-                months--;
+                units--;
             }
-            return Math.Max(months, 0);
-        }
 
-        /// <summary>
-        /// Rounds the elapsed time between "due" and "now" to the NEAREST full calendar month,
-        /// respecting the actual (variable) length of each individual month.
-        /// 
-        /// Finds the lower full-month boundary (due.AddMonths(n)) and the next
-        /// one (due.AddMonths(n+1)), calculates the exact midpoint between them,
-        /// and rounds up or down depending on which side "now" falls on. This way,
-        /// for example "just before 2 months" correctly rounds to 2 months even if the specific
-        /// months involved are shorter or longer than 30 days
-        /// </summary>
-        private static int RoundedCalendarMonthsBetween(DateTime earlier, DateTime later)
-        {
-            int lowerMonths = CalendarMonthsBetween(earlier, later);
-            DateTime lowerBound = earlier.AddMonths(lowerMonths);
-            DateTime upperBound = earlier.AddMonths(lowerMonths + 1);
-            DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
-
-            return later >= midpoint ? lowerMonths + 1 : lowerMonths;
-        }
-
-        // Counts full calendar years between two dates (floor) analogous to
-        // CalendarMonthsBetween, just for years
-        private static int CalendarYearsBetween(DateTime from, DateTime to)
-        {
-            int years = to.Year - from.Year;
-            if (to.Month < from.Month || (to.Month == from.Month && to.Day < from.Day))
+            while (step(earlier, units + 1) <= later)
             {
-                years--;
+                units++;
             }
-            return Math.Max(years, 0);
+
+            return units;
         }
 
-        // Rounds to the nearest full calendar year, analogous to
-        // RoundedCalendarMonthsOverdue - accounts for leap years automatically thanks to AddYears/DateTime
-        private static int RoundedCalendarYearsBetween(DateTime earlier, DateTime later)
+        // The month-number difference is at most one step away from the real
+        // answer, which makes it a safe starting estimate.
+        private static int FullCalendarMonthsBetween(DateTime earlier, DateTime later)
         {
-            int lowerYears = CalendarYearsBetween(earlier, later);
-            DateTime lowerBound = earlier.AddYears(lowerYears);
-            DateTime upperBound = earlier.AddYears(lowerYears + 1);
-            DateTime midpoint = lowerBound.AddTicks((upperBound - lowerBound).Ticks / 2);
+            int estimate = ((later.Year - earlier.Year) * 12) + (later.Month - earlier.Month);
 
-            return later >= midpoint ? lowerYears + 1 : lowerYears;
+            return FullCalendarUnitsBetween(earlier, later, estimate, MonthStep);
+        }
+
+        private static int FullCalendarYearsBetween(DateTime earlier, DateTime later)
+        {
+            return FullCalendarUnitsBetween(earlier, later, later.Year - earlier.Year, YearStep);
         }
     }
 }
