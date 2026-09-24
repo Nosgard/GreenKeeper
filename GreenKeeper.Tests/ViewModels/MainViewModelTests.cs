@@ -16,7 +16,7 @@ namespace GreenKeeper.Tests.ViewModels
 {
     public class MainViewModelTests
     {
-        // -- Basics Section --
+        // -- Basics Tests --
 
         [Fact]
         public async Task InitializeAsync_GivenRepositoryWithOnePlant_PopulatesPlants()
@@ -38,7 +38,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", viewModel.Plants[0].Name);
         }
 
-        // -- Add-Plant Section --
+        // -- Add-Plant Tests --
 
         [Fact]
         public async Task AddPlantAsync_GivenExistingPlants_AppendsWithoutRemovingExisting()
@@ -158,7 +158,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(selectedPlant, viewModel.SelectedPlant);
         }
 
-        // -- Plant selected Section --
+        // -- Plant selected Tests --
 
         [Fact]
         public async Task SelectedPlant_GivenPlantIsSelected_UpdatesIsPlantSelectedAndRaisesPropertyChanged()
@@ -192,7 +192,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
 
-        // -- Search Section --
+        // -- Search Tests --
 
         [Fact]
         public async Task SearchText_GivenPlantIsSelected_ResetsSelectedPlantToNull()
@@ -974,7 +974,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.DoesNotContain(careStatuses, c => c is SunlightStatusViewModel);
         }
 
-        // -- Notes Section --
+        // -- Notes Tests --
 
         [Fact]
         public async Task UpdatePlantNotesAsync_GivenNewNotes_PersistsAndUpdatesPlantObject()
@@ -1353,7 +1353,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", selectedPlant.Name);
         }
 
-        // -- Theme Section --
+        // -- Theme Tests --
 
         [Fact]
         public void IsDarkTheme_GivenBrightThemeIsActive_ReturnsFalse()
