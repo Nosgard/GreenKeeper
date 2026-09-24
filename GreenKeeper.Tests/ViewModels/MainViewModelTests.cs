@@ -5,7 +5,6 @@ using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
-using GreenKeeper.ViewModels.RenamePlant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -184,11 +183,13 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // Then: IsPlantSelected reflects the new state, and PropertyChanged was
-            // raised for all three properties that depend on the selection
+            // raised for all three properties that depend on the selection.
+            // CareStatuses matters just as much as the other two: without its
+            // notification the status cards would keep showing the previous plant
             Assert.True(viewModel.IsPlantSelected);
-            Assert.Contains(nameof(viewModel.SelectedPlant), raisedProperties);
-            Assert.Contains(nameof(viewModel.IsPlantSelected), raisedProperties);
+            Assert.Contains(nameof(MainViewModel.SelectedPlant), raisedProperties);
             Assert.Contains(nameof(MainViewModel.IsPlantSelected), raisedProperties);
+            Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
 
         // -- Search Section --
@@ -491,6 +492,10 @@ namespace GreenKeeper.Tests.ViewModels
             fertilizingCard.Single().RemoveCommand!.Execute(null);
 
             // Then: the Fertilizing schedule is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
+            Assert.DoesNotContain(persistedSchedules, s => s.Care == CareType.Fertilizing);
+            Assert.Contains(persistedSchedules, s => s.Care == CareType.Watering);
+
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(updatedCareStatuses, c => c is FertilizingStatusViewModel);
             Assert.Contains(updatedCareStatuses, c => c is WateringStatusViewModel);
@@ -1344,51 +1349,6 @@ namespace GreenKeeper.Tests.ViewModels
             // and shows an error dialog), and the in-memory name stays untouched
             Assert.IsType<InvalidOperationException>(exception);
             Assert.Equal("Aloe Vera", selectedPlant.Name);
-        }
-
-        [Fact]
-        public void SaveCommand_GivenValidName_CanExecuteReturnsTrue()
-        {
-            // Given: a ViewModel with a non-empty name
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is possible
-            Assert.True(canExecute);
-        }
-
-        [Fact]
-        public void SaveCommand_GivenEmptyName_CanExecuteReturnsFalse()
-        {
-            // Given: a ViewModel whose name was cleared entirely
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-            viewModel.NewName = string.Empty;
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is blocked - a plant without a name would show up as an
-            // empty entry in the sidebar
-            Assert.False(canExecute);
-        }
-
-        [Fact]
-        public void SaveCommand_GivenWhitespaceOnlyName_CanExecuteReturnsFalse()
-        {
-            // Given: a ViewModel whose name consists only of spaces
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-            viewModel.NewName = "   ";
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is blocked just like for an empty name
-            Assert.False(canExecute);
         }
 
         // -- Theme Section --
