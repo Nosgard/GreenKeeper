@@ -491,7 +491,11 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the Remove Command is executed on the Fertilizing card
             fertilizingCard.Single().RemoveCommand!.Execute(null);
 
-            // Then: the Fertilizing schedule is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            // Then: Fertilizing is gone from the repository and from the cards, while
+            // Watering stays. The call count is what proves the repository was asked
+            // at all - the ViewModel drops the schedule from the same Plant object anyway
+            Assert.Equal(1, plantRepository.RemoveCareScheduleAsyncCallCount);
+
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
             Assert.DoesNotContain(persistedSchedules, s => s.Care == CareType.Fertilizing);
             Assert.Contains(persistedSchedules, s => s.Care == CareType.Watering);
@@ -588,7 +592,11 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the Remove Command is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: the Sunlight-Requirement is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            // Then: the Sunlight-Requirement is gone from the repository and from the
+            // cards, while Watering stays. The call count is what proves the repository
+            // was asked - the ViewModel clears it on the same Plant object anyway
+            Assert.Equal(1, plantRepository.RemoveSunlightRequirementAsyncCallCount);
+
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
             Assert.Null(persistedPlant.SunlightRequirement);
             Assert.Contains(viewModel.CareStatuses, s => s is WateringStatusViewModel);
@@ -996,9 +1004,10 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the notes are updated
             await viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes");
 
-            // Then: the Plant-Object carries the new text, which also means the
-            // awaited repository call did not throw. Not a persistence check though:
-            // FakePlantRepository holds the same instance, so reading it back proves nothing.
+            // Then: the text went through the repository and not only onto the
+            // object - the ViewModel assigns it locally as well, so the call count
+            // is what tells the two apart
+            Assert.Equal(1, plantRepository.UpdatePlantNotesAsyncCallCount);
             Assert.Equal("New notes", selectedPlant.Notes);
         }
 
