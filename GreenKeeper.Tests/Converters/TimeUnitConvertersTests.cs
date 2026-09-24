@@ -531,10 +531,13 @@ namespace GreenKeeper.Tests.Converters
         public void ToTimeSpan_GivenACalendarUnit_Throws(TimeUnit unit)
         {
             // Given: a unit whose length depends on the calendar
-            // When / Then: it cannot be expressed as a flat TimeSpan, so the
-            // conversion refuses instead of silently assuming 30 or 365 days
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => TimeUnitConverter.ToTimeSpan(1, unit));
+            Action convert = () => TimeUnitConverter.ToTimeSpan(1, unit);
+
+            // When: it is converted into a flat TimeSpan
+            var exception = Record.Exception(convert);
+
+            // Then: the conversion refuses instead of silently assuming 30 or 365 days
+            Assert.IsType<ArgumentOutOfRangeException>(exception);
         }
     }
 }
