@@ -996,7 +996,9 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the notes are updated
             await viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes");
 
-            // Then: the change was persisted via the repository and the in-memory Plant-Object was updates directly too
+            // Then: the Plant-Object carries the new text, which also means the
+            // awaited repository call did not throw. Not a persistence check though:
+            // FakePlantRepository holds the same instance, so reading it back proves nothing.
             Assert.Equal("New notes", selectedPlant.Notes);
         }
 

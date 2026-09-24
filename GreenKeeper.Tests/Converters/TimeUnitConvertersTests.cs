@@ -48,11 +48,9 @@ namespace GreenKeeper.Tests.Converters
         }
 
         /// <summary>
-        /// Regression test for historical bug: 35 days overdue used to be
-        /// displayed as "Overdue for 2 months" instead of "Overdue for 1 month",
-        /// because the rounding logic used Math.Ceiling instead of rounding
-        /// to the nearest calendar month. Ensures this specific miscalculation
-        /// never silently returns
+        /// Regression test: 35 days overdue used to be rounded up to "2 months".
+        /// Only whole calendar units count, so everything after the first full
+        /// month is dropped.
         /// </summary>
         [Fact]
         public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForOneMonth()
