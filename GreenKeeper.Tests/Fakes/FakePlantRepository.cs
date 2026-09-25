@@ -27,6 +27,9 @@ namespace GreenKeeper.Tests.Fakes
         public int CompleteCareScheduleAsyncCallCount { get; private set; }
         public int AddOrReplaceCareScheduleAsyncCallCount { get; private set; }
         public int AddOrReplaceSunlightRequirementAsyncCallCount { get; private set; }
+        public int RemoveCareScheduleAsyncCallCount { get; private set; }
+        public int RemoveSunlightRequirementAsyncCallCount { get; private set; }
+        public int UpdatePlantNotesAsyncCallCount { get; private set; }
         public bool ShouldThrowOnRemoveCareSchedule { get; set; }
         public bool ShouldThrowOnRemoveSunlightRequirement { get; set; }
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
@@ -174,6 +177,8 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task RemoveCareScheduleAsync(int careScheduleId)
         {
+            RemoveCareScheduleAsyncCallCount++;
+
             if (ShouldThrowOnRemoveCareSchedule)
             {
                 throw new InvalidOperationException("Simulated database failure");
@@ -190,6 +195,8 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
+            RemoveSunlightRequirementAsyncCallCount++;
+
             if (ShouldThrowOnRemoveSunlightRequirement)
             {
                 throw new InvalidOperationException("Simulated database failure");
@@ -205,6 +212,8 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task UpdatePlantNotesAsync(int plantId, string notes)
         {
+            UpdatePlantNotesAsyncCallCount++;
+
             if (ShouldThrowOnUpdateNotes)
             {
                 throw new InvalidOperationException("Simulated database failure");

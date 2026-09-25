@@ -48,11 +48,9 @@ namespace GreenKeeper.Tests.Converters
         }
 
         /// <summary>
-        /// Regression test for historical bug: 35 days overdue used to be
-        /// displayed as "Overdue for 2 months" instead of "Overdue for 1 month",
-        /// because the rounding logic used Math.Ceiling instead of rounding
-        /// to the nearest calendar month. Ensures this specific miscalculation
-        /// never silently returns
+        /// Regression test: 35 days overdue used to be rounded up to "2 months".
+        /// Only whole calendar units count, so everything after the first full
+        /// month is dropped.
         /// </summary>
         [Fact]
         public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForOneMonth()
@@ -367,6 +365,36 @@ namespace GreenKeeper.Tests.Converters
         }
 
         /// <summary>
+        /// Pins the day on which the text switches from one unit to the next. The
+        /// property test below only checks the amount, so without these pairs a
+        /// span of 28 days could silently start reading "28 days" instead of
+        /// "4 weeks" and still pass.
+        ///
+        /// May is used as the reference month because its 31 days let the week
+        /// branch reach its widest before a full month is complete.
+        /// </summary>
+        [Theory]
+        [InlineData(6, "6 days")]     // days ...
+        [InlineData(7, "1 week")]     // ... become weeks
+        [InlineData(30, "4 weeks")]   // weeks ...
+        [InlineData(31, "1 month")]   // ... become months once the month is full
+        [InlineData(60, "1 month")]   // one day short of the second month
+        [InlineData(61, "2 months")]
+        public void ToDueDateText_AtEachUnitBoundary_SwitchesOnlyWhenTheNextUnitIsComplete(
+            int days, string expected)
+        {
+            // Given: a due date the given number of days ahead
+            var reference = new DateTime(2025, 5, 1);
+            var nextDueAt = reference.AddDays(days);
+
+            // When: the due date text is calculated
+            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+
+            // Then: the unit changes exactly one day after the larger one is full
+            Assert.Equal(expected, result);
+        }
+
+        /// <summary>
         /// The defining property of the new rule, checked across every calendar
         /// position instead of on single pinned dates: the reported span must have
         /// elapsed completely, and the next one up must not have. Both bounds
@@ -436,6 +464,80 @@ namespace GreenKeeper.Tests.Converters
 
             // Then: the result should be an empty string, not an exception or "null"
             Assert.Equal(string.Empty, result);
+        }
+
+        // -- ToDueDate Tests --
+
+        [Theory]
+        [InlineData(3, TimeUnit.Days, "2025-05-04")]
+        [InlineData(2, TimeUnit.Weeks, "2025-05-15")]
+        [InlineData(4, TimeUnit.Months, "2025-09-01")]
+        [InlineData(1, TimeUnit.Years, "2026-05-01")]
+        public void ToDueDate_GivenAmountAndUnit_AdvancesTheStartDateAccordingly(
+            int amount, TimeUnit unit, string expected)
+        {
+            // Given: a fixed start date
+            var start = new DateTime(2025, 5, 1);
+
+            // When: the due date is calculated
+            var result = TimeUnitConverter.ToDueDate(start, amount, unit);
+
+            // Then: the start date moved by exactly that interval
+            Assert.Equal(DateTime.Parse(expected, CultureInfo.InvariantCulture), result);
+        }
+
+        /// <summary>
+        /// Months and years are calendar steps, not fixed day counts: a target month
+        /// that is too short clamps to its last day. This is what lets a schedule
+        /// set on the 31st survive February.
+        /// </summary>
+        [Theory]
+        [InlineData("2025-01-31", 1, TimeUnit.Months, "2025-02-28")]
+        [InlineData("2024-01-31", 1, TimeUnit.Months, "2024-02-29")]
+        [InlineData("2024-02-29", 1, TimeUnit.Years, "2025-02-28")]
+        public void ToDueDate_GivenATargetTheShorterMonthDoesNotHave_ClampsToItsLastDay(
+            string start, int amount, TimeUnit unit, string expected)
+        {
+            // Given: a start date on a day the target month may not have
+            var startDate = DateTime.Parse(start, CultureInfo.InvariantCulture);
+
+            // When: the due date is calculated
+            var result = TimeUnitConverter.ToDueDate(startDate, amount, unit);
+
+            // Then: it lands on the last day of the shorter month
+            Assert.Equal(DateTime.Parse(expected, CultureInfo.InvariantCulture), result);
+        }
+
+        // -- ToTimeSpan Tests --
+
+        [Theory]
+        [InlineData(1, TimeUnit.Days, 24)]
+        [InlineData(3, TimeUnit.Days, 72)]
+        [InlineData(1, TimeUnit.Weeks, 168)]
+        [InlineData(2, TimeUnit.Weeks, 336)]
+        public void ToTimeSpan_GivenDaysOrWeeks_ReturnsThatManyHours(
+            int amount, TimeUnit unit, int expectedHours)
+        {
+            // Given / When: the interval is converted into a flat TimeSpan
+            var result = TimeUnitConverter.ToTimeSpan(amount, unit);
+
+            // Then: days and weeks have a fixed length, so the hours are exact
+            Assert.Equal(TimeSpan.FromHours(expectedHours), result);
+        }
+
+        [Theory]
+        [InlineData(TimeUnit.Months)]
+        [InlineData(TimeUnit.Years)]
+        public void ToTimeSpan_GivenACalendarUnit_Throws(TimeUnit unit)
+        {
+            // Given: a unit whose length depends on the calendar
+            Action convert = () => TimeUnitConverter.ToTimeSpan(1, unit);
+
+            // When: it is converted into a flat TimeSpan
+            var exception = Record.Exception(convert);
+
+            // Then: the conversion refuses instead of silently assuming 30 or 365 days
+            Assert.IsType<ArgumentOutOfRangeException>(exception);
         }
     }
 }

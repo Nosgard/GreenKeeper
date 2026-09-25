@@ -203,5 +203,94 @@ namespace GreenKeeper.Tests.ViewModels
             // Then: the passive card keeps its own wording
             Assert.Equal("6h / day", result);
         }
+
+        // -- Complete button and overdue colouring --
+
+        /// <summary>
+        /// IsCompletable is bound to the Complete button. A card due today has to be
+        /// completable: the status text already reads "Today", so a disabled button
+        /// would contradict it.
+        /// </summary>
+        [Theory]
+        [InlineData(-1, true)]  // overdue
+        [InlineData(0, true)]   // due today
+        [InlineData(1, false)]  // still ahead
+        public void IsCompletable_IsTrueFromTheDueDayOnwards(int dayOffset, bool expected)
+        {
+            // Given: a watering card with a due date around today
+            var card = WateringCard(DateTime.Now.AddDays(dayOffset));
+
+            // When: the enabled state of the Complete button is read
+            var result = card.IsCompletable;
+
+            // Then: it follows the calendar day
+            Assert.Equal(expected, result);
+        }
+
+        /// <summary>
+        /// IsOverdue drives the red status text. A card due today is not overdue yet -
+        /// red would contradict the green-yellow-red ladder of the plant's status dot,
+        /// which only turns red once a day was actually missed.
+        /// </summary>
+        [Theory]
+        [InlineData(-1, true)]  // overdue
+        [InlineData(0, false)]  // due today is not late yet
+        [InlineData(1, false)]  // still ahead
+        public void IsOverdue_IsTrueOnlyAfterTheDueDayHasPassed(int dayOffset, bool expected)
+        {
+            // Given: a watering card with a due date around today
+            var card = WateringCard(DateTime.Now.AddDays(dayOffset));
+
+            // When: the overdue state is read
+            var result = card.IsOverdue;
+
+            // Then: only a day that was actually missed counts as overdue
+            Assert.Equal(expected, result);
+        }
+
+        [Fact]
+        public void IsCompletableAndIsOverdue_GivenDueDateLaterOnTheCurrentDay_TreatItAsToday()
+        {
+            // Given: a watering card due just before midnight of the current day
+            var card = WateringCard(DateTime.Today.AddHours(23).AddMinutes(59));
+
+            // When: both states are read
+            var isCompletable = card.IsCompletable;
+            var isOverdue = card.IsOverdue;
+
+            // Then: both judge by the calendar day and not by the clock, so the card
+            // can already be completed and is not painted red
+            Assert.True(isCompletable);
+            Assert.False(isOverdue);
+        }
+
+        [Fact]
+        public void IsCompletableAndIsOverdue_GivenNoDueDate_AreBothFalse()
+        {
+            // Given: a watering card without a due date
+            var card = WateringCard(null);
+
+            // When: both states are read
+            var isCompletable = card.IsCompletable;
+            var isOverdue = card.IsOverdue;
+
+            // Then: there is nothing to complete and nothing to miss
+            Assert.False(isCompletable);
+            Assert.False(isOverdue);
+        }
+
+        [Fact]
+        public void IsOverdue_GivenSunlightCard_IsAlwaysFalse()
+        {
+            // Given: a sunlight card, which has no due date to miss
+            var requirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => { });
+
+            // When: the overdue state is read
+            var result = card.IsOverdue;
+
+            // Then: the passive card is never painted as overdue
+            Assert.False(result);
+        }
     }
 }

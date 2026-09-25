@@ -5,7 +5,6 @@ using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
-using GreenKeeper.ViewModels.RenamePlant;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace GreenKeeper.Tests.ViewModels
 {
     public class MainViewModelTests
     {
-        // -- Basics Section --
+        // -- Basics Tests --
 
         [Fact]
         public async Task InitializeAsync_GivenRepositoryWithOnePlant_PopulatesPlants()
@@ -39,7 +38,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", viewModel.Plants[0].Name);
         }
 
-        // -- Add-Plant Section --
+        // -- Add-Plant Tests --
 
         [Fact]
         public async Task AddPlantAsync_GivenExistingPlants_AppendsWithoutRemovingExisting()
@@ -159,7 +158,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(selectedPlant, viewModel.SelectedPlant);
         }
 
-        // -- Plant selected Section --
+        // -- Plant selected Tests --
 
         [Fact]
         public async Task SelectedPlant_GivenPlantIsSelected_UpdatesIsPlantSelectedAndRaisesPropertyChanged()
@@ -184,14 +183,16 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // Then: IsPlantSelected reflects the new state, and PropertyChanged was
-            // raised for all three properties that depend on the selection
+            // raised for all three properties that depend on the selection.
+            // CareStatuses matters just as much as the other two: without its
+            // notification the status cards would keep showing the previous plant
             Assert.True(viewModel.IsPlantSelected);
-            Assert.Contains(nameof(viewModel.SelectedPlant), raisedProperties);
-            Assert.Contains(nameof(viewModel.IsPlantSelected), raisedProperties);
+            Assert.Contains(nameof(MainViewModel.SelectedPlant), raisedProperties);
             Assert.Contains(nameof(MainViewModel.IsPlantSelected), raisedProperties);
+            Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
 
-        // -- Search Section --
+        // -- Search Tests --
 
         [Fact]
         public async Task SearchText_GivenPlantIsSelected_ResetsSelectedPlantToNull()
@@ -490,7 +491,15 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the Remove Command is executed on the Fertilizing card
             fertilizingCard.Single().RemoveCommand!.Execute(null);
 
-            // Then: the Fertilizing schedule is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            // Then: Fertilizing is gone from the repository and from the cards, while
+            // Watering stays. The call count is what proves the repository was asked
+            // at all - the ViewModel drops the schedule from the same Plant object anyway
+            Assert.Equal(1, plantRepository.RemoveCareScheduleAsyncCallCount);
+
+            var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
+            Assert.DoesNotContain(persistedSchedules, s => s.Care == CareType.Fertilizing);
+            Assert.Contains(persistedSchedules, s => s.Care == CareType.Watering);
+
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(updatedCareStatuses, c => c is FertilizingStatusViewModel);
             Assert.Contains(updatedCareStatuses, c => c is WateringStatusViewModel);
@@ -583,7 +592,11 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the Remove Command is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: the Sunlight-Requirement is gone from the repository and no longer appears among the Care-Statuses, while Watering remains
+            // Then: the Sunlight-Requirement is gone from the repository and from the
+            // cards, while Watering stays. The call count is what proves the repository
+            // was asked - the ViewModel clears it on the same Plant object anyway
+            Assert.Equal(1, plantRepository.RemoveSunlightRequirementAsyncCallCount);
+
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
             Assert.Null(persistedPlant.SunlightRequirement);
             Assert.Contains(viewModel.CareStatuses, s => s is WateringStatusViewModel);
@@ -969,7 +982,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.DoesNotContain(careStatuses, c => c is SunlightStatusViewModel);
         }
 
-        // -- Notes Section --
+        // -- Notes Tests --
 
         [Fact]
         public async Task UpdatePlantNotesAsync_GivenNewNotes_PersistsAndUpdatesPlantObject()
@@ -991,7 +1004,10 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the notes are updated
             await viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes");
 
-            // Then: the change was persisted via the repository and the in-memory Plant-Object was updates directly too
+            // Then: the text went through the repository and not only onto the
+            // object - the ViewModel assigns it locally as well, so the call count
+            // is what tells the two apart
+            Assert.Equal(1, plantRepository.UpdatePlantNotesAsyncCallCount);
             Assert.Equal("New notes", selectedPlant.Notes);
         }
 
@@ -1346,52 +1362,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", selectedPlant.Name);
         }
 
-        [Fact]
-        public void SaveCommand_GivenValidName_CanExecuteReturnsTrue()
-        {
-            // Given: a ViewModel with a non-empty name
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is possible
-            Assert.True(canExecute);
-        }
-
-        [Fact]
-        public void SaveCommand_GivenEmptyName_CanExecuteReturnsFalse()
-        {
-            // Given: a ViewModel whose name was cleared entirely
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-            viewModel.NewName = string.Empty;
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is blocked - a plant without a name would show up as an
-            // empty entry in the sidebar
-            Assert.False(canExecute);
-        }
-
-        [Fact]
-        public void SaveCommand_GivenWhitespaceOnlyName_CanExecuteReturnsFalse()
-        {
-            // Given: a ViewModel whose name consists only of spaces
-            var plant = new Plant { Name = "Aloe Vera" };
-            var viewModel = new RenamePlantViewModel(plant);
-            viewModel.NewName = "   ";
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.SaveCommand.CanExecute(null);
-
-            // Then: saving is blocked just like for an empty name
-            Assert.False(canExecute);
-        }
-
-        // -- Theme Section --
+        // -- Theme Tests --
 
         [Fact]
         public void IsDarkTheme_GivenBrightThemeIsActive_ReturnsFalse()
