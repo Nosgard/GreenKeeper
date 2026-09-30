@@ -17,8 +17,8 @@ namespace GreenKeeper.Services
         /// Starts invoking the given callback repeatedly at the given interval,
         /// until Stop() is called.
         /// </summary>
-        /// <param name="interval">How often the callback should be invoked.</param>
-        /// <param name="callback">The action to invoke on every tick.</param>
+        /// <param name="interval">How often the callback should be invoked</param>
+        /// <param name="callback">The action to invoke on every tick</param>
         void Start(TimeSpan interval, Action callback);
 
         // Stops any currently running periodic invocation started via Start()
