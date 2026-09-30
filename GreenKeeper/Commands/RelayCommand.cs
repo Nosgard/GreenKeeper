@@ -35,10 +35,10 @@ namespace GreenKeeper.Commands
         }
 
         /// <summary>
-        /// Manual Firing of CanExecuteChanged in case CanExecute
-        /// can change when a state was changed (e.g. switching steps in the Wizard)
-        /// and not by a direct UI-Interaction, CommandManager.RequerySuggested would
-        /// react on anyways
+        /// Manually fires CanExecuteChanged in case CanExecute
+        /// can change when a state was changed (e.g. switching steps in the wizard)
+        /// and not by a direct UI interaction, which CommandManager.RequerySuggested would
+        /// react to anyway.
         /// </summary>
         public void RaiseCanExecuteChanged()
         {
