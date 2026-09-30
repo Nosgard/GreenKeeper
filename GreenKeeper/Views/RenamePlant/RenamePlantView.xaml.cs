@@ -30,7 +30,7 @@ namespace GreenKeeper.Views.RenamePlant
             this.DataContext = _renamePlantViewModel;
 
             // Puts the cursor straight into the input field,
-            // so the user can just start typing to replace it
+            // so the user can continue typing at the end of the current name
             Loaded += (_, _) =>
             {
                 NameTextBox.Focus();
