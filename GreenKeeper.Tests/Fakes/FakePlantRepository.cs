@@ -15,7 +15,7 @@ namespace GreenKeeper.Tests.Fakes
     /// returns the new plant") without a real SQLite database or DbContext.
     /// 
     /// Tests can pre-populate the repository via SeedPlants(...) before
-    /// creating a MainViewModel, to set up a "Given" state
+    /// creating a MainViewModel, to set up a "Given" state.
     /// </summary>
     public class FakePlantRepository : IPlantRepository
     {
