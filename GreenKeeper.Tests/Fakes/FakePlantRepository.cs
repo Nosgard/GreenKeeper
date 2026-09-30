@@ -158,7 +158,7 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
-            AddOrReplaceCareScheduleAsyncCallCount++;
+            AddOrReplaceSunlightRequirementAsyncCallCount++;
 
             if (ShouldThrowOnAddOrReplaceSunlightRequirement)
             {

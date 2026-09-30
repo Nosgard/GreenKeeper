@@ -908,7 +908,9 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the new sunlight requirement is added
             await viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement);
 
-            // Then: it was persisted with the correct values and now appears among CareStatuses, alongside the existing Watering card
+            // Then: it was persisted exactly once with the correct values and now appears among CareStatuses, alongside the existing Watering card
+            Assert.Equal(1, plantRepository.AddOrReplaceSunlightRequirementAsyncCallCount);
+
             var persistedRequirement = (await plantRepository.GetPlantsAsync()).Single().SunlightRequirement;
 
             Assert.NotNull(persistedRequirement);
