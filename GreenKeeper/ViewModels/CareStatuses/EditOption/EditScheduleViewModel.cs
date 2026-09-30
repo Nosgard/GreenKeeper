@@ -75,12 +75,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public event EventHandler<bool>? RequestClose;
 
-        // Apply the entered values directly onto the plant object
+        // Hand the entered values back as a new object instead of changing the plant object
         private void Save()
         {
             if (_careType == CareType.Sunlight)
             {
-                // Create a new sunlight requirement if none exists yet; otherwise update the existing one in place
+                // Always create a new sunlight requirement - the repository replaces the existing one
                 var step = (EditSunlightViewModel)CurrentStep;
                 EditedSunlightRequirement = new SunlightRequirement
                 {

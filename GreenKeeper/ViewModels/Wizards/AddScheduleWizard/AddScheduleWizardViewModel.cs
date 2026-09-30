@@ -150,8 +150,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         }
 
         /// <summary>
-        /// Similar to PrepareCareSchedule. The only difference is that there is no due date
-        /// to be calculated. That's why it will already be filled completely with the
+        /// Similar to PrepareCareSchedule, but without a due date that MainViewModel has
+        /// to calculate later on. That's why it will already be filled completely with the
         /// related data.
         /// </summary>
         private bool PrepareSunlightRequirement(ScheduleSunlightStepViewModel step)
