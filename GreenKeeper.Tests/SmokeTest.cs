@@ -9,7 +9,7 @@ namespace GreenKeeper.Tests
         public void ProjectSetup_CompilesAndReferencesMainProject()
         {
             // Pure access test.
-            // In case the compilation fails, the ProjectReference on GreenKeeper.csproj doesn't work
+            // In case the compilation fails, the ProjectReference to GreenKeeper.csproj doesn't work
             var result = TimeUnitConverter.ToDueDateText(null);
 
             Assert.Equal(string.Empty, result);
