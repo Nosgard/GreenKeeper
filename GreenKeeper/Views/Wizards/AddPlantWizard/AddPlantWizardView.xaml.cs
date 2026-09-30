@@ -17,7 +17,7 @@ using System.Windows.Shapes;
 namespace GreenKeeper.Views.Wizards.AddPlantWizard
 {
     /// <summary>
-    /// Interaction logic for AddPlantWizardView.xaml
+    /// Interaction logic for AddPlantWizardView.xaml.
     /// </summary>
     public partial class AddPlantWizardView : Window
     {
@@ -31,8 +31,8 @@ namespace GreenKeeper.Views.Wizards.AddPlantWizard
             this.DataContext = _addPlantWizardViewModel;
         }
 
-        // After the Wizard is finished, read the created Plant-Object from the ViewModel.
-        // The Plant-Object is null if the Wizard was canceled
+        // After the wizard is finished, read the created plant object from the ViewModel.
+        // The plant object is null if the wizard was canceled
         public Plant? CreatedPlant => _addPlantWizardViewModel.CreatedPlant;
 
         private void AddPlantWizardViewModel_RequestClose(object? sender, bool dialogResult)

@@ -18,13 +18,13 @@ using System.Windows.Shapes;
 namespace GreenKeeper.Views.CareStatuses.EditOption
 {
     /// <summary>
-    /// Interaction logic for EditScheduleView.xaml
+    /// Interaction logic for EditScheduleView.xaml.
     /// </summary>
     public partial class EditScheduleView : Window
     {
         private readonly EditScheduleViewModel _viewModel;
 
-        // The parameters determine which Care-Schedule or Sunlight-Requirement gets edited
+        // The parameters determine which care schedule or sunlight requirement gets edited
         public EditScheduleView(Plant plant, CareType careType)
         {
             InitializeComponent();
@@ -33,7 +33,7 @@ namespace GreenKeeper.Views.CareStatuses.EditOption
             this.DataContext = _viewModel;
         }
 
-        // Provide the result for either the selected Care-Schedule or the Sunlight-Requirement
+        // Provide the result for either the selected care schedule or the sunlight requirement
         public CareSchedule? EditedCareSchedule => _viewModel.EditedCareSchedule;
         public SunlightRequirement? EditedSunlightRequirement => _viewModel.EditedSunlightRequirement;
         private void ViewModel_RequestClose(object? sender, bool dialogResult)

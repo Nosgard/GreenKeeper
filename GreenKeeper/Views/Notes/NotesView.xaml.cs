@@ -19,7 +19,7 @@ using System.Windows.Shapes;
 namespace GreenKeeper.Views.Notes
 {
     /// <summary>
-    /// Interaction logic for NotesView.xaml
+    /// Interaction logic for NotesView.xaml.
     /// </summary>
     public partial class NotesView : Window
     {
@@ -40,7 +40,7 @@ namespace GreenKeeper.Views.Notes
             Closing += NotesView_Closing;
         }
 
-        // Unsubscribing before closing prevents double subscriptions of the Event-Handler
+        // Unsubscribing before closing prevents double subscriptions of the event handler
         // when opening the same window (view) multiple times
         private void NotesViewModel_RequestClose(object? sender, bool? dialogResult)
         {
@@ -55,8 +55,8 @@ namespace GreenKeeper.Views.Notes
         /// ever checking for unsaved changes.
         /// 
         /// Reuses the ViewModel's existing CancelCommand instead of duplicating the confirm/save logic here:
-        /// clicking X behaves identically to clicking the Cancel-Button, using the exact same
-        /// warning and save flow
+        /// clicking X behaves identically to clicking the Cancel button, using the exact same
+        /// warning and save flow.
         /// </summary>
         private void NotesView_Closing(object? sender, CancelEventArgs e)
         {
