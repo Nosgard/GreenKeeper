@@ -28,7 +28,7 @@ namespace GreenKeeper.Tests.Converters
         /// <summary>
         /// Regression test for a historical bug: a due date exactly one calendar day
         /// in the past used to be displayed as "Overdue for 0 days" instead of
-        /// "Overdue for 1 day". The cause was a comparing the full, time-of-day-inclusive
+        /// "Overdue for 1 day". The cause was comparing the full, time-of-day-inclusive
         /// due date directly against an already Date-truncated "today" value - since
         /// less than 24 full hours had elapsed (due to the leftover time-of-day component),
         /// the day difference was truncated to 0 instead of being calculated on a
@@ -55,7 +55,7 @@ namespace GreenKeeper.Tests.Converters
         [Fact]
         public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForOneMonth()
         {
-            // Given: a due 35 days in the past
+            // Given: a due date 35 days in the past
             var nextDueAt = DateTime.Now.AddDays(-35);
 
             // When: the due date text is calculated
