@@ -34,7 +34,7 @@ namespace GreenKeeper.Converters
         /// <summary>
         /// Calculates a concrete due date from a start date,
         /// an amount and a unit - calendar-exact for Months/Years
-        /// and exact by definition for Hours/Days/Weeks.
+        /// and exact by definition for Days/Weeks.
         /// </summary>
         public static DateTime ToDueDate(DateTime start, int amount, TimeUnit unit)
         {
