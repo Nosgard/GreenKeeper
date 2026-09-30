@@ -34,7 +34,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
         {
-            // Given a plant with existing notes, and EditableNotes changed to a new value
+            // Given: a plant with existing notes, and EditableNotes changed to a new value
             var plant = new Plant { Name = "Aloe Vera", Notes ="Old notes"};
             var dialogService = new FakeDialogService();
 

@@ -36,7 +36,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a RenamePlantViewModel is created for it
             var viewModel = new RenamePlantViewModel(plant);
 
-            // Then: the counter reflects the remaining budget of the 50 character limit
+            // Then: the counter reflects the remaining budget of the 50-character limit
             Assert.Equal(RenamePlantViewModel.MaxNameLength - 9, viewModel.CharactersRemaining);
         }
 
@@ -46,7 +46,7 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a plant
             var plant = new Plant { Name = "Aloe Vera" };
 
-            // When: a RenamePlantViewModel is created, but nothing confirmed yet
+            // When: a RenamePlantViewModel is created, but nothing is confirmed yet
             var viewModel = new RenamePlantViewModel(plant);
 
             // Then: ConfirmedName stays null until the user actually saves
@@ -133,7 +133,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: saving must be blocked
             viewModel.NewName = "   ";
 
-            // Then: show as an empty entry
+            // Then: it would show as an empty entry
             Assert.False(viewModel.SaveCommand.CanExecute(null));
         }
 

@@ -204,7 +204,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("6h / day", result);
         }
 
-        // -- Complete button and overdue colouring --
+        // -- Complete button and overdue coloring --
 
         /// <summary>
         /// IsCompletable is bound to the Complete button. A card due today has to be

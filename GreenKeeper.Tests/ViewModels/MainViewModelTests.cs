@@ -16,7 +16,7 @@ namespace GreenKeeper.Tests.ViewModels
 {
     public class MainViewModelTests
     {
-        // -- Basics Tests --
+        // -- Basic Tests --
 
         [Fact]
         public async Task InitializeAsync_GivenRepositoryWithOnePlant_PopulatesPlants()
@@ -38,7 +38,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", viewModel.Plants[0].Name);
         }
 
-        // -- Add-Plant Tests --
+        // -- Add Plant Tests --
 
         [Fact]
         public async Task AddPlantAsync_GivenExistingPlants_AppendsWithoutRemovingExisting()
@@ -158,7 +158,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(selectedPlant, viewModel.SelectedPlant);
         }
 
-        // -- Plant selected Tests --
+        // -- Plant Selection Tests --
 
         [Fact]
         public async Task SelectedPlant_GivenPlantIsSelected_UpdatesIsPlantSelectedAndRaisesPropertyChanged()
@@ -243,12 +243,12 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.NotNull(viewModel.SelectedPlant);
         }
 
-        // -- Care-Statuses Tests --
+        // -- CareStatuses Tests --
 
         [Fact]
         public async Task CareStatuses_GivenPlantWithOnlyWatering_ReturnsOnlyWateringCard()
         {
-            // Given: a plant with only a Care-Schedule for Watering, no Fertilizing, no Sunlight
+            // Given: a plant with only a care schedule for Watering, no Fertilizing, no Sunlight
             var plant = new Plant { Name = "Cactus" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
@@ -262,7 +262,7 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // When: Care-Statuses is read
+            // When: CareStatuses is read
             var careStatuses = viewModel.CareStatuses.ToList();
 
             // Then: exactly one card for Watering
@@ -289,7 +289,7 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // When: Care-Statuses is read
+            // When: CareStatuses is read
             var careStatuses = viewModel.CareStatuses.ToList();
 
             // Then: all three cards are present, in the expected order
@@ -317,21 +317,21 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // When: Care-Statuses is read
+            // When: CareStatuses is read
             var careStatuses = viewModel.CareStatuses.ToList();
 
-            // Then: exactly Watering and SUnlight, no Fertilizing between them
+            // Then: exactly Watering and Sunlight, no Fertilizing between them
             Assert.Equal(2, careStatuses.Count);
             Assert.IsType<WateringStatusViewModel>(careStatuses[0]);
             Assert.IsType<SunlightStatusViewModel>(careStatuses[1]);
         }
 
-        // -- Complete-Button Tests --
+        // -- Complete Button Tests --
 
         [Fact]
         public async Task WateringCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDate()
         {
-            // Given: a plant with an overdue Watering Care-Schedule
+            // Given: a plant with an overdue Watering care schedule
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule
             {
@@ -355,7 +355,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var beforeClick = DateTime.Now;
 
-            // When: the Complete Command is executed
+            // When: CompleteCommand is executed
             wateringCard.CompleteCommand!.Execute(null);
 
             var afterClick = DateTime.Now;
@@ -408,7 +408,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var beforeClick = DateTime.Now;
 
-            // When: the Complete Command is executed on the Fertilizing card
+            // When: CompleteCommand is executed on the Fertilizing card
             fertilizingCard.CompleteCommand!.Execute(null);
 
             var afterClick = DateTime.Now;
@@ -451,7 +451,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
-            // When: the Complete Command is executed
+            // When: CompleteCommand is executed
             wateringCard.CompleteCommand!.Execute(null);
 
             // Then: the repository was never called, and the due date is untouched
@@ -465,12 +465,12 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(originalDueDate, persistedSchedule.NextDueAt);
         }
 
-        // -- Remove-Button Tests --
+        // -- Remove Button Tests --
 
         [Fact]
         public async Task FertilizingCard_RemoveCommand_GivenUserConfirms_RemovesFromRepositoryAndCareStatuses()
         {
-            // given: a plant with both Watering and Fertilizing schedules, and the user
+            // Given: a plant with both Watering and Fertilizing schedules, and the
             // dialog service configured to simulate the user choosing "Yes"
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
@@ -488,7 +488,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>();
 
-            // When: the Remove Command is executed on the Fertilizing card
+            // When: RemoveCommand is executed on the Fertilizing card
             fertilizingCard.Single().RemoveCommand!.Execute(null);
 
             // Then: Fertilizing is gone from the repository and from the cards, while
@@ -526,10 +526,10 @@ namespace GreenKeeper.Tests.ViewModels
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
-            // When: the Remove Command is executed on the Fertilizing card
+            // When: RemoveCommand is executed on the Fertilizing card
             fertilizingCard.RemoveCommand!.Execute(null);
 
-            // Then: nothing changed - the Fertilizing schedule remains in the repository and the Fertilizing card is still shown among Care-Statuses
+            // Then: nothing changed - the Fertilizing schedule remains in the repository and the Fertilizing card is still shown among CareStatuses
             var updatedCareStatuses = viewModel.CareStatuses.ToList();
             Assert.Contains(updatedCareStatuses, c => c is FertilizingStatusViewModel);
         }
@@ -555,10 +555,10 @@ namespace GreenKeeper.Tests.ViewModels
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
-            // When: the Remove Command is executed on the Fertilizing card
+            // When: RemoveCommand is executed on the Fertilizing card
             fertilizingCard.RemoveCommand!.Execute(null);
 
-            // Then: an error is shown, and the Fertilizing schedule remains fully intact - both in the repository and still shown among Care-Statuses
+            // Then: an error is shown, and the Fertilizing schedule remains fully intact - both in the repository and still shown among CareStatuses
             Assert.True(dialogService.ShowErrorWasCalled);
 
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
@@ -571,7 +571,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SunlightCard_RemoveCommand_GivenUserConfirms_RemovesFromRepositoryAndCareStatuses()
         {
-            // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
+            // Given: a plant with a Watering schedule and a sunlight requirement,
             // and the dialog service configured to simulate the user choosing "Yes"
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
@@ -589,10 +589,10 @@ namespace GreenKeeper.Tests.ViewModels
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
-            // When: the Remove Command is executed on the Sunlight card
+            // When: RemoveCommand is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: the Sunlight-Requirement is gone from the repository and from the
+            // Then: the sunlight requirement is gone from the repository and from the
             // cards, while Watering stays. The call count is what proves the repository
             // was asked - the ViewModel clears it on the same Plant object anyway
             Assert.Equal(1, plantRepository.RemoveSunlightRequirementAsyncCallCount);
@@ -609,7 +609,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SunlightCard_RemoveCommand_GivenUserDeclines_KeepsRequirementUnchanged()
         {
-            // Given: a plant woth a Watering schedule and a Sunlight-Requirement,
+            // Given: a plant with a Watering schedule and a sunlight requirement,
             // and the dialog service configured to simulate the user choosing "No"
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
@@ -627,10 +627,10 @@ namespace GreenKeeper.Tests.ViewModels
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
-            // When: the Remove Command is executed on the Sunlight card
+            // When: RemoveCommand is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: nothing changed - the Sunlight-Requirement remains in the repository and the Sunlight card is still shown among Care-Statuses
+            // Then: nothing changed - the sunlight requirement remains in the repository and the Sunlight card is still shown among CareStatuses
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
             Assert.NotNull(persistedPlant.SunlightRequirement);
 
@@ -641,7 +641,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SunlightCard_RemoveCommand_GivenRepositoryThrows_ShowsErrorAndKeepsRequirement()
         {
-            // Given: a plant with a Watering schedule and a Sunlight-Requirement,
+            // Given: a plant with a Watering schedule and a sunlight requirement,
             // the user confirming the removal, but the repository configured to fail
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
@@ -659,10 +659,10 @@ namespace GreenKeeper.Tests.ViewModels
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
-            // When: the Remove Command is executed on the Sunlight card
+            // When: RemoveCommand is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: an error is shown, and the Sunlight-Requirement remains fully intanct - both in the repository and still shown among Care-Statuses
+            // Then: an error is shown, and the sunlight requirement remains fully intact - both in the repository and still shown among CareStatuses
             Assert.True(dialogService.ShowErrorWasCalled);
 
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
@@ -672,7 +672,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Contains(updatedCareStatuses, c => c is SunlightStatusViewModel);
         }
 
-        // -- Add/Replace Care-Schedules/Sunlight-Requirement Tests --
+        // -- Add/Replace Care Schedules/Sunlight Requirement Tests --
 
         [Fact]
         public async Task AddOrReplaceCareScheduleAsync_GivenNoSelectedPlant_DoesNothing()
@@ -705,7 +705,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task AddOrReplaceCareScheduleAsync_GivenMissingIntervalData_DoesNothing()
         {
-            // Given: a plant is selected, but the new Care-Schedule has no
+            // Given: a plant is selected, but the new care schedule has no
             // IntervalAmount/IntervalUnit set
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
@@ -765,7 +765,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var afterCall = DateTime.Now;
 
-            // Then: it was persisted with a correctly calculated due date and now appears among Care-Statuses, alongside the existing Watering card
+            // Then: it was persisted with a correctly calculated due date and now appears among CareStatuses, alongside the existing Watering card
             var persistedFertilizing = (await plantRepository.GetPlantsAsync())
                 .Single()
                 .CareSchedules
@@ -812,7 +812,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var afterCall = DateTime.Now;
 
-            // Then: exactly ONE Fertilizing entry remains, with the new interval- no duplicate. Watering remains untouched and the Care-Statuses show exactly two cards
+            // Then: exactly ONE Fertilizing entry remains, with the new interval - no duplicate. Watering remains untouched and CareStatuses shows exactly two cards
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
             var persistedFertilizing = persistedSchedules.Where(s => s.Care == CareType.Fertilizing).Single();
 
@@ -827,7 +827,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceCareScheduleAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotAddLocally()
         {
             // Given: a plant with only Watering, and the repository configured to
-            // fail when adding/replacing a Care-Schedule
+            // fail when adding/replacing a care schedule
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
@@ -885,7 +885,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task AddOrReplaceSunlightRequirementAsync_GivenNoExistingRequirement_PersistsAndAddsToCareStatuses()
         {
-            // Given: a plant with only a Watering schedule, no Sunlight-Requirement yet
+            // Given: a plant with only a Watering schedule, no sunlight requirement yet
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
@@ -905,10 +905,10 @@ namespace GreenKeeper.Tests.ViewModels
                 Period = SunlightPeriod.Day
             };
 
-            // When: the new Sunlight-Requirement is added
+            // When: the new sunlight requirement is added
             await viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement);
 
-            // Then: it was persisted with the correct values and now appears among Care-Statuses, alongside the existing Watering card
+            // Then: it was persisted with the correct values and now appears among CareStatuses, alongside the existing Watering card
             var persistedRequirement = (await plantRepository.GetPlantsAsync()).Single().SunlightRequirement;
 
             Assert.NotNull(persistedRequirement);
@@ -923,7 +923,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task AddOrReplaceSunlightRequirementAsync_GivenExistingRequirement_ReplaceWithNewValues()
         {
-            // Given: a plant with an existing Sunlight-Requirement (6 hours per day)
+            // Given: a plant with an existing sunlight requirement (6 hours per day)
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
             plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
@@ -941,10 +941,10 @@ namespace GreenKeeper.Tests.ViewModels
             // The replacement uses different values (3 hours per week instead of 6 per day)
             var replacementRequirement = new SunlightRequirement { Hours = 3, Period = SunlightPeriod.Week };
 
-            // When: the Sunlight-Requirement is replaced
+            // When: the sunlight requirement is replaced
             await viewModel.AddOrReplaceSunlightRequirementAsync(replacementRequirement);
 
-            // Then: the persisted requirement reflects the new values and Care-Statuses still show two cards (Watering + Sunlight)
+            // Then: the persisted requirement reflects the new values and CareStatuses still shows two cards (Watering + Sunlight)
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
             Assert.NotNull(persistedPlant.SunlightRequirement);
             Assert.Equal(3, persistedPlant.SunlightRequirement!.Hours);
@@ -957,7 +957,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceSunlightRequirementAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotAddLocally()
         {
             // Given: a plant with only Watering, and the repository configured to
-            // fail when adding/replacing a Sunlight-Requirement
+            // fail when adding/replacing a sunlight requirement
             var plant = new Plant { Name = "Aloe Vera" };
             plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
 
@@ -1033,7 +1033,7 @@ namespace GreenKeeper.Tests.ViewModels
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes"));
 
-            // Then: the in-memory Plant-Object was NOT updated
+            // Then: the in-memory plant object was NOT updated
             Assert.Equal("Old notes", selectedPlant.Notes);
         }
 
@@ -1197,18 +1197,18 @@ namespace GreenKeeper.Tests.ViewModels
                 raisedArgs = args;
             };
 
-            // When: the Edit Command is executed on the Watering card
+            // When: EditCommand is executed on the Watering card
             wateringCard.EditCommand!.Execute(null);
 
             // Then: EditScheduleRequested was raised exactly once, with the
-            // selected plant and the Care-Type "Water" as the arguments
+            // selected plant and the care type "Water" as the arguments
             Assert.Equal(1, eventRaisedCount);
             Assert.Same(viewModel.SelectedPlant, raisedArgs!.Value.plant);
             Assert.Equal(CareType.Watering, raisedArgs.Value.care);
         }
 
-        // Help-Method: Maps a simple string identifier to the actual command on the ViewModel -
-        // necessary because [InlineData] can only carry constant values, not delegates or direct Command references
+        // Helper method: Maps a simple string identifier to the actual command on the ViewModel -
+        // necessary because [InlineData] can only carry constant values, not delegates or direct command references
         private static ICommand GetCommand(MainViewModel viewModel, string commandName) => commandName switch
         {
             "AddSchedule" => viewModel.AddScheduleCommand,
@@ -1252,7 +1252,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: RefreshCareStatuses is called directly
             viewModel.RefreshCareStatuses();
 
-            // Then: PropertyChanged was raised for Care-Statuses
+            // Then: PropertyChanged was raised for CareStatuses
             Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
 
@@ -1273,7 +1273,7 @@ namespace GreenKeeper.Tests.ViewModels
             timerService.TriggerTick();
 
             // Then: the callback passed to _timerService.Start(...) in the constructor is genuinely wired
-            // to RefreshCareStatuses and that the timer actually triggers it
+            // to RefreshCareStatuses, and the timer actually triggers it
             Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
         }
 
@@ -1459,7 +1459,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.ToggleThemeCommand.Execute(null);
 
             // Then: ApplyTheme ran exactly once. Applying twice would be invisible
-            // in the end state but would restart the colour transition mid-flight
+            // in the end state but would restart the color transition mid-flight
             Assert.Equal(1, themeService.ApplyThemeCallCount);
         }
 
@@ -1479,7 +1479,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed
             viewModel.ToggleThemeCommand.Execute(null);
 
-            // Then: IsDarkTheme was announced. Without this the colours would change
+            // Then: IsDarkTheme was announced. Without this the colors would change
             // but the toggle button would keep showing the icon of the old theme
             Assert.Contains(nameof(MainViewModel.IsDarkTheme), raisedProperties);
         }
