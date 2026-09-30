@@ -133,6 +133,10 @@ namespace GreenKeeper.Repositories
             // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
+            // Runs the removal and the insert below as one unit: if the insert fails, the
+            // transaction is disposed without a commit and the removal is rolled back too.
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             var existing = await context.CareSchedules
                 .FirstOrDefaultAsync(cs => cs.PlantId == plantId && cs.Care == careSchedule.Care);
 
@@ -149,6 +153,8 @@ namespace GreenKeeper.Repositories
             context.CareSchedules.Add(careSchedule);
             await context.SaveChangesAsync();
 
+            await transaction.CommitAsync();
+
             return careSchedule;
         }
 
@@ -164,6 +170,9 @@ namespace GreenKeeper.Repositories
             // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
+            // Removal and insert as one unit, same as AddOrReplaceCareScheduleAsync.
+            await using var transaction = await context.Database.BeginTransactionAsync();
+
             var existing = await context.SunlightRequirements
                 .FirstOrDefaultAsync(sr => sr.PlantId == plantId);
 
@@ -177,6 +186,8 @@ namespace GreenKeeper.Repositories
             sunlightRequirement.PlantId = plantId;
             context.SunlightRequirements.Add(sunlightRequirement);
             await context.SaveChangesAsync();
+
+            await transaction.CommitAsync();
 
             return sunlightRequirement;
         }
