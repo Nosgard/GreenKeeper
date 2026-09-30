@@ -1201,7 +1201,7 @@ namespace GreenKeeper.Tests.ViewModels
             wateringCard.EditCommand!.Execute(null);
 
             // Then: EditScheduleRequested was raised exactly once, with the
-            // selected plant and the care type "Water" as the arguments
+            // selected plant and the care type "Watering" as the arguments
             Assert.Equal(1, eventRaisedCount);
             Assert.Same(viewModel.SelectedPlant, raisedArgs!.Value.plant);
             Assert.Equal(CareType.Watering, raisedArgs.Value.care);
