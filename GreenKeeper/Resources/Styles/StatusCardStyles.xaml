@@ -18,7 +18,7 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Icon-Box -->
+                <!-- Icon box -->
                 <Border Grid.Column="0"
                 Background="{Binding IconBackground}"
                 CornerRadius="10"
@@ -66,7 +66,7 @@
     
     <!-- DataTemplates to set the right buttons for each care status -->
 
-    <!-- Button-Set: Watering -->
+    <!-- Button set: Watering -->
     <DataTemplate DataType="{x:Type active:WateringStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource StatusCardActionButton}"
@@ -82,7 +82,7 @@
         </StackPanel>
     </DataTemplate>
     
-    <!-- Button-Set: Fertilizing -->
+    <!-- Button set: Fertilizing -->
     <DataTemplate DataType="{x:Type active:FertilizingStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource StatusCardActionButton}"
@@ -103,7 +103,7 @@
         </StackPanel>
     </DataTemplate>
     
-    <!-- Button-Set: Sunlight -->
+    <!-- Button set: Sunlight -->
     <DataTemplate DataType="{x:Type passive:SunlightStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource StatusCardActionButton}"
