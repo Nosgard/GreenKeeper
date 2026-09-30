@@ -22,7 +22,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive
             { SunlightPeriod.Day, 24 },
             { SunlightPeriod.Week, 168 },
             { SunlightPeriod.Month, 744 },
-            { SunlightPeriod.Year, 87760 },
+            { SunlightPeriod.Year, 8760 },
         };
 
         private string _amountText = string.Empty;
