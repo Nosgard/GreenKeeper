@@ -15,7 +15,7 @@ namespace GreenKeeper.Converters
     /// sidebar, based on the most urgent state among its Watering and
     /// Fertilizing schedules (Sunlight is irrelevant, since it has no
     /// due date). Overdue takes priority over "due today", which in turn
-    /// takes priority over the default green state
+    /// takes priority over the default green state.
     /// </summary>
     public class PlantStatusDotConverter : IValueConverter
     {

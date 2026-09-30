@@ -6,9 +6,9 @@ namespace GreenKeeper.Converters
     {
 
         /// <summary>
-        /// Debug-only purposes
-        /// Meant for the Debugging-Tool, where a flat TimeSpan is subtracted from
-        /// existing dates rather than added onto a fixed start date
+        /// For debugging purposes only.
+        /// Meant for the debugging tool, where a flat TimeSpan is subtracted from
+        /// existing dates rather than added onto a fixed start date.
         /// </summary>
         public static TimeSpan ToTimeSpan(int amount, TimeUnit unit)
         {
@@ -34,7 +34,7 @@ namespace GreenKeeper.Converters
         /// <summary>
         /// Calculates a concrete due date from a start date,
         /// an amount and a unit - calendar-exact for Months/Years
-        /// and exact by definition for Hours/Days/Weeks
+        /// and exact by definition for Hours/Days/Weeks.
         /// </summary>
         public static DateTime ToDueDate(DateTime start, int amount, TimeUnit unit)
         {
@@ -76,7 +76,7 @@ namespace GreenKeeper.Converters
             var due = nextDueAt.Value.Date;
             var today = reference.Date;
 
-            // The due date "Today" will be determined by the Calendar-Date to prevent a drift
+            // The due date "Today" is determined by the calendar date to prevent a drift
             if (due == today)
             {
                 return "Today";
@@ -134,7 +134,7 @@ namespace GreenKeeper.Converters
                 : $"{amount} {unitLabel}";
         }
 
-        // -- Calculation of time differences for calendar months/-years --
+        // -- Calculation of time differences for calendar months and years --
 
         // How a single calendar step is taken. Passing these around keeps months
         // and years on one shared implementation instead of two that drift apart.
