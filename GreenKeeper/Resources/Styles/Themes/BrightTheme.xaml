@@ -36,7 +36,7 @@
     <!-- Overdue status text -->
     <SolidColorBrush x:Key="OverdueText" Color="#84342F" />
 
-    <!-- Destructive action (Delete Plant) -->
+    <!-- Debug panel (DEBUG builds only) -->
     <SolidColorBrush x:Key="DangerBackground" Color="#F1D7D7" />
     <SolidColorBrush x:Key="DangerBorder" Color="#B96D6E" />
     <SolidColorBrush x:Key="DangerForeground" Color="#A32B2B" />
