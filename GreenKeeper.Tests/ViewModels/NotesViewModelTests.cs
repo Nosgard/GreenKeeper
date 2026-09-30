@@ -144,17 +144,17 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
             viewModel.EditableNotes = "New notes";
 
-            bool? closeResult = null;
-            viewModel.RequestClose += (_, result) => closeResult = result;
+            var closeResults = new List<bool?>();
+            viewModel.RequestClose += (_, result) => closeResults.Add(result);
 
             // When: CancelCommand is executed
             viewModel.CancelCommand.Execute(null);
 
             // Then: the user was asked, but the change was discarded (never saved),
-            // and the window closes with false
+            // and the window closes exactly once with false
             Assert.True(dialogService.ConfirmWasCalled);
             Assert.False(saveWasCalled);
-            Assert.Equal(false, closeResult);
+            Assert.Equal(new bool?[] { false }, closeResults);
         }
 
         [Fact]

@@ -185,6 +185,7 @@ namespace GreenKeeper.ViewModels.Notes
 
                 // User chose "No"? Discard all changes and close.
                 RequestClose?.Invoke(this, false);
+                return;
             }
 
             // No changes? Simply close.
