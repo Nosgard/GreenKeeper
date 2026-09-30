@@ -272,7 +272,7 @@
                                FontWeight="SemiBold"
                                Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    <!-- Status Cards (Watering, Nutrients, Sunlight (missing)) -->
+                    <!-- Status Cards (Watering, Fertilizing, Sunlight) -->
                     <ItemsControl ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}" />
                 </StackPanel>
