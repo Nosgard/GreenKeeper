@@ -13,9 +13,9 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Orchestrator for the Edit-Dialog, analogous to the Wizard-ViewModels,
-    /// but without a step navigation - there is only ONE step, chosen
-    /// once in the constructor based on the given Care-Type
+    /// Orchestrator for the edit dialog, analogous to the wizard ViewModels,
+    /// but without step navigation - there is only ONE step, chosen
+    /// once in the constructor based on the given care type.
     /// </summary>
     public class EditScheduleViewModel : INotifyPropertyChanged
     {
@@ -28,7 +28,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         public CareSchedule? EditedCareSchedule { get; private set; }
         public SunlightRequirement? EditedSunlightRequirement { get; private set; }
 
-        // Either an active (Watering /Fertilizing) or passive (Sunlight) Care-Type
+        // Either an active (Watering / Fertilizing) or passive (Sunlight) care type
         public EditScheduleViewModel(Plant plant, CareType careType)
         {
             _plant = plant;
@@ -36,7 +36,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
             if (careType == CareType.Sunlight)
             {
-                // Pre-fill from the plant's existing Sunlight-Requirement, if any
+                // Pre-fill from the plant's existing sunlight requirement, if any
                 var requirement = plant.SunlightRequirement;
                 CurrentStep = new EditSunlightViewModel(
                     requirement?.Hours,
@@ -45,7 +45,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             else
             {
                 // Pre-fill from the matching IntervalAmount/IntervalUnit, if one
-                // already exists for this plant and Care-Type
+                // already exists for this plant and care type
                 var schedule = plant.CareSchedules.FirstOrDefault(s => s.Care == careType);
                 string title = careType == CareType.Watering ? "Watering" : "Fertilizing";
                 CurrentStep = new EditActiveScheduleViewModel(
@@ -62,7 +62,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
                 execute: _ => RequestClose?.Invoke(this, false));
         }
 
-        // Delegates validity-check to whichever concrete step type is currently active
+        // Delegates the validity check to whichever concrete step type is currently active
         private bool IsCurrentStepValid() => CurrentStep switch
         {
             EditActiveScheduleViewModel active => active.HasValidAmount,
@@ -75,12 +75,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public event EventHandler<bool>? RequestClose;
 
-        // Apply the entered values directly onto the Plant-Object
+        // Apply the entered values directly onto the plant object
         private void Save()
         {
             if (_careType == CareType.Sunlight)
             {
-                // Create a new Sunlight-Requirement if none exists yet, otherwise update the existing one in place
+                // Create a new sunlight requirement if none exists yet; otherwise update the existing one in place
                 var step = (EditSunlightViewModel)CurrentStep;
                 EditedSunlightRequirement = new SunlightRequirement
                 {

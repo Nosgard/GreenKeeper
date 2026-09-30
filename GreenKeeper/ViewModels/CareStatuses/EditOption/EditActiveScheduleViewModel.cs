@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Base of the Edit-Option for all active statuses (Watering / Fertilizing).
+    /// Base of the edit option for all active statuses (Watering / Fertilizing).
     /// </summary>
     public class EditActiveScheduleViewModel : AmountAndUnitInputViewModel
     {
@@ -18,10 +18,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public EditActiveScheduleViewModel(string title, int? initialAmount, TimeUnit initialUnit)
         {
-            // Title of the Care-Type (Watering / Fertilizing)
+            // Title of the care type (Watering / Fertilizing)
             Title = title;
 
-            // Fill the amount text with the original value, that was set in the Wizard beforehand
+            // Fill the amount text with the original value that was set in the wizard beforehand
             if (initialAmount.HasValue)
             {
                 AmountText = initialAmount.Value.ToString();
@@ -37,8 +37,8 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         /// <summary>
         /// Shows the next expected due date.
-        /// This is important so that the user knows, that the countdown is NOW running.
-        /// The calculation of the next due date takes place NOW and not at the old due date
+        /// This is important so that the user knows that the countdown is NOW running.
+        /// The calculation of the next due date takes place NOW and not at the old due date.
         /// </summary>
         public string PreviewText => HasValidAmount
             ? $"New due date: {TimeUnitConverter.ToDueDateText(TimeUnitConverter.ToDueDate(DateTime.Now, int.Parse(AmountText), SelectedUnit))}"

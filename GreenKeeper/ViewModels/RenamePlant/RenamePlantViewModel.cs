@@ -11,20 +11,20 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.RenamePlant
 {
     /// <summary>
-    /// Backs the Rename-Dialog. Like the Wizard- and Edit-ViewModels, it only
+    /// Backs the rename dialog. Like the wizard and edit ViewModels, it only
     /// prepares the new value and signals the result - the actual persistence
     /// happens in the MainViewModel via the repository, so this class knows
-    /// nothing about databases or windows
+    /// nothing about databases or windows.
     /// </summary>
     public class RenamePlantViewModel : INotifyPropertyChanged
     {
 
-        // Same limit as the Add-Plant-Wizard's name step - it would be
+        // Same limit as the Add Plant wizard's name step - it would be
         // inconsistent to allow longer names when renaming
         public const int MaxNameLength = 50;
 
-        // Holds the confirmed new name once the user clicked Save.
-        // Stays null if the dialog was cancelled
+        // Holds the confirmed new name once the user has clicked Save.
+        // Stays null if the dialog was canceled
         public string? ConfirmedName { get; private set; }
 
         public RenamePlantViewModel(Plant plant)

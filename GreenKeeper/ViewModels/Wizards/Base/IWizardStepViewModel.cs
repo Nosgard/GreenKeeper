@@ -9,10 +9,10 @@ namespace GreenKeeper.ViewModels.Wizards.Base
 {
     public interface IWizardStepViewModel : INotifyPropertyChanged
     {
-        // Controls the "Next"-Button on every page whether to be active or not
+        // Controls whether the "Next" button is active on every page
         bool CanProceed { get; }
 
-        // Controls the text of the "Next"-Button.
+        // Controls the text of the "Next" button.
         // Usually "Next", in case of optional and empty steps "Skip"
         string NextButtonLabel { get; }
     }

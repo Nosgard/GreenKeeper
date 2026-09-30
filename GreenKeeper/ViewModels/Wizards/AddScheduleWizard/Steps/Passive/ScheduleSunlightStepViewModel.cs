@@ -11,8 +11,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive
 {
     /// <summary>
     /// Passive step just like in the AddPlantWizard, but mandatory
-    /// and with an explicit "Finish" on the Next-Button, because the user
-    /// selected the status on purpose
+    /// and with an explicit "Finish" on the Next button, because the user
+    /// selected the status on purpose.
     /// </summary>
     public class ScheduleSunlightStepViewModel : IWizardStepViewModel
     {

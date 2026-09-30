@@ -22,14 +22,14 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         private readonly Plant _plant;
         private readonly IDialogService _dialogService;
 
-        // Holds the finished result, one of the two ends up set, never both.
+        // Holds the finished result: one of the two ends up set, never both.
         public CareSchedule? CreatedCareSchedule { get; private set; }
         public SunlightRequirement? CreatedSunlightRequirement { get; private set; }
 
         private readonly CareTypeSelectionStepViewModel _selectionStep = new();
 
-        // Will be instantiated, once the user made his decision on the first step.
-        // Unlike the AddPlantWizard there is no explicit order because the next step will be set dynamically
+        // Is instantiated once the user has made their decision on the first step.
+        // Unlike the AddPlantWizard, there is no explicit order, because the next step is set dynamically
         private IWizardStepViewModel? _detailStep;
 
         public AddScheduleWizardViewModel(Plant plant, IDialogService dialogService)
@@ -86,8 +86,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             }
             else
             {
-                // "Finish" is trying to apply the status, but can abort
-                // without closing the Wizard e.g. when the user enters "No" in the warning to overwrite
+                // "Finish" tries to apply the status, but can abort
+                // without closing the wizard, e.g. when the user answers "No" to the overwrite warning
                 if (TryApply())
                 {
                     RequestClose?.Invoke(this, true);
@@ -97,7 +97,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
         private void GoBack()
         {
-            // Back to the first step: The Detail-Step will be discarded.
+            // Back to the first step: The detail step will be discarded.
             // If a value was entered, it's not going to be cached as it's not necessary for only two steps
             CurrentStep = _selectionStep;
         }
@@ -107,8 +107,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             RequestClose?.Invoke(this, false);
         }
 
-        // Handle the entry in the Detail-Step.
-        // In case the user refused to overwrite the Wizard remains open, otherwise it will be closed
+        // Handle the entry in the detail step.
+        // In case the user refuses to overwrite, the wizard remains open; otherwise it will be closed
         private bool TryApply()
         {
             return _selectionStep.SelectedCareType switch
@@ -119,7 +119,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             };
         }
 
-        // Overwrite-confirmation stays local (only needs the in-memory _plant),
+        // The overwrite confirmation stays local (only needs the in-memory _plant);
         // only the actual "apply" step changed from mutation to data prep
         private bool PrepareCareSchedule(CareType careType, ScheduleActiveStepViewModel step)
         {
@@ -133,7 +133,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
                 if (!shouldReplace)
                 {
-                    // Keep the Wizard open
+                    // Keep the wizard open
                     return false;
                 }
             }
@@ -152,7 +152,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         /// <summary>
         /// Similar to PrepareCareSchedule. The only difference is that there is no due date
         /// to be calculated. That's why it will already be filled completely with the
-        /// related data
+        /// related data.
         /// </summary>
         private bool PrepareSunlightRequirement(ScheduleSunlightStepViewModel step)
         {
@@ -164,7 +164,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
                 if (!shouldReplace)
                 {
-                    // Keep the Wizard open
+                    // Keep the wizard open
                     return false;
                 }
             }

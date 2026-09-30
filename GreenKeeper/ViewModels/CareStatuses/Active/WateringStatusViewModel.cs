@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.CareStatuses.Active
 {
-    // <summary>
-    /// Set the Status-Card for Watering via the given schedule.
-    /// onEdit: Will be given by MainViewModel and encapsulates the EditscheduleView for this Care-Type.
-    /// The Watering-Status is mandatory so no RemoveCommand is needed
+    /// <summary>
+    /// Set the status card for Watering via the given schedule.
+    /// onEdit: Is provided by MainViewModel and encapsulates the EditScheduleView for this care type.
+    /// The watering status is mandatory, so no RemoveCommand is needed.
     /// 
-    /// Note: The ViewModel neither knows the Plant-Object nor any Window-Class,
-    /// it only triggers the given Action
+    /// Note: The ViewModel knows neither the plant object nor any window class;
+    /// it only triggers the given Action.
     /// </summary>
     public class WateringStatusViewModel : ActiveCareStatusViewModel
     {

@@ -16,12 +16,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.Passive
         private readonly SunlightRequirement? _sunlightRequirement;
 
         /// <summary>
-        /// Set the Status-Card for Sunlight via the related sunlight requirement (Passive Care-Status).
-        /// onEdit: Will be given by MainViewModel and encapsulates the EditscheduleView for this Care-Type
-        /// onRemove: Will be given by MainViewModel and encapsulates the Confirmation + Removement.
+        /// Set the status card for Sunlight via the related sunlight requirement (passive care status).
+        /// onEdit: Is provided by MainViewModel and encapsulates the EditScheduleView for this care type
+        /// onRemove: Is provided by MainViewModel and encapsulates the confirmation + removal.
         /// 
-        /// Note: The ViewModel neither knows the Plant-Object nor any Window-Class,
-        /// it only triggers the given Action
+        /// Note: The ViewModel knows neither the plant object nor any window class;
+        /// it only triggers the given Action.
         /// </summary>
         public SunlightStatusViewModel(SunlightRequirement sunlightRequirement, Action onEdit, Action onRemove)
             : base(CareType.Sunlight, "Sunlight", "/Resources/Icons/Sun.png", "#ffcc00")

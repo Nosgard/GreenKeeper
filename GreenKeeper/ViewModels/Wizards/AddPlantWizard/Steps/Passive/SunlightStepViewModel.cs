@@ -50,10 +50,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
         }
 
         /// <summary>
-        /// Options for the ComboBox
+        /// Options for the ComboBox.
         /// 
-        /// Key: Actual Enum-Value (will be bound)
-        /// Value: Text that the user sees
+        /// Key: Actual enum value (will be bound)
+        /// Value: Text that the user sees.
         /// </summary>
         public IReadOnlyList<KeyValuePair<SunlightPeriod, string>> AvailablePeriods { get; } =
             new List<KeyValuePair<SunlightPeriod, string>>
@@ -66,8 +66,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
 
         /// <summary>
         /// Every available unit has a maximum amount to prevent misuse.
-        /// The limits are declared in hours by the given period and
-        /// can be set from here
+        /// The limits are declared in hours per period and
+        /// can be set from here.
         /// </summary>
         private static readonly Dictionary<SunlightPeriod, int> MaxHoursByPeriod = new()
         {
@@ -81,19 +81,19 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
         /// <summary>
-        /// The amount needs to have a positive number.
+        /// The amount needs to be a positive number.
         /// Sunlight is a special case because it's passive.
-        /// You enter a positive amount of hours by period
-        /// that is underneath the maximum
+        /// You enter a positive amount of hours per period
+        /// that is below the maximum.
         /// </summary>
         public bool HasValidAmount =>
             int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 
         // Basically the same as for the active steps (watering and fertilizing).
-        // The only difference is that you enter a positive amount of hours by period (as mentioned above) or keep it empty
+        // The only difference is that you enter a positive amount of hours per period (as mentioned above) or keep it empty
         public bool CanProceed => true;
 
-        // Depending on the entered amount of hours by period show "Next" or "Skip"
+        // Depending on the entered amount of hours per period, show "Next" or "Skip"
         public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";
 
         // Implementation of INotifyPropertyChanged

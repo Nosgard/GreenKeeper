@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active
 {
     /// <summary>
-    /// Will be used for both Watering and Fertilizing, if the user
-    /// decided for one of both statuses.
+    /// Is used for both Watering and Fertilizing, if the user
+    /// chose one of these two statuses.
     /// Unlike in the AddPlantWizard, entering a value is always mandatory
-    /// because the user selected the status on purpose
+    /// because the user selected the status on purpose.
     /// </summary>
     public class ScheduleActiveStepViewModel : ActiveStepViewModel
     {

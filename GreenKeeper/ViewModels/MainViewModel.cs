@@ -35,16 +35,16 @@ namespace GreenKeeper.ViewModels
         /// Important notes for OpenNotesCommand:
         /// Commands always need to be initialized in the constructor.
         /// The OpenNotesCommand is get-only, which means that if there
-        /// is no allocation it remains 'null', the compiler will
-        /// cause no alarm and WPF ignores the click on a bound command
+        /// is no assignment it remains 'null', the compiler will
+        /// raise no warning and WPF ignores the click on a bound command
         /// set to 'null'.
         /// 
-        /// execute: Rules what happens after a click.
+        /// execute: Defines what happens after a click.
         /// You only fire an event (OpenNotesRequested), instead of opening
         /// a new window directly.
-        /// -> Why? Because the ViewModel should not know anything about the view
+        /// -> Why? Because the ViewModel should not know anything about the view.
         /// 
-        /// canExecute: Controls the bound button whether to be enabled or disabled.
+        /// canExecute: Controls whether the bound button is enabled or disabled.
         /// If there is no plant selected, the button remains deactivated.
         /// </summary>
         /// <param name="plantRepository"></param>
@@ -63,34 +63,34 @@ namespace GreenKeeper.ViewModels
             // the ListView picks up this filter automatically, without needing to be changed itself
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
-            // Periodically refreshes the Status-Cards, so due date texts and Complete-Button's
+            // Periodically refreshes the status cards, so due date texts and the Complete button's
             // enabled state (IsCompletable) stay up to date automatically
             _timerService.Start(TimeSpan.FromMinutes(5), RefreshCareStatuses);
 
-            // Theme related Command
+            // Command related to the theme
             ToggleThemeCommand = new RelayCommand(
                 execute: _ => ToggleTheme());
 
-            // Add Plant Wizard related Command
+            // Command related to the Add Plant wizard
             AddPlantCommand = new RelayCommand(
                 execute: _ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
 
-            // Add Schedule Wizard related Command
+            // Command related to the Add Schedule wizard
             AddScheduleCommand = new RelayCommand(
                 execute: _ => AddScheduleRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
 
-            // Delete Plant Button related Command
+            // Command related to the Delete Plant button
             DeletePlantCommand = new RelayCommand(
                 execute: _ => DeleteSelectedPlant(),
                 canExecute: _ => SelectedPlant != null);
 
-            // Notes related Command
+            // Command related to the notes
             OpenNotesCommand = new RelayCommand(
                 execute: _ => OpenNotesRequested?.Invoke(this, SelectedPlant!),
                 canExecute: _ => SelectedPlant != null);
 
-            // Rename Plant related Command
+            // Command related to renaming a plant
             RenamePlantCommand = new RelayCommand(
                 execute: parameter =>
                 {
@@ -101,7 +101,7 @@ namespace GreenKeeper.ViewModels
                 },
                 canExecute: parameter => parameter is Plant);
 
-            // -- Debug-Section --
+            // -- Debug Section --
 
 #if DEBUG
             SimulateTimePassingCommand = new RelayCommand(
@@ -111,9 +111,9 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Loads all plants from the database und fills it with plants.
-        /// It needs to be called singularly after the constructor was called
-        /// (The constructor cannot use await)
+        /// Loads all plants from the database and fills the Plants collection with them.
+        /// It needs to be called once after the constructor has been called
+        /// (The constructor cannot use await.)
         /// </summary>
         public async Task InitializeAsync()
         {
@@ -132,14 +132,14 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// One card per defined CareType. Depending on the set care types,
-        /// only the cards of the allocated care types will appear in the status.
+        /// One card per defined CareType. Depending on which care types are set,
+        /// only the cards of the assigned care types will appear in the status.
         /// 
         /// Important!
         /// The watering schedule is mandatory for all plants, which means that
-        /// it's status card is always visible.
+        /// its status card is always visible.
         /// The fertilizing schedule and the separate sunlight requirement are optional
-        /// and will not show up if they are not set to a plant
+        /// and will not show up if they are not set for a plant.
         /// </summary>
         public IEnumerable<CareStatusViewModel> CareStatuses
         {
@@ -159,7 +159,7 @@ namespace GreenKeeper.ViewModels
                     onComplete: () => CompleteCareSchedule(CareType.Watering),
                     onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Watering)));
 
-                // Fertilizing optional, only show the status if set to a plant
+                // Fertilizing: optional, only show the status if set for a plant
                 var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
                 if (fertilizingSchedule != null)
                 {
@@ -185,8 +185,8 @@ namespace GreenKeeper.ViewModels
         /// <summary>
         /// Reminder:
         /// An explicit "Requery" of OpenNotesCommand is not necessary.
-        /// RelayCommand is hanging on CommandManager.RequerySuggested,
-        /// which automatically requests CanExecute on most UI-interactions
+        /// RelayCommand is hooked into CommandManager.RequerySuggested,
+        /// which automatically requests CanExecute on most UI interactions.
         /// </summary>
         private Plant? _SelectedPlant;
         public Plant? SelectedPlant
@@ -202,7 +202,7 @@ namespace GreenKeeper.ViewModels
         }
 
         // Check if a plant is selected.
-        // Useful for Visibility-Bindings like the Status-Title in the Dashboard
+        // Useful for visibility bindings like the status title in the dashboard
         public bool IsPlantSelected => SelectedPlant != null;
 
         // -- Theme Section --
@@ -236,21 +236,21 @@ namespace GreenKeeper.ViewModels
 
         // -- Notes Section --
 
-        // Essential command to be bound to the Notes-Button in MainWIndow.xaml.
+        // Essential command to be bound to the Notes button in MainWindow.xaml.
         // It is ICommand so that the View only binds the interface and
         // the explicit implementation remains exchangeable
         public ICommand OpenNotesCommand { get; }
 
-        // Notify the View, that a new Notes-Window for the given plant should be opened.
-        // Will be subscribed by MainWindow.xaml.cs (for more information, go there).
-        // Code-Behind opens the window (View), while the ViewModel does not know any Window-Class
+        // Notify the View that a new notes window for the given plant should be opened.
+        // Will be subscribed to by MainWindow.xaml.cs (for more information, go there).
+        // The code-behind opens the window (View), while the ViewModel does not know any window class
         public event EventHandler<Plant>? OpenNotesRequested;
 
         /// <summary>
-        /// Persists new Notes-Text for the given plant, then updates the local,
-        /// in-memory Plant-Object so it reflects the saved state. Called via the
+        /// Persists new notes text for the given plant, then updates the local,
+        /// in-memory plant object so it reflects the saved state. Called via the
         /// callback that NotesViewModel receives (see NotesView/MainWindow) -
-        /// not directly bound to a Command, so this stays a plain async Task
+        /// not directly bound to a command, so this stays a plain async Task.
         /// </summary>
         public async Task UpdatePlantNotesAsync(Plant plant, string notes)
         {
@@ -267,9 +267,9 @@ namespace GreenKeeper.ViewModels
         /// The setter fires on every single keystroke - not just when the
         /// TextBox loses focus. Combined with the Refresh() call, it produces
         /// the live search behavior (similar to a search engine).
-        /// If a plant was selected, the selected plant will be set to null
+        /// If a plant was selected, the selected plant will be set to null,
         /// as no selected plant that doesn't appear in the ListView during
-        /// the search should keep it's selected state
+        /// the search should keep its selected state.
         /// </summary>
         public string SearchText
         {
@@ -296,8 +296,8 @@ namespace GreenKeeper.ViewModels
         /// the plant visible in the ListView, false hides it.
         /// 
         /// Empty/whitespace-only search text -> every plant is shown
-        /// (no filtering applied)
-        /// Text entered: case-insensitive substring match against the plant's name
+        /// (no filtering applied).
+        /// Text entered: case-insensitive substring match against the plant's name.
         /// </summary>
         private bool FilterPlants(object item)
         {
@@ -318,7 +318,7 @@ namespace GreenKeeper.ViewModels
 
         public ICommand RenamePlantCommand { get; }
 
-        // Notifies the View that the Rename-Dialog should be opened for a specific plant.
+        // Notifies the View that the rename dialog should be opened for a specific plant.
         // Follows the same pattern as EditScheduleRequested: the ViewModel only signals the
         // intent, while MainWindow.xaml.cs actually opens the window
         public event EventHandler<Plant>? RenamePlantRequested;
@@ -329,7 +329,7 @@ namespace GreenKeeper.ViewModels
         /// 
         /// Deliberately touches nothing but the name: care schedules, the sunlight requirement
         /// and all due dates stay exactly as they are. Renaming is purely cosmetic - it must
-        /// never restart a countdown or otherwise disturb the plant's care state
+        /// never restart a countdown or otherwise disturb the plant's care state.
         /// </summary>
         public async Task RenamePlantAsync(Plant plant, string newName)
         {
@@ -337,7 +337,7 @@ namespace GreenKeeper.ViewModels
             plant.Name = newName;
 
             // Plant implements no INotifyPropertyChanged, so the ListView would
-            // never notice the changed name on its own - same reason for RefreshCareStatuses
+            // never notice the changed name on its own - same reason as for RefreshCareStatuses
             CollectionViewSource.GetDefaultView(Plants).Refresh();
 
             // The dashboard header binds to SelectedPlant.Name, so it needs an
@@ -350,14 +350,14 @@ namespace GreenKeeper.ViewModels
         public event EventHandler? AddPlantRequested;
 
         /// <summary>
-        /// Persists a newly created plant (built by the Add-Plant-Wizard)
+        /// Persists a newly created plant (built by the Add Plant wizard)
         /// to the database via the repository, and only THEN adds it to
-        /// the ObervableCollection that the sidebar's ListView is bound to.
+        /// the ObservableCollection that the sidebar's ListView is bound to.
         /// 
         /// Doing it in this order matters: if AddPlantAsync (the repository call)
         /// were to fail - e.g. a database error - the new plant would never reach
         /// the UI either. This avoids a situation where the UI shows a plant that,
-        /// in reality, was never actually saved
+        /// in reality, was never actually saved.
         /// </summary>
         public async Task AddPlantAsync(Plant plant)
         {
@@ -370,11 +370,11 @@ namespace GreenKeeper.ViewModels
         public event EventHandler<Plant>? AddScheduleRequested;
 
         /// <summary>
-        /// Calculates NextDueAt/LastCaredAt for a new//replacing Care-Schedule,
-        /// persists it via the repository, then updates the local Care-Schedules
-        /// list so the Status-Card appears immediately without a DB reload.
-        /// Called directly from MainWindow (not via a Command callback), so this
-        /// stays a plain async Task - the caller awaits it in it's own try/catch
+        /// Calculates NextDueAt/LastCaredAt for a new or replacing care schedule,
+        /// persists it via the repository, then updates the local CareSchedules
+        /// list so the status card appears immediately without a DB reload.
+        /// Called directly from MainWindow (not via a command callback), so this
+        /// stays a plain async Task - the caller awaits it in its own try/catch.
         /// </summary>
         public async Task AddOrReplaceCareScheduleAsync(CareSchedule newCareSchedule)
         {
@@ -388,7 +388,7 @@ namespace GreenKeeper.ViewModels
 
             var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, newCareSchedule);
 
-            // Swap out any old local entry of the same Care-Type for the saved one
+            // Swap out any old local entry of the same care type for the saved one
             var existingLocal = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == saved.Care);
             if (existingLocal != null)
             {
@@ -400,8 +400,8 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Persists a new/replacing Sunlight-Requirement for the selected plant -
-        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed
+        /// Persists a new/replacing sunlight requirement for the selected plant -
+        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed.
         /// </summary>
         public async Task AddOrReplaceSunlightRequirementAsync(SunlightRequirement newSunlightRequirement)
         {
@@ -452,27 +452,27 @@ namespace GreenKeeper.ViewModels
             Plants.Remove(SelectedPlant);
 
             // After removing a plant, there is no "selected" plant.
-            // Prevent the Dashboard from presenting non-existing data
+            // Prevent the dashboard from presenting non-existent data
             SelectedPlant = null;
         }
 
-        // -- Care-Status related Section --
+        // -- Care Status Section --
 
         /// <summary>
-        /// Refreshes both the Dashboard and the Sidebar after any change to a plant's Care-Schedules or Sunlight-Requirement,
+        /// Refreshes both the dashboard and the sidebar after any change to a plant's care schedules or sunlight requirement,
         /// e.g. after completing, adding, replacing or removing a schedule.
         /// 
         /// Called from multiple places rather than relying on ObservableCollection notifications, because the change happens
-        /// directly on an already-loaded Plant-Object (Plant/CareSchedule don't implement INotifyPropertyChanged).
-        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed
+        /// directly on an already-loaded plant object (Plant/CareSchedule don't implement INotifyPropertyChanged).
+        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed.
         /// 
         /// What both things do:
         /// 
-        /// OnPropertyChanged: updates the Dashboard's Status-Cards for the currently selected plant
+        /// OnPropertyChanged: updates the dashboard's status cards for the currently selected plant.
         /// 
-        /// CollectionViewSource: forces the Sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
+        /// CollectionViewSource: forces the sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
         /// for each plant's status dot - without this, the dot would only ever update by coincidence (e.g. when the ListView happens
-        /// to redraw for an unrelated reason)
+        /// to redraw for an unrelated reason).
         /// </summary>
         public void RefreshCareStatuses()
         {
@@ -481,10 +481,10 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Marks an active Care-Schedule (Watering/Fertilizing) as "done now":
+        /// Marks an active care schedule (Watering/Fertilizing) as "done now":
         /// calculates a new due date starting from the exact moment of the click,
         /// persists that new due date to the database, and then updates the local,
-        /// in-memory copy so the Status-Card reflects the change immediately
+        /// in-memory copy so the status card reflects the change immediately.
         /// </summary>
         private async void CompleteCareSchedule(CareType careType)
         {
@@ -523,19 +523,19 @@ namespace GreenKeeper.ViewModels
             RefreshCareStatuses();
         }
 
-        // Care-Status Edit-Option
+        // Care Status Edit Option
 
-        // Notify the View that the Edit-Dialog (EditScheduleView) must be opened for a specific Care-Type of the selected plant
+        // Notify the View that the edit dialog (EditScheduleView) must be opened for a specific care type of the selected plant
         public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
 
 
-        // Care-Status Remove-Option
+        // Care Status Remove Option
 
         /// <summary>
-        /// Removes the optional care schedule from the selected plant once the user confirmed.
+        /// Removes the optional care schedule from the selected plant once the user has confirmed.
         /// "async void" because onRemove is wired up via a synchronous Action delegate
         /// in CareStatuses, so error handling must happen entirely within this method via try/catch,
-        /// since the caller of an async void method cannot catch exceptions from it
+        /// since the caller of an async void method cannot catch exceptions from it.
         /// </summary>
         private async void RemoveCareSchedule(CareType careType, string displayName)
         {
@@ -573,14 +573,14 @@ namespace GreenKeeper.ViewModels
 
             SelectedPlant.CareSchedules.Remove(schedule);
 
-            // CareStatuses doesn't have any Backing-Field and reads from the selected plant (SelectedPlant).
-            // The call of RefreshCareStatuses is enough to let the removed Status-Card disappear from the ItemsControl
+            // CareStatuses doesn't have any backing field and reads from the selected plant (SelectedPlant).
+            // The call to RefreshCareStatuses is enough to let the removed status card disappear from the ItemsControl
             RefreshCareStatuses();
         }
 
         /// <summary>
-        /// Removes the sunlight requirement from the selected plant once the user confirmed.
-        /// Same "async void" reasoning as RemoveCareSchedule
+        /// Removes the sunlight requirement from the selected plant once the user has confirmed.
+        /// Same "async void" reasoning as RemoveCareSchedule.
         /// </summary>
         private async void RemoveSunlightRequirement()
         {
@@ -616,10 +616,10 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Stop the periodic Status-Card refresh (see _timerService.Start in the constructor).
+        /// Stop the periodic status card refresh (see _timerService.Start in the constructor).
         /// Called by MainWindow.xaml.cs when the main window is closed, so the timer doesn't
         /// keep running (and referencing this ViewModel) after the application would otherwise
-        /// be shutting down
+        /// have shut down.
         /// </summary>
         public void StopCareStatusRefreshTimer()
         {
@@ -634,7 +634,7 @@ namespace GreenKeeper.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        // -- Debug-Section --
+        // -- Debug Section --
 
 #if DEBUG
         public bool IsDebugBuild => true;
@@ -674,8 +674,8 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Pulls the Time-Span of NextDueAt (and optionally LastCaredAt, if set)
-        /// for ALL Care-Schedules of the selected plant except the Sunlight-Requirement
+        /// Subtracts the time span from NextDueAt (and optionally LastCaredAt, if set)
+        /// for ALL care schedules of the selected plant except the sunlight requirement.
         /// </summary>
         private void SimulateTimePassing()
         {

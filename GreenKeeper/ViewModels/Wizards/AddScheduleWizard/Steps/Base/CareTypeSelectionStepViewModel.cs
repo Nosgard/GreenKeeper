@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base
 {
     /// <summary>
-    /// Choose, which CareType you want to add.
-    /// Depending on what you chose, the next step will be made ready.
+    /// Choose which CareType you want to add.
+    /// Depending on what you choose, the next step will be made ready.
     /// 
-    /// Watering/Fertilizing: Open the related active step (similar to the step in the AddPlantWizard)
+    /// Watering/Fertilizing: Open the related active step (similar to the step in the AddPlantWizard).
     /// 
-    /// Sunlight: Open the passive step for the sunlight requirement
+    /// Sunlight: Open the passive step for the sunlight requirement.
     /// </summary>
     public class CareTypeSelectionStepViewModel : IWizardStepViewModel
     {
@@ -42,7 +42,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base
                 new(CareType.Sunlight, "Sunlight"),
             };
 
-        // Always a valid standard selection means that you can always proceed
+        // There is always a valid default selection, so you can always proceed
         public bool CanProceed => true;
 
         public string NextButtonLabel => "Next";

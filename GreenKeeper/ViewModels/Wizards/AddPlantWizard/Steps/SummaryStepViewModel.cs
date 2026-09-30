@@ -40,12 +40,12 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         public string Fertilizing =>
             $"{_fertilizingStepViewModel.AmountText} {GetUnit(_fertilizingStepViewModel)}";
 
-        // Sunlight is optional - the same principle as Fertilizing but with a value by period
+        // Sunlight is optional - the same principle as Fertilizing but with a value per period
         public bool HasSunlight => _sunlightStepViewModel.HasValidAmount;
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
 
-        // Dissolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days")
+        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days")
         private static string GetUnit(ActiveStepViewModel step) =>
             step.AvailableUnits.First(u => u.Key == step.SelectedUnit).Value;
 
@@ -59,11 +59,11 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         public string NextButtonLabel => "Finish";
 
         /// <summary>
-        /// Will be called by the Wizard, once this step (the summary step) is called.
+        /// Is called by the wizard once this step (the summary step) is reached.
         /// This is necessary because all values of Watering/Fertilizing/Sunlight can get
-        /// changed in the meantime (e.g. by using the Back-Button + entering a new value).
-        /// The Summary-Properties don't have their own Backing-Field. Instead they actively
-        /// read from the other steps
+        /// changed in the meantime (e.g. by using the Back button + entering a new value).
+        /// The summary properties don't have their own backing field. Instead, they actively
+        /// read from the other steps.
         /// </summary>
         public void Refresh()
         {

@@ -20,7 +20,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
     public class AddPlantWizardViewModel : INotifyPropertyChanged
     {
         // Collected data across all steps.
-        // Will be turned into a Plant-Object by the end of the Wizard
+        // Will be turned into a plant object at the end of the wizard
         private readonly PlantNameStepViewModel _plantNameStepViewModel = new PlantNameStepViewModel();
         private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
         private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
@@ -77,7 +77,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
                 (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
 
                 // Once you reach the summary step, all values from the prior properties
-                // must be read (e.g. in case the user presses the Back-Button an changes the values)
+                // must be read (e.g. in case the user presses the Back button and changes the values)
                 if (value is SummaryStepViewModel summary)
                 {
                     summary.Refresh();
@@ -89,10 +89,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
         public ICommand BackCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Signalize the View, that the Wizard will be closed
+        // Signals the View that the wizard will be closed
         public event EventHandler<bool>? RequestClose;
 
-        // After finishing the Wizard, the View reads the property, when RequestClose closed the window.
+        // After finishing the wizard, the View reads the property when RequestClose has closed the window.
         // Only this ViewModel is allowed to set the created plant
         public Plant? CreatedPlant { get; private set; }
 
@@ -111,8 +111,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
 
         private void GoBack()
         {
-            // Usually canExecute makes sure the Index never gets called at 0,
-            // but once GoBack() will be called elsewhere in the future, cover this case
+            // Usually canExecute makes sure GoBack() is never called at index 0,
+            // but in case GoBack() is called elsewhere in the future, cover this case
             if (_currentStepIndex > 0)
             {
                 _currentStepIndex--;
@@ -166,7 +166,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             }
 
             // Sunlight: Optional. Unlike Watering/Fertilizing you don't need any calculation.
-            // The Wizard already asks for values in the exact same structure (Hours + Period)
+            // The wizard already asks for values in the exact same structure (Hours + Period)
             if (_sunlightStepViewModel.HasValidAmount)
             {
                 plant.SunlightRequirement = new SunlightRequirement

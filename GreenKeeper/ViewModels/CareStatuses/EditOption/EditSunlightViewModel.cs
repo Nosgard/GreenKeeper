@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Base of the Edit-Button for the Sunlight-Status.
+    /// Base of the Edit button for the sunlight status.
     /// It's standalone instead of inheriting from SunlightStepViewModel, since the semantics
-    /// differ here. It's mandatory and pre-filled with the existing Sunlight-Requirement.
-    /// No PreviewText needed, since Sunlight has no due date
+    /// differ here. It's mandatory and pre-filled with the existing sunlight requirement.
+    /// No PreviewText needed, since Sunlight has no due date.
     /// </summary>
     public class EditSunlightViewModel : INotifyPropertyChanged
     {
@@ -24,7 +24,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             { SunlightPeriod.Year, 8760 },
         };
 
-        // Pre-fill the fields with the current Sunlight-Requirement
+        // Pre-fill the fields with the current sunlight requirement
         public EditSunlightViewModel(int? initialHours, SunlightPeriod initialPeriod)
         {
             if (initialHours.HasValue)
@@ -78,8 +78,8 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
-        // Unlike SunlightStepViewModel in the Wizard, there is no option to skip.
-        // the user is actively editing an existing value, so a valid amount is always required
+        // Unlike SunlightStepViewModel in the wizard, there is no option to skip.
+        // The user is actively editing an existing value, so a valid amount is always required
         public bool HasValidAmount =>
             int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 

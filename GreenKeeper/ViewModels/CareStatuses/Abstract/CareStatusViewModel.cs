@@ -20,12 +20,12 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public string IconSource { get; }
         public Brush IconBackground { get; }
 
-        // Removes an optional Status-Card (Fertilizing, Sunlight).
-        // Nullable because mandatory Status-Cards above all Watering are unremovable so they are null
+        // Removes an optional status card (Fertilizing, Sunlight).
+        // Nullable because mandatory status cards such as Watering are unremovable, so for them it is null
         public ICommand? RemoveCommand { get; protected set; }
 
-        // Allows the user to edit the value of a Status-Card that was set beforehand.
-        // That goes to all available Status-Cards, but set by the concrete ViewModel of the Status
+        // Allows the user to edit the value of a status card that was set beforehand.
+        // This applies to all available status cards, but it is set by the concrete ViewModel of the status
         public ICommand? EditCommand { get; protected set; }
 
         // Provide all important data for the card of the care status

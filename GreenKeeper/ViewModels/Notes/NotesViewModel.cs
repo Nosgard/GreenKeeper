@@ -16,7 +16,7 @@ namespace GreenKeeper.ViewModels.Notes
     {
         private readonly Plant _plant;
 
-        // Dependency will be given from outside (Constructor Injection),
+        // The dependency is passed in from outside (Constructor Injection),
         // instead of an explicit implementation.
         private readonly IDialogService _dialogService;
 
@@ -24,41 +24,41 @@ namespace GreenKeeper.ViewModels.Notes
         /// Handles the actual persistence via MainViewModel.UpdatePlantNotesAsync -
         /// NotesViewModel itself still knows neither the repository nor the database.
         /// Func is used instead of Action because Save() needs to await the result
-        /// to keep the dialog open on failure
+        /// to keep the dialog open on failure.
         /// </summary>
         private readonly Func<string, Task> _saveNotesAsync;
 
-        // Value when opening the NotesView. Reference if changes on the notes are made.
+        // Value when opening the NotesView. Reference if changes to the notes are made.
         // Used to compare via IsDirty (for more info scroll down) with the edited notes.
         // After saving changes, IsDirty "forgets" the saved changes and treats the
-        // the changed notes as the original
+        // changed notes as the original
         private string _originalNotes;
 
         // Takes the original notes so that changes can be recognized.
-        // Separated from the notes in the Plant-Object so that the
-        // Cancel-Button can discard changes without changing the
-        // Plant-Object in the meantime
+        // Separated from the notes in the plant object so that the
+        // Cancel button can discard changes without changing the
+        // plant object in the meantime
         private string _editableNotes;
 
         /// <summary>
         /// Important notes for SaveCommand and CancelCommand:
         /// SaveCommand in detail:
         /// 
-        /// execute: Controls what happens when you click the Save-Button -> Fire Save()-Method
+        /// execute: Controls what happens when you click the Save button -> fire the Save() method.
         /// 
-        /// canExecute: The Save-Button is only active, when IsDirty is true.
-        /// What does that mean? The notes are considered dirty if the notes are deviant from
+        /// canExecute: The Save button is only active when IsDirty is true.
+        /// What does that mean? The notes are considered dirty if the notes differ from
         /// the original.
         /// 
         /// Important info for IsDirty!
-        /// The allocation of IsDirty must be in the constructor, otherwise WPF ignores
-        /// the click on a Command set to 'null'.
+        /// The assignment of IsDirty must be in the constructor; otherwise WPF ignores
+        /// the click on a command set to 'null'.
         /// 
         /// CancelCommand in detail:
         /// 
-        /// execute: Fires the Cancel()-Method
+        /// execute: Fires the Cancel() method
         /// Why no canExecute? Because Cancel must always be executable, even if there are
-        /// no changes. This simply leads to closing the View without any warning
+        /// no changes. This simply leads to closing the View without any warning.
         /// 
         /// </summary>
         /// <param name="plant"></param>
@@ -82,9 +82,9 @@ namespace GreenKeeper.ViewModels.Notes
         public string PlantName => _plant.Name;
 
         /// <summary>
-        /// Extract the Notes-property from the Plant-Model to present it in the related view
-        /// and make it editable. Changes on the original notes will be recognized by OnPropertyChanged.
-        /// The Setter always fires on every button click.
+        /// Extract the Notes property from the plant model to present it in the related view
+        /// and make it editable. Changes to the original notes will be recognized by OnPropertyChanged.
+        /// The setter always fires on every button click.
         /// </summary>
         public string EditableNotes
         {
@@ -99,13 +99,13 @@ namespace GreenKeeper.ViewModels.Notes
                 OnPropertyChanged(nameof(EditableNotes));
 
                 // IsDirty depends on _editableNotes.
-                // Manually tell, that IsDirty could change and with that the Save-Button as well
+                // Manually signal that IsDirty could change, and with that the Save button as well
                 OnPropertyChanged(nameof(IsDirty));
             }
         }
 
-        // True, once the current notes are deviant from the original.
-        // Controls CanExecute from SaveCommand (Save-Button enabled/disabled)
+        // True once the current notes differ from the original.
+        // Controls CanExecute of SaveCommand (Save button enabled/disabled)
         public bool IsDirty => _editableNotes != _originalNotes;
 
         // Commands to be bound in NotesView.xaml
@@ -113,17 +113,17 @@ namespace GreenKeeper.ViewModels.Notes
         public ICommand CancelCommand { get; }
 
         /// <summary>
-        /// Signalizes the NotesView, that the window is about to be closed.
-        /// This is necessary to warn the user from unsaved changes.
+        /// Signals the NotesView that the window is about to be closed.
+        /// This is necessary to warn the user about unsaved changes.
         /// NotesView.xaml.cs subscribes to it.
-        /// Only fired by the Cancel()-Method.
+        /// Only fired by the Cancel() method.
         /// 
-        /// bool? depicts Window.DialogResult (true = save and close, false = discard and close)
+        /// bool? represents Window.DialogResult (true = save and close, false = discard and close).
         /// </summary>
         public event EventHandler<bool?>? RequestClose;
 
 
-        // Sets the edited text in the Plant-Object by calling TrySaveAsync.
+        // Sets the edited text in the plant object by calling TrySaveAsync.
         // Error handling happens inside TrySaveAsync
         private async void Save()
         {
@@ -133,7 +133,7 @@ namespace GreenKeeper.ViewModels.Notes
         /// <summary>
         /// Runs the actual save via the callback, updates _originalNotes on success (resets IsDirty)
         /// and returns whether it worked. Used by both Save() and Cancel() so both share the same
-        /// error behavior - on failure the entered text stays untouched instead of being lost
+        /// error behavior - on failure the entered text stays untouched instead of being lost.
         /// </summary>
         private async Task<bool> TrySaveAsync()
         {
@@ -155,19 +155,19 @@ namespace GreenKeeper.ViewModels.Notes
         }
 
         /// <summary>
-        /// Call, when the Cancel-Button is clicked.
-        /// A warning shows up, if IsDirty recognized changes on the notes.
+        /// Called when the Cancel button is clicked.
+        /// A warning shows up if IsDirty recognizes changes to the notes.
         /// In case the user tries to cancel while there are unsaved changes,
         /// TrySaveAsync() will be awaited before actually closing.
-        /// This is for error handling
+        /// This is for error handling.
         /// </summary>
         private async void Cancel()
         {
             if (IsDirty)
             {
-                // Alternative and more clean way instead MessageBox.Show() by
+                // A cleaner alternative to MessageBox.Show() through
                 // the injected abstraction. The ViewModel only knows that there
-                // is a yes or no.
+                // is a yes or a no.
                 bool shouldSave = _dialogService.Confirm(
                     "There are unsaved changes. Do you want to save?",
                     "Unsaved Changes");
