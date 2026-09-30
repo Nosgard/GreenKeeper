@@ -53,7 +53,7 @@
                            VerticalAlignment="Center"
                            Margin="4, 0, 0, 0" />
 
-                <!-- Theme-Toggle-Button -->
+                <!-- Theme toggle button -->
                 <Button Grid.Column="2"
                         Style="{StaticResource IconButton}"
                         VerticalAlignment="Center"
@@ -79,7 +79,7 @@
                 </Button>
             </Grid>
 
-            <!-- Searchbar -->
+            <!-- Search bar -->
             <Border Grid.Row="1"
                     Margin="10, 10, 10, 10"
                     Background="{DynamicResource SearchBarBackground}"
@@ -207,7 +207,7 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <!-- Add-Button -->
+            <!-- Add button -->
             <Button Grid.Row="3"
                     Style="{StaticResource BigButton}"
                     Margin="10, 8, 10, 12"
@@ -272,12 +272,12 @@
                                FontWeight="SemiBold"
                                Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    <!-- Status Cards (Watering, Nutrients, Sunlighting (missing)) -->
+                    <!-- Status Cards (Watering, Nutrients, Sunlight (missing)) -->
                     <ItemsControl ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}" />
                 </StackPanel>
                 
-                <!-- Notes-Button -->
+                <!-- Notes button -->
                 <Button Style="{StaticResource MediumButton}"
                         Content="View Notes"
                         Padding="10"
@@ -286,7 +286,7 @@
                         VerticalAlignment="Bottom"
                         Command="{Binding OpenNotesCommand}"/>
                 
-                <!-- Debug-Section -->
+                <!-- Debug section -->
                 <Border Grid.Row="2"
                         Background="{DynamicResource DangerBackground}"
                         BorderBrush="{DynamicResource DangerBorder}"

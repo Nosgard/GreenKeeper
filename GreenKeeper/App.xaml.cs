@@ -8,7 +8,7 @@ using System.Windows;
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interaction logic for App.xaml.
     /// </summary>
     public partial class App : Application
     {
@@ -18,7 +18,7 @@ namespace GreenKeeper
         /// Why this exists: An end user who downloads the released application never executes "Update-Database"
         /// manually - therefore their machine would have no tables at all, and the app would crash on the
         /// first data access with a "no such table" error. Applying migrations here, at startup, makes the app
-        /// self-sufficient on any machine
+        /// self-sufficient on any machine.
         /// </summary>
         protected override async void OnStartup(StartupEventArgs e)
         {
@@ -35,8 +35,8 @@ namespace GreenKeeper
             }
             catch (Exception ex)
             {
-                // In case the preparing of the database fails, the app cannot work in any meaningful way.
-                // Every feature depends on the database so the app must shutdown
+                // If preparing the database fails, the app cannot work in any meaningful way.
+                // Every feature depends on the database, so the app must shut down
                 MessageBox.Show(
                     $"The database could not be prepared: \n\n{ex.Message}\n\nThe application will now close",
                     "Database Error",
@@ -49,8 +49,8 @@ namespace GreenKeeper
 
             // Restore the theme the user picked last time. This has to happen before
             // the window is created - applying it afterwards would show the window in
-            // the default theme first and only then switch. Load never throws, so a
-            // missing or damaged settings file simply starts in the default theme
+            // the default theme first and only then switch. Load never throws, so with a
+            // missing or damaged settings file the app simply starts in the default theme
             var settingsService = new SettingsService();
             var themeService = new ThemeService();
             themeService.ApplyTheme(settingsService.Load().Theme);

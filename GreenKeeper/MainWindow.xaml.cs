@@ -25,17 +25,17 @@ using System.Windows.Shapes;
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml.
     /// </summary>
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _mainViewModel;
 
-        // One instance to be passed on from everywhere.
-        // This DialogService is primarily served for Yes/No-Warnings
+        // One instance to be passed on everywhere.
+        // This DialogService is primarily used for yes/no warnings
         private readonly IDialogService _dialogService = new MessageBoxDialogService();
 
-        // Concrete, implementation of ITimerService. Created and owned here and then injected
+        // Concrete implementation of ITimerService. Created and owned here and then injected
         // into the MainViewModel via its constructor
         private readonly ITimerService _timerService = new DispatcherTimerService();
 
@@ -48,7 +48,7 @@ namespace GreenKeeper
         private readonly IThemeService _themeService;
         private readonly ISettingsService _settingsService;
 
-        // Factory for short-lived DbContext-Instances - willed be passed on to the repository
+        // Factory for short-lived DbContext instances - will be passed on to the repository
         private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
 
         public MainWindow(IThemeService themeService, ISettingsService settingsService)
@@ -63,27 +63,27 @@ namespace GreenKeeper
 
             // Subscription to the event that fires "OpenNotesCommand" in the MainViewModel.
             // Opening a new window for the notes (NotesView) does not happen in the ViewModel
-            // so that it has no window-references and remains testable
+            // so that it has no window references and remains testable
             _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
 
             _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
 
             _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
-            // Stops the periodic Status-Card refresh once this window (and therefore the application)
+            // Stops the periodic status card refresh once this window (and therefore the application)
             // is closed, so the timer doesn't keep firing after the app is meant to shut down
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
-            // The constructor cannot be async so loading the plants will be fired
-            // via the Loaded-Event, once the window is ready
+            // The constructor cannot be async, so loading the plants will be fired
+            // via the Loaded event once the window is ready
             Loaded += MainWindow_Loaded;
 
             this.DataContext = _mainViewModel;
         }
 
-        // The actual reaction on OpenNotesRequested, caused by the OpenNotesCommand in the ViewModel.
+        // The actual reaction to OpenNotesRequested, caused by the OpenNotesCommand in the ViewModel.
         // It opens a new window and shows the notes of the given plant
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
@@ -98,13 +98,13 @@ namespace GreenKeeper
         }
 
         /// <summary>
-        /// Opens the Add-Schedule-Wizard. If completed, persists whichever result
-        /// the Wizard produced (CareSchedule or SunlightRequirement, only one is
+        /// Opens the Add Schedule wizard. If completed, persists whichever result
+        /// the wizard produced (CareSchedule or SunlightRequirement, only one is
         /// ever set) via MainViewModel.
         /// 
         /// "async void" required because AddScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
+        /// is an event handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this method.
         /// </summary>
         private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
@@ -142,15 +142,15 @@ namespace GreenKeeper
         }
 
         /// <summary>
-        /// Opens the Edit-Dialog. If saved, persists whichever result was
-        /// prepared (Care-Schedule or Sunlight-Requirement) by reusing the exact
-        /// same MainViewModel methods the Add-Schedule-Wizard already uses -
-        /// editing a schedule and replacing it with a new one via the Wizard are,
-        /// from database's point of view, the identical operation.
+        /// Opens the edit dialog. If saved, persists whichever result was
+        /// prepared (care schedule or sunlight requirement) by reusing the exact
+        /// same MainViewModel methods the Add Schedule wizard already uses -
+        /// editing a schedule and replacing it with a new one via the wizard are,
+        /// from the database's point of view, the identical operation.
         /// 
         /// "async void" required because EditScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
+        /// is an event handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this method.
         /// </summary>
         private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
@@ -188,13 +188,13 @@ namespace GreenKeeper
         }
 
         /// <summary>
-        /// Opens the Rename-Dialog for the plant that was right-clicked in the
+        /// Opens the rename dialog for the plant that was right-clicked in the
         /// sidebar. If the user confirmed a new name, it's handed off to the
         /// ViewModel to be persisted.
         /// 
-        /// "async void" required because RenameScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
+        /// "async void" required because RenamePlantRequested
+        /// is an event handler, which mandates a void-returning handler.
+        /// Error handling therefore has to happen entirely inside this method.
         /// </summary>
         private async void MainViewModel_RenamePlantRequested(object? sender, Plant plant)
         {
@@ -273,8 +273,8 @@ namespace GreenKeeper
         }
 
         /// <summary>
-        /// Opens the Add-Plant-Wizard as a modal dialog. If the user
-        /// completed it and a Plant-Object was built, that plant is
+        /// Opens the Add Plant wizard as a modal dialog. If the user
+        /// completed it and a plant object was built, that plant is
         /// handed off to the ViewModel to be persisted to the database.
         /// </summary>
         private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
