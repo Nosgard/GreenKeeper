@@ -14,8 +14,8 @@ namespace GreenKeeper.Database
     /// 
     /// Necessary because GreenKeeperDbContext has no parameterless
     /// constructor (it requires DbContextOptions to be passed in)
-    /// and this project has no central DI-Startup configuration
-    /// the tooling could otherwise discover automatically
+    /// and this project has no central DI startup configuration
+    /// the tooling could otherwise discover automatically.
     /// </summary>
     public class GreenKeeperDbContextDesignTimeFactory : IDesignTimeDbContextFactory<GreenKeeperDbContext>
     {
