@@ -173,7 +173,7 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
-            // Sanity check on the initial state, before the actual "When" happens
+            // Sanity check on the initial state, before the actual "When" happens.
             Assert.False(viewModel.IsPlantSelected);
 
             var raisedProperties = new List<string>();
@@ -208,7 +208,7 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // Sanity check before the actual "When"
+            // Sanity check before the actual "When".
             Assert.NotNull(viewModel.SelectedPlant);
 
             // When: the search text changes
@@ -685,7 +685,7 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
-            // Sanity check: nothing selected
+            // Sanity check: nothing selected.
             Assert.Null(viewModel.SelectedPlant);
 
             var newSchedule = new CareSchedule
@@ -797,7 +797,7 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // The replacement schedule uses a different interval (14 days instead of 30)
+            // The replacement schedule uses a different interval (14 days instead of 30).
             var replacementSchedule = new CareSchedule
             {
                 Care = CareType.Fertilizing,
@@ -867,7 +867,7 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
             await viewModel.InitializeAsync();
 
-            // Sanity check: nothing selected
+            // Sanity check: nothing selected.
             Assert.Null(viewModel.SelectedPlant);
 
             var newRequirement = new SunlightRequirement
@@ -938,7 +938,7 @@ namespace GreenKeeper.Tests.ViewModels
             await viewModel.InitializeAsync();
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            // The replacement uses different values (3 hours per week instead of 6 per day)
+            // The replacement uses different values (3 hours per week instead of 6 per day).
             var replacementRequirement = new SunlightRequirement { Hours = 3, Period = SunlightPeriod.Week };
 
             // When: the sunlight requirement is replaced
@@ -1208,7 +1208,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         // Helper method: Maps a simple string identifier to the actual command on the ViewModel -
-        // necessary because [InlineData] can only carry constant values, not delegates or direct command references
+        // necessary because [InlineData] can only carry constant values, not delegates or direct command references.
         private static ICommand GetCommand(MainViewModel viewModel, string commandName) => commandName switch
         {
             "AddSchedule" => viewModel.AddScheduleCommand,

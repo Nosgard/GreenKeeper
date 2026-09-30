@@ -32,7 +32,7 @@ namespace GreenKeeper.Views.Wizards.AddPlantWizard
         }
 
         // After the wizard is finished, read the created plant object from the ViewModel.
-        // The plant object is null if the wizard was canceled
+        // The plant object is null if the wizard was canceled.
         public Plant? CreatedPlant => _addPlantWizardViewModel.CreatedPlant;
 
         private void AddPlantWizardViewModel_RequestClose(object? sender, bool dialogResult)

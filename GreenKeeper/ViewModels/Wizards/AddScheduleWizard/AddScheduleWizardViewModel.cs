@@ -29,7 +29,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         private readonly CareTypeSelectionStepViewModel _selectionStep = new();
 
         // Is instantiated once the user has made their decision on the first step.
-        // Unlike the AddPlantWizard, there is no explicit order, because the next step is set dynamically
+        // Unlike the AddPlantWizard, there is no explicit order, because the next step is set dynamically.
         private IWizardStepViewModel? _detailStep;
 
         public AddScheduleWizardViewModel(Plant plant, IDialogService dialogService)
@@ -74,7 +74,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         {
             if (CurrentStep == _selectionStep)
             {
-                // Set the next step depending on the selection in the previous step
+                // Set the next step depending on the selection in the previous step.
                 _detailStep = _selectionStep.SelectedCareType switch
                 {
                     CareType.Watering => new ScheduleActiveStepViewModel("Watering"),
@@ -87,7 +87,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             else
             {
                 // "Finish" tries to apply the status, but can abort
-                // without closing the wizard, e.g. when the user answers "No" to the overwrite warning
+                // without closing the wizard, e.g. when the user answers "No" to the overwrite warning.
                 if (TryApply())
                 {
                     RequestClose?.Invoke(this, true);
@@ -98,7 +98,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         private void GoBack()
         {
             // Back to the first step: The detail step will be discarded.
-            // If a value was entered, it's not going to be cached as it's not necessary for only two steps
+            // If a value was entered, it's not going to be cached as it's not necessary for only two steps.
             CurrentStep = _selectionStep;
         }
 
@@ -108,7 +108,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         }
 
         // Handle the entry in the detail step.
-        // In case the user refuses to overwrite, the wizard remains open; otherwise it will be closed
+        // In case the user refuses to overwrite, the wizard remains open; otherwise it will be closed.
         private bool TryApply()
         {
             return _selectionStep.SelectedCareType switch
@@ -120,7 +120,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         }
 
         // The overwrite confirmation stays local (only needs the in-memory _plant);
-        // only the actual "apply" step changed from mutation to data prep
+        // only the actual "apply" step changed from mutation to data prep.
         private bool PrepareCareSchedule(CareType careType, ScheduleActiveStepViewModel step)
         {
             var existing = _plant.CareSchedules.FirstOrDefault(s => s.Care == careType);
@@ -133,12 +133,12 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
                 if (!shouldReplace)
                 {
-                    // Keep the wizard open
+                    // Keep the wizard open.
                     return false;
                 }
             }
 
-            // No NextDueAt/LastCaredAt set here - the calculation stays centralized in MainViewModel
+            // No NextDueAt/LastCaredAt set here - the calculation stays centralized in MainViewModel.
             CreatedCareSchedule = new CareSchedule
             {
                 Care = careType,
@@ -164,7 +164,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 
                 if (!shouldReplace)
                 {
-                    // Keep the wizard open
+                    // Keep the wizard open.
                     return false;
                 }
             }

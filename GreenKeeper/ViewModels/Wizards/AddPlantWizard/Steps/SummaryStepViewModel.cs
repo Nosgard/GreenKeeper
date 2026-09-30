@@ -31,31 +31,31 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 
         public string PlantName => _nameStepViewModel.PlantName;
 
-        // Watering is mandatory - it always has a value to show
+        // Watering is mandatory - it always has a value to show.
         public string Watering =>
             $"{_wateringStepViewModel.AmountText} {GetUnit(_wateringStepViewModel)}";
 
-        // Fertilizing is optional - only show a value if a value was entered (not skipped)
+        // Fertilizing is optional - only show a value if a value was entered (not skipped).
         public bool HasFertilizing => _fertilizingStepViewModel.HasValidAmount;
         public string Fertilizing =>
             $"{_fertilizingStepViewModel.AmountText} {GetUnit(_fertilizingStepViewModel)}";
 
-        // Sunlight is optional - the same principle as Fertilizing but with a value per period
+        // Sunlight is optional - the same principle as Fertilizing but with a value per period.
         public bool HasSunlight => _sunlightStepViewModel.HasValidAmount;
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
 
-        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days")
+        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days").
         private static string GetUnit(ActiveStepViewModel step) =>
             step.AvailableUnits.First(u => u.Key == step.SelectedUnit).Value;
 
         private static string GetPeriod(SunlightStepViewModel step) =>
             step.AvailablePeriods.First(p => p.Key == step.SelectedPeriod).Value;
 
-        // The summary step is the last step, so proceeding is always possible
+        // The summary step is the last step, so proceeding is always possible.
         public bool CanProceed => true;
 
-        // Last step -> always "Finish"
+        // Last step -> always "Finish".
         public string NextButtonLabel => "Finish";
 
         /// <summary>

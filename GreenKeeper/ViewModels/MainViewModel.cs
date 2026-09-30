@@ -30,7 +30,7 @@ namespace GreenKeeper.ViewModels
         private readonly ISettingsService _settingsService;
         private ObservableCollection<Plant> _plants;
 
-        // Set all plants for the ListView
+        // Set all plants for the ListView.
         /// <summary>
         /// Important notes for OpenNotesCommand:
         /// Commands always need to be initialized in the constructor.
@@ -60,11 +60,11 @@ namespace GreenKeeper.ViewModels
 
             // Register FilterPlants as the filter predicate for the default view of plants.
             // Since both the ListView and the operation are on the same underlying collection instance,
-            // the ListView picks up this filter automatically, without needing to be changed itself
+            // the ListView picks up this filter automatically, without needing to be changed itself.
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
             // Periodically refreshes the status cards, so due date texts and the Complete button's
-            // enabled state (IsCompletable) stay up to date automatically
+            // enabled state (IsCompletable) stay up to date automatically.
             _timerService.Start(TimeSpan.FromMinutes(5), RefreshCareStatuses);
 
             // Command related to the theme
@@ -124,7 +124,7 @@ namespace GreenKeeper.ViewModels
             }
         }
 
-        // All available plants for the ListView
+        // All available plants for the ListView.
         public ObservableCollection<Plant> Plants
         {
             get { return _plants; }
@@ -153,13 +153,13 @@ namespace GreenKeeper.ViewModels
                 CareSchedule? ScheduleFor(CareType type) =>
                     SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-                // Watering: mandatory for every plant
+                // Watering: mandatory for every plant.
                 yield return new WateringStatusViewModel(
                     ScheduleFor(CareType.Watering),
                     onComplete: () => CompleteCareSchedule(CareType.Watering),
                     onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Watering)));
 
-                // Fertilizing: optional, only show the status if set for a plant
+                // Fertilizing: optional, only show the status if set for a plant.
                 var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
                 if (fertilizingSchedule != null)
                 {
@@ -170,7 +170,7 @@ namespace GreenKeeper.ViewModels
                         onRemove: () => RemoveCareSchedule(CareType.Fertilizing, "fertilizing schedule"));
                 }
 
-                // Sunlight: optional
+                // Sunlight: optional.
                 if (SelectedPlant.SunlightRequirement != null)
                 {
                     yield return new SunlightStatusViewModel(
@@ -181,7 +181,7 @@ namespace GreenKeeper.ViewModels
             }
         }
 
-        // Selected plant in the ListView
+        // Selected plant in the ListView.
         /// <summary>
         /// Reminder:
         /// An explicit "Requery" of OpenNotesCommand is not necessary.
@@ -202,7 +202,7 @@ namespace GreenKeeper.ViewModels
         }
 
         // Check if a plant is selected.
-        // Useful for visibility bindings like the status title in the dashboard
+        // Useful for visibility bindings like the status title in the dashboard.
         public bool IsPlantSelected => SelectedPlant != null;
 
         // -- Theme Section --
@@ -238,12 +238,12 @@ namespace GreenKeeper.ViewModels
 
         // Essential command to be bound to the Notes button in MainWindow.xaml.
         // It is ICommand so that the View only binds the interface and
-        // the explicit implementation remains exchangeable
+        // the explicit implementation remains exchangeable.
         public ICommand OpenNotesCommand { get; }
 
         // Notify the View that a new notes window for the given plant should be opened.
         // Will be subscribed to by MainWindow.xaml.cs (for more information, go there).
-        // The code-behind opens the window (View), while the ViewModel does not know any window class
+        // The code-behind opens the window (View), while the ViewModel does not know any window class.
         public event EventHandler<Plant>? OpenNotesRequested;
 
         /// <summary>
@@ -285,7 +285,7 @@ namespace GreenKeeper.ViewModels
                 SelectedPlant = null;
                 OnPropertyChanged(nameof(SearchText));
 
-                // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText
+                // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText.
                 CollectionViewSource.GetDefaultView(Plants).Refresh();
             }
         }
@@ -320,7 +320,7 @@ namespace GreenKeeper.ViewModels
 
         // Notifies the View that the rename dialog should be opened for a specific plant.
         // Follows the same pattern as EditScheduleRequested: the ViewModel only signals the
-        // intent, while MainWindow.xaml.cs actually opens the window
+        // intent, while MainWindow.xaml.cs actually opens the window.
         public event EventHandler<Plant>? RenamePlantRequested;
 
         /// <summary>
@@ -337,11 +337,11 @@ namespace GreenKeeper.ViewModels
             plant.Name = newName;
 
             // Plant implements no INotifyPropertyChanged, so the ListView would
-            // never notice the changed name on its own - same reason as for RefreshCareStatuses
+            // never notice the changed name on its own - same reason as for RefreshCareStatuses.
             CollectionViewSource.GetDefaultView(Plants).Refresh();
 
             // The dashboard header binds to SelectedPlant.Name, so it needs an
-            // explicit nudge as well if the renamed plant happens to be selected
+            // explicit nudge as well if the renamed plant happens to be selected.
             OnPropertyChanged(nameof(SelectedPlant));
         }
         
@@ -388,7 +388,7 @@ namespace GreenKeeper.ViewModels
 
             var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, newCareSchedule);
 
-            // Swap out any old local entry of the same care type for the saved one
+            // Swap out any old local entry of the same care type for the saved one.
             var existingLocal = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == saved.Care);
             if (existingLocal != null)
             {
@@ -452,7 +452,7 @@ namespace GreenKeeper.ViewModels
             Plants.Remove(SelectedPlant);
 
             // After removing a plant, there is no "selected" plant.
-            // Prevent the dashboard from presenting non-existent data
+            // Prevent the dashboard from presenting non-existent data.
             SelectedPlant = null;
         }
 
@@ -496,12 +496,12 @@ namespace GreenKeeper.ViewModels
             var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
             if (schedule?.IntervalAmount == null || schedule.IntervalUnit == null)
             {
-                // No saved amount or unit -> No calculation of a new interval
+                // No saved amount or unit -> No calculation of a new interval.
                 return;
             }
 
             // Calculated here, so the exact same values that get persisted to the database are
-            // also the ones applied to the local object afterwards
+            // also the ones applied to the local object afterwards.
             var newNextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, schedule.IntervalAmount.Value, schedule.IntervalUnit.Value);
             var newLastCaredAt = DateTime.Now;
 
@@ -525,7 +525,7 @@ namespace GreenKeeper.ViewModels
 
         // Care Status Edit Option
 
-        // Notify the View that the edit dialog (EditScheduleView) must be opened for a specific care type of the selected plant
+        // Notify the View that the edit dialog (EditScheduleView) must be opened for a specific care type of the selected plant.
         public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
 
 
@@ -574,7 +574,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.CareSchedules.Remove(schedule);
 
             // CareStatuses doesn't have any backing field and reads from the selected plant (SelectedPlant).
-            // The call to RefreshCareStatuses is enough to let the removed status card disappear from the ItemsControl
+            // The call to RefreshCareStatuses is enough to let the removed status card disappear from the ItemsControl.
             RefreshCareStatuses();
         }
 

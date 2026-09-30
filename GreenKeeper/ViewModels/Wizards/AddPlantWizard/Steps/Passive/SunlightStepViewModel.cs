@@ -43,7 +43,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
                 OnPropertyChanged(nameof(MaxAmount));
 
                 // An entered amount can be invalid with the new period (e.g. 100 is valid for weeks but not for days).
-                // Therefore CanProceed is indispensable when changing the unit
+                // Therefore CanProceed is indispensable when changing the unit.
                 OnPropertyChanged(nameof(CanProceed));
                 OnPropertyChanged(nameof(NextButtonLabel));
             }
@@ -77,7 +77,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
             { SunlightPeriod.Year, 8760 },      // 365 * 24
         };
 
-        // Set the limit for the selected period
+        // Set the limit for the selected period.
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
         /// <summary>
@@ -90,10 +90,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
             int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 
         // Basically the same as for the active steps (watering and fertilizing).
-        // The only difference is that you enter a positive amount of hours per period (as mentioned above) or keep it empty
+        // The only difference is that you enter a positive amount of hours per period (as mentioned above) or keep it empty.
         public bool CanProceed => true;
 
-        // Depending on the entered amount of hours per period, show "Next" or "Skip"
+        // Depending on the entered amount of hours per period, show "Next" or "Skip".
         public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";
 
         // Implementation of INotifyPropertyChanged

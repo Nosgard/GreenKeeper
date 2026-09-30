@@ -21,7 +21,7 @@ namespace GreenKeeper.Services
         /// <param name="callback">The action to invoke on every tick</param>
         void Start(TimeSpan interval, Action callback);
 
-        // Stops any currently running periodic invocation started via Start()
+        // Stops any currently running periodic invocation started via Start().
         void Stop();
     }
 }

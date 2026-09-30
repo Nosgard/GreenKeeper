@@ -18,10 +18,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public EditActiveScheduleViewModel(string title, int? initialAmount, TimeUnit initialUnit)
         {
-            // Title of the care type (Watering / Fertilizing)
+            // Title of the care type (Watering / Fertilizing).
             Title = title;
 
-            // Fill the amount text with the original value that was set in the wizard beforehand
+            // Fill the amount text with the original value that was set in the wizard beforehand.
             if (initialAmount.HasValue)
             {
                 AmountText = initialAmount.Value.ToString();

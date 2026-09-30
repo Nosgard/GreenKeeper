@@ -19,7 +19,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
 
             // A callback stand-in for the actual save logic - not expected to
-            // be called in this test, since we're only checking the initial state
+            // be called in this test, since we're only checking the initial state.
             Func<string, Task> saveNotesAsync = _ => Task.CompletedTask;
 
             // When: a NotesViewModel is created for this plant
@@ -39,7 +39,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
 
             // Captures whatever text the ViewModel attempts to save, so the test
-            // can verify it without needing a real repository/database
+            // can verify it without needing a real repository/database.
             string? savedText = null;
             Func<string, Task> saveNotesAsync = text =>
             {

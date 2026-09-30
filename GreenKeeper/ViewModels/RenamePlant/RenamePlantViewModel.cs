@@ -20,17 +20,17 @@ namespace GreenKeeper.ViewModels.RenamePlant
     {
 
         // Same limit as the Add Plant wizard's name step - it would be
-        // inconsistent to allow longer names when renaming
+        // inconsistent to allow longer names when renaming.
         public const int MaxNameLength = 50;
 
         // Holds the confirmed new name once the user has clicked Save.
-        // Stays null if the dialog was canceled
+        // Stays null if the dialog was canceled.
         public string? ConfirmedName { get; private set; }
 
         public RenamePlantViewModel(Plant plant)
         {
             // Pre-fill with the current name, so the user sees what they're
-            // changing and can make small corrections without retyping
+            // changing and can make small corrections without retyping.
             _newName = plant.Name;
 
             SaveCommand = new RelayCommand(
@@ -56,17 +56,17 @@ namespace GreenKeeper.ViewModels.RenamePlant
                 OnPropertyChanged(nameof(NewName));
 
                 // Both depend on _newName and must be re-evaluated whenever
-                // the text changes
+                // the text changes.
                 OnPropertyChanged(nameof(CharactersRemaining));
                 OnPropertyChanged(nameof(HasValidName));
             }
         }
 
-        // Shown below the input field
+        // Shown below the input field.
         public int CharactersRemaining => MaxNameLength - (_newName?.Length ?? 0);
 
         // A name consisting only of spaces would look empty in the sidebar
-        // but still pass a simple null/empty check
+        // but still pass a simple null/empty check.
         public bool HasValidName => !string.IsNullOrWhiteSpace(_newName);
 
         public ICommand SaveCommand { get; }
@@ -77,7 +77,7 @@ namespace GreenKeeper.ViewModels.RenamePlant
         private void Save()
         {
             // Trim so leading/trailing spaces don't end up in the database -
-            // they'd be invisible in the UI but affect sorting and searching
+            // they'd be invisible in the UI but affect sorting and searching.
             ConfirmedName = _newName.Trim();
 
             RequestClose?.Invoke(this, true);

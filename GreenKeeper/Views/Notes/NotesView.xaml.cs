@@ -28,7 +28,7 @@ namespace GreenKeeper.Views.Notes
         // Guards against re-entrancy: false as long as the close hasn't been confirmed yet.
         // Once set to true, the Closing handler lets the window close without intercepting it again -
         // otherwise the DialogResult assignment in ViewModel_RequestClose would immediately re-trigger
-        // Closing and loop back into the confirmation flow a second time
+        // Closing and loop back into the confirmation flow a second time.
         private bool _closeConfirmed;
 
         public NotesView(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
@@ -41,7 +41,7 @@ namespace GreenKeeper.Views.Notes
         }
 
         // Unsubscribing before closing prevents double subscriptions of the event handler
-        // when opening the same window (view) multiple times
+        // when opening the same window (view) multiple times.
         private void NotesViewModel_RequestClose(object? sender, bool? dialogResult)
         {
             _notesViewModel.RequestClose -= NotesViewModel_RequestClose;

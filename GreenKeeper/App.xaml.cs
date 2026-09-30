@@ -30,13 +30,13 @@ namespace GreenKeeper
                 await using var context = contextFactory.CreateDbContext();
 
                 // Applies every migration that hasn't run on this machine yet.
-                // On a first launch, this creates the entire schema from scratch
+                // On a first launch, this creates the entire schema from scratch.
                 await context.Database.MigrateAsync();
             }
             catch (Exception ex)
             {
                 // If preparing the database fails, the app cannot work in any meaningful way.
-                // Every feature depends on the database, so the app must shut down
+                // Every feature depends on the database, so the app must shut down.
                 MessageBox.Show(
                     $"The database could not be prepared: \n\n{ex.Message}\n\nThe application will now close",
                     "Database Error",
@@ -50,13 +50,13 @@ namespace GreenKeeper
             // Restore the theme the user picked last time. This has to happen before
             // the window is created - applying it afterwards would show the window in
             // the default theme first and only then switch. Load never throws, so with a
-            // missing or damaged settings file the app simply starts in the default theme
+            // missing or damaged settings file the app simply starts in the default theme.
             var settingsService = new SettingsService();
             var themeService = new ThemeService();
             themeService.ApplyTheme(settingsService.Load().Theme);
 
             // Create the main window manually. StartupUri would show the window immediately
-            // before the code above had any chance to run
+            // before the code above had any chance to run.
             var mainWindow = new MainWindow(themeService, settingsService);
             mainWindow.Show();
         }

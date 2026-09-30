@@ -32,11 +32,11 @@ namespace GreenKeeper
         private readonly MainViewModel _mainViewModel;
 
         // One instance to be passed on everywhere.
-        // This DialogService is primarily used for yes/no warnings
+        // This DialogService is primarily used for yes/no warnings.
         private readonly IDialogService _dialogService = new MessageBoxDialogService();
 
         // Concrete implementation of ITimerService. Created and owned here and then injected
-        // into the MainViewModel via its constructor
+        // into the MainViewModel via its constructor.
         private readonly ITimerService _timerService = new DispatcherTimerService();
 
         // Theme and settings are created in App.OnStartup, not here: the stored
@@ -48,7 +48,7 @@ namespace GreenKeeper
         private readonly IThemeService _themeService;
         private readonly ISettingsService _settingsService;
 
-        // Factory for short-lived DbContext instances - will be passed on to the repository
+        // Factory for short-lived DbContext instances - will be passed on to the repository.
         private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
 
         public MainWindow(IThemeService themeService, ISettingsService settingsService)
@@ -63,7 +63,7 @@ namespace GreenKeeper
 
             // Subscription to the event that fires "OpenNotesCommand" in the MainViewModel.
             // Opening a new window for the notes (NotesView) does not happen in the ViewModel
-            // so that it has no window references and remains testable
+            // so that it has no window references and remains testable.
             _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
 
             _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
@@ -71,20 +71,20 @@ namespace GreenKeeper
             _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
             // Stops the periodic status card refresh once this window (and therefore the application)
-            // is closed, so the timer doesn't keep firing after the app is meant to shut down
+            // is closed, so the timer doesn't keep firing after the app is meant to shut down.
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
             // The constructor cannot be async, so loading the plants will be fired
-            // via the Loaded event once the window is ready
+            // via the Loaded event once the window is ready.
             Loaded += MainWindow_Loaded;
 
             this.DataContext = _mainViewModel;
         }
 
         // The actual reaction to OpenNotesRequested, caused by the OpenNotesCommand in the ViewModel.
-        // It opens a new window and shows the notes of the given plant
+        // It opens a new window and shows the notes of the given plant.
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
             var notesView = new NotesView(
@@ -290,7 +290,7 @@ namespace GreenKeeper
             {
                 try
                 {
-                    // Await the database save before doing anything else
+                    // Await the database save before doing anything else.
                     await _mainViewModel.AddPlantAsync(WizardView.CreatedPlant);
                 }
                 catch (Exception ex)

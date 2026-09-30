@@ -30,7 +30,7 @@ namespace GreenKeeper.Views.RenamePlant
             this.DataContext = _renamePlantViewModel;
 
             // Puts the cursor straight into the input field,
-            // so the user can continue typing at the end of the current name
+            // so the user can continue typing at the end of the current name.
             Loaded += (_, _) =>
             {
                 NameTextBox.Focus();
@@ -39,11 +39,11 @@ namespace GreenKeeper.Views.RenamePlant
         }
 
         // Exposes the name to the caller (MainWindow), analogous to
-        // EditScheduleView.EditedCareSchedule - the actual persistence happens in the MainViewModel
+        // EditScheduleView.EditedCareSchedule - the actual persistence happens in the MainViewModel.
         public string? ConfirmedName => _renamePlantViewModel.ConfirmedName;
 
         // Unsubscribing before closing prevents double subscriptions of the
-        // event handler when opening the same window (view) multiple times
+        // event handler when opening the same window (view) multiple times.
         private void ViewModel_RequestClose(object? sender, bool dialogResult)
         {
             _renamePlantViewModel.RequestClose -= ViewModel_RequestClose;

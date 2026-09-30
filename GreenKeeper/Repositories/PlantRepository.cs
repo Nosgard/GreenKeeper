@@ -26,11 +26,11 @@ namespace GreenKeeper.Repositories
         public async Task<List<Plant>> GetPlantsAsync()
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             // Include: Mandatory because otherwise care schedules/sunlight requirements remain empty.
-            // AsNoTracking: Data will be shown read-only, so they won't get changed during the execution
+            // AsNoTracking: Data will be shown read-only, so they won't get changed during the execution.
             return await context.Plants
                 .Include(p => p.CareSchedules)
                 .Include(p => p.SunlightRequirement)
@@ -56,15 +56,15 @@ namespace GreenKeeper.Repositories
         public async Task<Plant> AddPlantAsync(Plant plant)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             // Marks "plant" as newly added, pending data to be written to the
-            // database on the next SaveChangesAsync() call
+            // database on the next SaveChangesAsync() call.
             context.Plants.Add(plant);
 
             // Executes the INSERT statements against the database.
-            // After that, the data is permanently stored on disk
+            // After that, the data is permanently stored on disk.
             await context.SaveChangesAsync();
 
             return plant;
@@ -77,7 +77,7 @@ namespace GreenKeeper.Repositories
         public async Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var schedule = await context.CareSchedules.FindAsync(careScheduleId);
@@ -85,7 +85,7 @@ namespace GreenKeeper.Repositories
             if (schedule == null)
             {
                 // The schedule could get deleted in some other way than via the Remove button,
-                // so give the user an explanatory exception in this case
+                // so give the user an explanatory exception in this case.
                 throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
             }
 
@@ -103,7 +103,7 @@ namespace GreenKeeper.Repositories
         public async Task DeletePlantAsync(int plantId)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var plant = await context.Plants.FindAsync(plantId);
@@ -111,7 +111,7 @@ namespace GreenKeeper.Repositories
             if (plant == null)
             {
                 // It can happen that the plant was already deleted through some
-                // other means in the meantime
+                // other means in the meantime.
                 throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
             }
 
@@ -130,7 +130,7 @@ namespace GreenKeeper.Repositories
         public async Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var existing = await context.CareSchedules
@@ -140,7 +140,7 @@ namespace GreenKeeper.Repositories
             {
                 // Remove + own SaveChangesAsync BEFORE the Add:
                 // guarantees the old row is gone
-                // before the new one is inserted, avoiding a brief clash with the unique index on (PlantId, Care)
+                // before the new one is inserted, avoiding a brief clash with the unique index on (PlantId, Care).
                 context.CareSchedules.Remove(existing);
                 await context.SaveChangesAsync();
             }
@@ -161,7 +161,7 @@ namespace GreenKeeper.Repositories
         public async Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var existing = await context.SunlightRequirements
@@ -169,7 +169,7 @@ namespace GreenKeeper.Repositories
 
             if (existing != null)
             {
-                // Remove + save first, then insert, same as AddOrReplaceCareScheduleAsync
+                // Remove + save first, then insert, same as AddOrReplaceCareScheduleAsync.
                 context.SunlightRequirements.Remove(existing);
                 await context.SaveChangesAsync();
             }
@@ -188,7 +188,7 @@ namespace GreenKeeper.Repositories
         public async Task RemoveCareScheduleAsync(int careScheduleId)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var schedule = await context.CareSchedules.FindAsync(careScheduleId);
@@ -209,7 +209,7 @@ namespace GreenKeeper.Repositories
         public async Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var requirement = await context.SunlightRequirements.FindAsync(sunlightRequirementId);
@@ -230,7 +230,7 @@ namespace GreenKeeper.Repositories
         public async Task UpdatePlantNotesAsync(int plantId, string notes)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var plant = await context.Plants.FindAsync(plantId);
@@ -247,7 +247,7 @@ namespace GreenKeeper.Repositories
         public async Task RenamePlantAsync(int plantId, string newName)
         {
             // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block
+            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             var plant = await context.Plants.FindAsync(plantId);

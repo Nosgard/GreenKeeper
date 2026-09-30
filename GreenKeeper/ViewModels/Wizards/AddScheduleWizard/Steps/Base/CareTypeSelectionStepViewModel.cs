@@ -42,7 +42,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base
                 new(CareType.Sunlight, "Sunlight"),
             };
 
-        // There is always a valid default selection, so you can always proceed
+        // There is always a valid default selection, so you can always proceed.
         public bool CanProceed => true;
 
         public string NextButtonLabel => "Next";

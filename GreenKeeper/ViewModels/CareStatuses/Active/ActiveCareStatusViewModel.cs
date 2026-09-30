@@ -36,10 +36,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         public bool IsCompletable => _schedule?.NextDueAt != null && _schedule.NextDueAt.Value.Date <= DateTime.Now.Date;
 
         // Fires the completion of the care;
-        // once it's done, the new due date is recalculated from NOW
+        // once it's done, the new due date is recalculated from NOW.
         public ICommand? CompleteCommand { get; protected set; }
 
-        // The whole logic for the conversion of the time units is handled by the TimeUnitConverter
+        // The whole logic for the conversion of the time units is handled by the TimeUnitConverter.
         /// <summary>
         /// A due date that is still ahead reads as "Due in 3 days" rather than just
         /// "3 days", so the card states what the number actually means. "Today" and

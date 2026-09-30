@@ -26,26 +26,26 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
                 OnPropertyChanged(nameof(PlantName));
 
                 // CanProceed depends on PlantName.
-                // Notify so that the Next button can be activated/deactivated
+                // Notify so that the Next button can be activated/deactivated.
                 OnPropertyChanged(nameof(CanProceed));
 
                 // Update the UI on every change so that a live counter
-                // for the remaining characters can follow along
+                // for the remaining characters can follow along.
                 OnPropertyChanged(nameof(CharactersRemaining));
 
 
             }
         }
 
-        // Helper that is used to show the remaining characters in the UI
+        // Helper that is used to show the remaining characters in the UI.
         public int CharactersRemaining => MAXNAMELENGTH - PlantName.Length;
 
 
         // Mandatory: Only active when the name is not empty and is within
-        // the maximum length
+        // the maximum length.
         public bool CanProceed => !string.IsNullOrWhiteSpace(PlantName) && PlantName.Length <= MAXNAMELENGTH;
 
-        // Because the step is mandatory, the button always shows "Next"
+        // Because the step is mandatory, the button always shows "Next".
         public string NextButtonLabel => "Next";
 
         // Implementation of INotifyPropertyChanged

@@ -20,7 +20,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
     public class AddPlantWizardViewModel : INotifyPropertyChanged
     {
         // Collected data across all steps.
-        // Will be turned into a plant object at the end of the wizard
+        // Will be turned into a plant object at the end of the wizard.
         private readonly PlantNameStepViewModel _plantNameStepViewModel = new PlantNameStepViewModel();
         private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
         private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
@@ -48,7 +48,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
                 _summaryStepViewModel,
             };
 
-            // Make the current step ready
+            // Make the current step ready.
             _currentStepIndex = 0;
             CurrentStep = _steps[_currentStepIndex];
 
@@ -77,7 +77,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
                 (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
 
                 // Once you reach the summary step, all values from the prior properties
-                // must be read (e.g. in case the user presses the Back button and changes the values)
+                // must be read (e.g. in case the user presses the Back button and changes the values).
                 if (value is SummaryStepViewModel summary)
                 {
                     summary.Refresh();
@@ -89,11 +89,11 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
         public ICommand BackCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Signals the View that the wizard will be closed
+        // Signals the View that the wizard will be closed.
         public event EventHandler<bool>? RequestClose;
 
         // After finishing the wizard, the View reads the property when RequestClose has closed the window.
-        // Only this ViewModel is allowed to set the created plant
+        // Only this ViewModel is allowed to set the created plant.
         public Plant? CreatedPlant { get; private set; }
 
         private void GoNext()
@@ -112,7 +112,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
         private void GoBack()
         {
             // Usually canExecute makes sure GoBack() is never called at index 0,
-            // but in case GoBack() is called elsewhere in the future, cover this case
+            // but in case GoBack() is called elsewhere in the future, cover this case.
             if (_currentStepIndex > 0)
             {
                 _currentStepIndex--;
@@ -141,8 +141,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             };
 
             // Watering: Mandatory field, so no further check is needed.
-            // IntervalUnit: Saves the selected time unit for calculating the next due date later on (for more go to TimeUnitConverter -> ToDueDate)
-            // NextDueAt = now + the amount and unit of the related step, calendar-exact via ToDueDate
+            // IntervalUnit: Saves the selected time unit for calculating the next due date later on (for more go to TimeUnitConverter -> ToDueDate).
+            // NextDueAt = now + the amount and unit of the related step, calendar-exact via ToDueDate.
             int wateringAmount = int.Parse(_wateringStepViewModel.AmountText);
             plant.CareSchedules.Add(new CareSchedule
             {
@@ -152,7 +152,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
                 NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, wateringAmount, _wateringStepViewModel.SelectedUnit)
             });
 
-            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value
+            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value.
             if (_fertilizingStepViewModel.HasValidAmount)
             {
                 int fertilizingAmount = int.Parse(_fertilizingStepViewModel.AmountText);
@@ -166,7 +166,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             }
 
             // Sunlight: Optional. Unlike Watering/Fertilizing you don't need any calculation.
-            // The wizard already asks for values in the exact same structure (Hours + Period)
+            // The wizard already asks for values in the exact same structure (Hours + Period).
             if (_sunlightStepViewModel.HasValidAmount)
             {
                 plant.SunlightRequirement = new SunlightRequirement

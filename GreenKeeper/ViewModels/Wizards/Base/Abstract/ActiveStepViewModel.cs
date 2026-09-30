@@ -13,7 +13,7 @@ namespace GreenKeeper.ViewModels.Wizards.Base.Abstract
     public abstract class ActiveStepViewModel : AmountAndUnitInputViewModel, IWizardStepViewModel
     {
         // Mandatory for watering + optional for fertilizing.
-        // Will be implemented by the respective class
+        // Will be implemented by the respective class.
         public abstract bool CanProceed { get; }
 
         // Default: "Next"

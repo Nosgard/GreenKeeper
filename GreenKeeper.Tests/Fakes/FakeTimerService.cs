@@ -41,7 +41,7 @@ namespace GreenKeeper.Tests.Fakes
         }
 
         // Allows a test to manually simulate a timer tick, without waiting for
-        // a real interval to elapse
+        // a real interval to elapse.
         public void TriggerTick()
         {
             _callback?.Invoke();

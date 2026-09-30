@@ -35,7 +35,7 @@ namespace GreenKeeper.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Prevents two care schedules of the same care type from being
-            // accidentally created for the same plant object
+            // accidentally created for the same plant object.
             modelBuilder.Entity<CareSchedule>()
                 .HasIndex(cs => new { cs.PlantId, cs.Care })
                 .IsUnique();

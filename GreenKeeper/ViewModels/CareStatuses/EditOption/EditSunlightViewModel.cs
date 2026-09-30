@@ -24,7 +24,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             { SunlightPeriod.Year, 8760 },
         };
 
-        // Pre-fill the fields with the current sunlight requirement
+        // Pre-fill the fields with the current sunlight requirement.
         public EditSunlightViewModel(int? initialHours, SunlightPeriod initialPeriod)
         {
             if (initialHours.HasValue)
@@ -79,7 +79,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
         // Unlike SunlightStepViewModel in the wizard, there is no option to skip.
-        // The user is actively editing an existing value, so a valid amount is always required
+        // The user is actively editing an existing value, so a valid amount is always required.
         public bool HasValidAmount =>
             int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
 

@@ -21,7 +21,7 @@ namespace GreenKeeper.Services
         private readonly DispatcherTimer _timer = new();
 
         // Stores the callback passed into Start(), so OnTick can invoke it
-        // whenever the timer fires. Nullable since no callback exists before Start() has been called first
+        // whenever the timer fires. Nullable since no callback exists before Start() has been called first.
         private Action? _callback;
 
         public void Start(TimeSpan interval, Action callback)
@@ -30,7 +30,7 @@ namespace GreenKeeper.Services
             _timer.Interval = interval;
 
             // Unsubscribe first, in case Start() is ever called more than once on the same instance.
-            // Without this, OnTick would end up subscribed multiple times
+            // Without this, OnTick would end up subscribed multiple times.
             _timer.Tick -= OnTick;
             _timer.Tick += OnTick;
 
@@ -38,7 +38,7 @@ namespace GreenKeeper.Services
         }
 
         // Wired up to DispatcherTimer.Tick. Simply forwards the tick to
-        // whatever callback was registered via Start()
+        // whatever callback was registered via Start().
         private void OnTick(object? sender, EventArgs e)
         {
             _callback?.Invoke();

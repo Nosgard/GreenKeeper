@@ -31,13 +31,13 @@ namespace GreenKeeper.ViewModels.Notes
         // Value when opening the NotesView. Reference if changes to the notes are made.
         // Used to compare via IsDirty (for more info scroll down) with the edited notes.
         // After saving changes, IsDirty "forgets" the saved changes and treats the
-        // changed notes as the original
+        // changed notes as the original.
         private string _originalNotes;
 
         // Takes the original notes so that changes can be recognized.
         // Separated from the notes in the plant object so that the
         // Cancel button can discard changes without changing the
-        // plant object in the meantime
+        // plant object in the meantime.
         private string _editableNotes;
 
         /// <summary>
@@ -99,13 +99,13 @@ namespace GreenKeeper.ViewModels.Notes
                 OnPropertyChanged(nameof(EditableNotes));
 
                 // IsDirty depends on _editableNotes.
-                // Manually signal that IsDirty could change, and with that the Save button as well
+                // Manually signal that IsDirty could change, and with that the Save button as well.
                 OnPropertyChanged(nameof(IsDirty));
             }
         }
 
         // True once the current notes differ from the original.
-        // Controls CanExecute of SaveCommand (Save button enabled/disabled)
+        // Controls CanExecute of SaveCommand (Save button enabled/disabled).
         public bool IsDirty => _editableNotes != _originalNotes;
 
         // Commands to be bound in NotesView.xaml
@@ -124,7 +124,7 @@ namespace GreenKeeper.ViewModels.Notes
 
 
         // Sets the edited text in the plant object by calling TrySaveAsync.
-        // Error handling happens inside TrySaveAsync
+        // Error handling happens inside TrySaveAsync.
         private async void Save()
         {
             await TrySaveAsync();
@@ -172,7 +172,7 @@ namespace GreenKeeper.ViewModels.Notes
                     "There are unsaved changes. Do you want to save?",
                     "Unsaved Changes");
 
-                // Act like Save + Close the View together
+                // Act like Save + Close the View together.
                 if (shouldSave)
                 {
                     bool saved = await TrySaveAsync();
@@ -183,11 +183,11 @@ namespace GreenKeeper.ViewModels.Notes
                     return;
                 }
 
-                // User chose "No"? Discard all changes and close
+                // User chose "No"? Discard all changes and close.
                 RequestClose?.Invoke(this, false);
             }
 
-            // No changes? Simply close
+            // No changes? Simply close.
             RequestClose?.Invoke(this, false);
         }
 

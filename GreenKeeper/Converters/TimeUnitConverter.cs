@@ -76,7 +76,7 @@ namespace GreenKeeper.Converters
             var due = nextDueAt.Value.Date;
             var today = reference.Date;
 
-            // The due date "Today" is determined by the calendar date to prevent a drift
+            // The due date "Today" is determined by the calendar date to prevent a drift.
             if (due == today)
             {
                 return "Today";
