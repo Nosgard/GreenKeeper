@@ -98,6 +98,39 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", nameStep.PlantName);
         }
 
+        [Fact]
+        public void PlantNameStep_GivenTypedName_CountsDownTheRemainingCharacters()
+        {
+            // Given: the name step with a listener
+            var step = new PlantNameStepViewModel();
+            var raisedProperties = new List<string>();
+            step.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: a name of 9 characters is typed
+            step.PlantName = "Aloe Vera";
+
+            // Then: 41 of the 50 characters are left, and the view learns about it
+            Assert.Equal(41, step.CharactersRemaining);
+            Assert.Contains(nameof(PlantNameStepViewModel.CharactersRemaining), raisedProperties);
+        }
+
+        [Theory]
+        [InlineData("", false)]
+        [InlineData("7", true)]
+        public void WateringStep_IsMandatory_AndAlwaysOffersNext(string amount, bool expectedCanProceed)
+        {
+            // Given: the mandatory watering step
+            var step = new WateringStepViewModel { AmountText = amount };
+
+            // When: the state of the Next button is read
+            var canProceed = step.CanProceed;
+            var label = step.NextButtonLabel;
+
+            // Then: it proceeds only with a valid amount and never offers to skip
+            Assert.Equal(expectedCanProceed, canProceed);
+            Assert.Equal("Next", label);
+        }
+
         [Theory]
         [InlineData("", "Skip")]
         [InlineData("30", "Next")]
@@ -183,7 +216,7 @@ namespace GreenKeeper.Tests.ViewModels
             var wizard = WizardAtSummary(fertilizingAmount: "30", sunlightHours: "6");
 
             // When: the summary step is read
-            var summary = Assert.IsType<SummaryStepViewModel>(wizard.CurrentStep);
+            var summary = (SummaryStepViewModel)wizard.CurrentStep;
 
             // Then: it repeats the entered values in words
             Assert.Equal("Aloe Vera", summary.PlantName);
