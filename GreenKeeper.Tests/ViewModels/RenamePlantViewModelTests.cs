@@ -1,11 +1,5 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.ViewModels.RenamePlant;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GreenKeeper.Tests.ViewModels
 {
@@ -37,7 +31,7 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new RenamePlantViewModel(plant);
 
             // Then: the counter reflects the remaining budget of the 50-character limit
-            Assert.Equal(RenamePlantViewModel.MaxNameLength - 9, viewModel.CharactersRemaining);
+            Assert.Equal(Plant.MaxNameLength - "Aloe Vera".Length, viewModel.CharactersRemaining);
         }
 
         [Fact]
@@ -87,7 +81,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.NewName = "Basil";
 
             // Then: the counter reflects the new length, not the original one
-            Assert.Equal(RenamePlantViewModel.MaxNameLength - 5, viewModel.CharactersRemaining);
+            Assert.Equal(Plant.MaxNameLength - "Basil".Length, viewModel.CharactersRemaining);
         }
 
         // -- Save Command Validation Tests --
@@ -99,8 +93,11 @@ namespace GreenKeeper.Tests.ViewModels
             var plant = new Plant { Name = "Aloe Vera" };
             var viewModel = new RenamePlantViewModel(plant);
 
-            // When / Then: saving should be possible
-            Assert.True(viewModel.SaveCommand.CanExecute(null));
+            // When: the enabled state of the Save button is read
+            var canSave = viewModel.SaveCommand.CanExecute(null);
+
+            // Then: saving should be possible
+            Assert.True(canSave);
         }
 
         [Fact]

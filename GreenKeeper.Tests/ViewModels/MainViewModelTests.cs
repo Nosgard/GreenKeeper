@@ -1,21 +1,20 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
-using GreenKeeper.Repositories;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
+using static GreenKeeper.Tests.TestPlants;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GreenKeeper.ViewModels.Themes;
 using System.Windows.Input;
 
 namespace GreenKeeper.Tests.ViewModels
 {
     public class MainViewModelTests
     {
+        // The clock every ViewModel under test runs on, so due dates are exact instead of "now".
+        private static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
+
         // -- Basic Tests --
 
         [Fact]
@@ -23,12 +22,9 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a repository seeded with one existing plant
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
+            var viewModel = CreateViewModel(plantRepository);
 
             // When: InitializeAsync is called
             await viewModel.InitializeAsync();
@@ -45,16 +41,12 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a repository already containing one plant
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             // When: a second plant is added
-            await viewModel.AddPlantAsync(new Models.Plant { Name = "Basil" });
+            await viewModel.AddPlantAsync(new Plant { Name = "Basil" });
 
             // Then: both plants should be present, not just the new one
             Assert.Equal(2, viewModel.Plants.Count);
@@ -67,19 +59,37 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a repository configured to fail when saving
             var plantRepository = new FakePlantRepository { ShouldThrowOnAdd = true };
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
+            var viewModel = CreateViewModel(plantRepository);
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-
-            // When: InitializeAsync is called
             await viewModel.InitializeAsync();
 
-            // Then: adding a plant should propagate the exception and the plant should NOT appear in the UI-bound collection
-            await Assert.ThrowsAsync<InvalidOperationException>(
-                () => viewModel.AddPlantAsync(new Models.Plant { Name = "Basil" }));
+            // When: a plant is added
+            var exception = await Record.ExceptionAsync(() => viewModel.AddPlantAsync(new Plant { Name = "Basil" }));
 
+            // Then: the exception is propagated and the plant does NOT appear in the UI-bound collection
+            Assert.IsType<InvalidOperationException>(exception);
             Assert.Empty(viewModel.Plants);
+        }
+
+        [Fact]
+        public async Task AddPlantAsync_GivenPlantWithSchedules_StartsTheirIntervalsNow()
+        {
+            // Given: a plant from the wizard, watered every 7 days and fertilized every 30 days, without due dates yet
+            var plantRepository = new FakePlantRepository();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
+
+            // When: the plant is added
+            await viewModel.AddPlantAsync(plant);
+
+            // Then: every schedule counts as cared for now and is due one interval later
+            var persisted = (await plantRepository.GetPlantsAsync()).Single();
+            var watering = persisted.CareSchedules.Single(s => s.Care == CareType.Watering);
+            var fertilizing = persisted.CareSchedules.Single(s => s.Care == CareType.Fertilizing);
+            Assert.Equal(Now.AddDays(7), watering.NextDueAt);
+            Assert.Equal(Now.AddDays(30), fertilizing.NextDueAt);
+            Assert.Equal(Now, watering.LastCaredAt);
+            Assert.Equal(Now, fertilizing.LastCaredAt);
         }
 
         // -- Delete Plant --
@@ -90,13 +100,11 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a repository with one plant, currently selected, and the
             // dialog service configured to simulate the user choosing "Yes"
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // When: DeletePlantCommand is executed
@@ -114,13 +122,11 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: a repository with one plant, currently selected, and the
             // dialog service configured to simulate the user choosing "No"
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
             var dialogService = new FakeDialogService { ConfirmResult = false };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             var selectedPlant = viewModel.Plants[0];
             viewModel.SelectedPlant = selectedPlant;
 
@@ -138,13 +144,11 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a repository configured to fail on delete, one plant selected, and the user confirming the deletion
             var plantRepository = new FakePlantRepository { ShouldThrowOnDelete = true };
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             var selectedPlant = viewModel.Plants[0];
             viewModel.SelectedPlant = selectedPlant;
 
@@ -165,13 +169,9 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: an initialized MainViewModel with one plant, nothing selected yet
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             // Sanity check on the initial state, before the actual "When" happens.
             Assert.False(viewModel.IsPlantSelected);
@@ -199,13 +199,9 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: an initialized MainViewModel with a plant currently selected
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // Sanity check before the actual "When".
@@ -224,13 +220,9 @@ namespace GreenKeeper.Tests.ViewModels
             // Given: an initialized MainViewModel with a plant selected, and
             // SearchText already set to a specific value
             var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(new Models.Plant { Name = "Aloe Vera" });
+            plantRepository.SeedPlants(AloeVera());
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SearchText = "al";
             viewModel.SelectedPlant = viewModel.Plants[0];
 
@@ -249,17 +241,12 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task CareStatuses_GivenPlantWithOnlyWatering_ReturnsOnlyWateringCard()
         {
             // Given: a plant with only a care schedule for Watering, no Fertilizing, no Sunlight
-            var plant = new Plant { Name = "Cactus" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = PlantNamed("Cactus", WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // When: CareStatuses is read
@@ -274,19 +261,13 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task CareStatuses_GivenPlantWithAllCareTypes_ReturnsAllThreeStatusCardsInOrder()
         {
             // Given: a plant with Watering, Fertilizing and SunlightRequirement all set
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // When: CareStatuses is read
@@ -303,18 +284,13 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task CareStatuses_GivenPlantWithWateringAndSUnlightButNoFertilizing_ReturnsOnlyThoseTwoStatusCards()
         {
             // Given: a plant with Watering and SunlightRequirement, but no Fertilizing
-            var plant = new Plant { Name = "Snake Plant" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 14, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 4, Period = SunlightPeriod.Day };
+            var plant = PlantNamed("Snake Plant", WateringEveryDays(14));
+            plant.SunlightRequirement = DailySunlight(4);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // When: CareStatuses is read
@@ -332,52 +308,44 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task WateringCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDate()
         {
             // Given: a plant with an overdue Watering care schedule
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             plant.CareSchedules.Add(new CareSchedule
             {
                 Care = CareType.Watering,
                 IntervalAmount = 7,
                 IntervalUnit = TimeUnit.Days,
-                NextDueAt = DateTime.Now.AddDays(-1)
+                NextDueAt = Now.AddDays(-1)
             });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
-            var beforeClick = DateTime.Now;
-
             // When: CompleteCommand is executed
             wateringCard.CompleteCommand!.Execute(null);
 
-            var afterClick = DateTime.Now;
-
-            // Then: the persisted schedule reflects a next due date (NextDueAt) roughly 7 days from now,
-            // and the last date of care (LastCaredAt) roughly now - checked via the repository, not
+            // Then: the persisted schedule reflects a next due date (NextDueAt) exactly 7 days from now,
+            // and the last date of care (LastCaredAt) now - checked via the repository, not
             // just the in-memory ViewModel state, to confirm actual persistence
             var persistedSchedule = (await plantRepository.GetPlantsAsync())
                 .Single()
                 .CareSchedules
                 .Single(s => s.Care == CareType.Watering);
 
-            Assert.InRange(persistedSchedule.NextDueAt!.Value, beforeClick.AddDays(7).AddSeconds(-2), afterClick.AddDays(7).AddSeconds(2));
-            Assert.InRange(persistedSchedule.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
+            Assert.Equal(Now.AddDays(7), persistedSchedule.NextDueAt);
+            Assert.Equal(Now, persistedSchedule.LastCaredAt);
         }
 
         [Fact]
         public async Task FertilizingCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDateWithoutAffectingWatering()
         {
             // Given: a plant with both a Watering schedule (untouched reference point) and an overdue Fertilizing schedule
-            var plant = new Plant { Name = "Aloe Vera" };
-            var originalWateringDueDate = DateTime.Now.AddDays(3);
+            var plant = AloeVera();
+            var originalWateringDueDate = Now.AddDays(3);
 
             plant.CareSchedules.Add(new CareSchedule
             {
@@ -391,35 +359,27 @@ namespace GreenKeeper.Tests.ViewModels
                 Care = CareType.Fertilizing,
                 IntervalAmount = 30,
                 IntervalUnit = TimeUnit.Days,
-                NextDueAt = DateTime.Now.AddDays(-1)
+                NextDueAt = Now.AddDays(-1)
             });
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
-            var beforeClick = DateTime.Now;
-
             // When: CompleteCommand is executed on the Fertilizing card
             fertilizingCard.CompleteCommand!.Execute(null);
-
-            var afterClick = DateTime.Now;
 
             // Then: only the Fertilizing schedule was recalculated and persisted, while the due date of Watering remains completely untouched
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
             var persistedFertilizing = persistedSchedules.Single(s => s.Care == CareType.Fertilizing);
             var persistedWatering = persistedSchedules.Single(s => s.Care == CareType.Watering);
 
-            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeClick.AddDays(30).AddSeconds(-2), afterClick.AddDays(30).AddSeconds(2));
-            Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeClick.AddSeconds(-2), afterClick.AddSeconds(2));
+            Assert.Equal(Now.AddDays(30), persistedFertilizing.NextDueAt);
+            Assert.Equal(Now, persistedFertilizing.LastCaredAt);
 
             Assert.Equal(originalWateringDueDate, persistedWatering.NextDueAt);
             Assert.Null(persistedWatering.LastCaredAt);
@@ -429,8 +389,8 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task WateringCard_CompleteCommand_GivenMissingIntervalData_DoesNothing()
         {
             // Given: a plant with a Watering schedule that has NO IntervalAmount/IntervalUnit set, but the next due date (NextDueAt) is still present
-            var originalDueDate = DateTime.Now.AddDays(-1);
-            var plant = new Plant { Name = "Aloe Vera" };
+            var originalDueDate = Now.AddDays(-1);
+            var plant = AloeVera();
             plant.CareSchedules.Add(new CareSchedule
             {
                 Care = CareType.Watering,
@@ -442,11 +402,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
@@ -472,18 +428,14 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with both Watering and Fertilizing schedules, and the
             // dialog service configured to simulate the user choosing "Yes"
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>();
@@ -510,18 +462,14 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with Watering and Fertilizing schedules, and the
             // dialog service configured to simulate the user choosing "No"
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = false };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
@@ -539,18 +487,14 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with Watering and Fertilizing schedules, the user
             // confirming the removal, but the repository configured to fail
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveCareSchedule = true };
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
@@ -573,18 +517,15 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with a Watering schedule and a sunlight requirement,
             // and the dialog service configured to simulate the user choosing "Yes"
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
@@ -611,18 +552,15 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with a Watering schedule and a sunlight requirement,
             // and the dialog service configured to simulate the user choosing "No"
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = false };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
@@ -643,18 +581,15 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with a Watering schedule and a sunlight requirement,
             // the user confirming the removal, but the repository configured to fail
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnRemoveSunlightRequirement = true };
             plantRepository.SeedPlants(plant);
 
             var dialogService = new FakeDialogService { ConfirmResult = true };
-            var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var sunlightCard = viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single();
@@ -679,11 +614,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: an initialized MainViewModel with no plant selected
             var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             // Sanity check: nothing selected.
             Assert.Null(viewModel.SelectedPlant);
@@ -707,17 +638,12 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant is selected, but the new care schedule has no
             // IntervalAmount/IntervalUnit set
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var incompleteSchedule = new CareSchedule
@@ -738,17 +664,12 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceCareSchedulesAsync_GivenNewCareType_PersistsAndAddsToCareStatuses()
         {
             // Given: a plant with only a Watering schedule, no Fertilizing yet
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var newFertilizingSchedule = new CareSchedule
@@ -758,12 +679,8 @@ namespace GreenKeeper.Tests.ViewModels
                 IntervalUnit = TimeUnit.Days
             };
 
-            var beforeCall = DateTime.Now;
-
             // When: the new Fertilizing schedule is added
             await viewModel.AddOrReplaceCareScheduleAsync(newFertilizingSchedule);
-
-            var afterCall = DateTime.Now;
 
             // Then: it was persisted with a correctly calculated due date and now appears among CareStatuses, alongside the existing Watering card
             var persistedFertilizing = (await plantRepository.GetPlantsAsync())
@@ -771,8 +688,8 @@ namespace GreenKeeper.Tests.ViewModels
                 .CareSchedules
                 .Single(s => s.Care == CareType.Fertilizing);
 
-            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(30).AddSeconds(-2), afterCall.AddDays(30).AddSeconds(2));
-            Assert.InRange(persistedFertilizing.LastCaredAt!.Value, beforeCall.AddSeconds(-2), afterCall.AddSeconds(2));
+            Assert.Equal(Now.AddDays(30), persistedFertilizing.NextDueAt);
+            Assert.Equal(Now, persistedFertilizing.LastCaredAt);
 
             var careStatuses = viewModel.CareStatuses.ToList();
             Assert.Contains(careStatuses, c => c is WateringStatusViewModel);
@@ -783,18 +700,12 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceCareScheduleAsync_GivenExistingCareType_ReplacesWithoutDuplicating()
         {
             // Given: a plant with an existing Fertilizing schedule (30-day interval)
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care= CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Fertilizing, IntervalAmount = 30, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // The replacement schedule uses a different interval (14 days instead of 30).
@@ -805,19 +716,15 @@ namespace GreenKeeper.Tests.ViewModels
                 IntervalUnit = TimeUnit.Days
             };
 
-            var beforeCall = DateTime.Now;
-
             // When: the Fertilizing schedule is replaced
             await viewModel.AddOrReplaceCareScheduleAsync(replacementSchedule);
-
-            var afterCall = DateTime.Now;
 
             // Then: exactly ONE Fertilizing entry remains, with the new interval - no duplicate. Watering remains untouched and CareStatuses shows exactly two cards
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
             var persistedFertilizing = persistedSchedules.Where(s => s.Care == CareType.Fertilizing).Single();
 
             Assert.Equal(14, persistedFertilizing.IntervalAmount);
-            Assert.InRange(persistedFertilizing.NextDueAt!.Value, beforeCall.AddDays(14).AddSeconds(-2), afterCall.AddDays(14).AddSeconds(2));
+            Assert.Equal(Now.AddDays(14), persistedFertilizing.NextDueAt);
 
             Assert.Single(persistedSchedules, s => s.Care == CareType.Watering);
             Assert.Equal(2, viewModel.CareStatuses.Count());
@@ -828,17 +735,12 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with only Watering, and the repository configured to
             // fail when adding/replacing a care schedule
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceCareSchedule = true };
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var newFertilizingSchedule = new CareSchedule
@@ -861,11 +763,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: an initialized MainViewModel with no plant selected
             var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             // Sanity check: nothing selected.
             Assert.Null(viewModel.SelectedPlant);
@@ -886,17 +784,12 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceSunlightRequirementAsync_GivenNoExistingRequirement_PersistsAndAddsToCareStatuses()
         {
             // Given: a plant with only a Watering schedule, no sunlight requirement yet
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var newRequirement = new SunlightRequirement
@@ -926,18 +819,13 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddOrReplaceSunlightRequirementAsync_GivenExistingRequirement_ReplaceWithNewValues()
         {
             // Given: a plant with an existing sunlight requirement (6 hours per day)
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
-            plant.SunlightRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // The replacement uses different values (3 hours per week instead of 6 per day).
@@ -960,17 +848,12 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a plant with only Watering, and the repository configured to
             // fail when adding/replacing a sunlight requirement
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository { ShouldThrowOnAddOrReplaceSunlightRequirement = true };
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var newRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
@@ -995,11 +878,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             var selectedPlant = viewModel.Plants[0];
 
@@ -1023,11 +902,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plantRepository = new FakePlantRepository { ShouldThrowOnUpdateNotes = true };
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             var selectedPlant = viewModel.Plants[0];
 
@@ -1048,12 +923,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task Command_GivenNoSelectedPlant_CanExecuteReturnsFalse(string commandName)
         {
             // Given: an initialized MainViewModel with no plant selected
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync();
 
             // When: Command is set
             var command = GetCommand(viewModel, commandName);
@@ -1069,15 +939,11 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task Command_GivenSelectedPlant_CanExecuteReturnsTrue(string commandName)
         {
             // Given: an initialized MainViewModel with a plant selected
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             // When: Command is set
@@ -1091,12 +957,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddPlantCommand_Execute_RaisesAddPlantRequested()
         {
             // Given: an initialized MainViewModel
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync();
 
             int eventRaisedCount = 0;
             viewModel.AddPlantRequested += (_, _) => eventRaisedCount++;
@@ -1112,15 +973,11 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task AddScheduleCommand_Execute_RaisesAddScheduleRequestedWithSelectedPlant()
         {
             // Given: an initialized MainViewModel with a plant selected
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             Plant? raisedPlant = null;
@@ -1144,15 +1001,11 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task OpenNotesCommand_Execute_RaisesOpenNotesRequestedWithSelectedPlant()
         {
             // Given: an initialized MainViewModel with a plant selected
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             Plant? raisedPlant = null;
@@ -1176,17 +1029,12 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task WateringCard_EditCommand_RaisesEditScheduleRequestedWithPlantAndCareType()
         {
             // Given: an initialized MainViewModel with a plant that has a Watering schedule
-            var plant = new Plant { Name = "Aloe Vera" };
-            plant.CareSchedules.Add(new CareSchedule { Care = CareType.Watering, IntervalAmount = 7, IntervalUnit = TimeUnit.Days });
+            var plant = AloeVera(WateringEveryDays(7));
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
             var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
@@ -1225,12 +1073,10 @@ namespace GreenKeeper.Tests.ViewModels
         public void Constructor_GivenTimerService_StartsTimerWithFiveMinuteInterval()
         {
             // Given: a fresh FakeTimerService
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
             // When: a MainViewModel is constructed with it
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
+            CreateViewModel(timerService: timerService);
 
             // Then: Start was called with a 5-minute interval
             Assert.True(timerService.StartWasCalled);
@@ -1241,12 +1087,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task RefreshCareStatuses_WhenCalled_RaisesPropertyChangedForCareStatuses()
         {
             // Given: an initialized MainViewModel
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync();
 
             var raisedProperties = new List<string>();
             viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
@@ -1261,12 +1102,9 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SimulatedTimerTick_WhenTriggered_RaisesPropertyChangedForCareStatuses()
         {
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(timerService: timerService);
 
             var raisedProperties = new List<string>();
             viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
@@ -1283,12 +1121,9 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task StopCareStatusRefreshTimer_WhenCalled_StopsTheTimerService()
         {
             // Given: an initialized MainViewModel
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
             var timerService = new FakeTimerService();
 
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(timerService: timerService);
 
             // When: StopCareStatusRefreshTimer is called
             viewModel.StopCareStatusRefreshTimer();
@@ -1303,15 +1138,11 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task RenamePlantCommand_GivenPlantParameter_CanExecuteReturnsTrue()
         {
             // Given: an initialized MainViewModel and a plant
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             // When: CanExecute is evaluated with a plant as parameter
             var canExecute = viewModel.RenamePlantCommand.CanExecute(viewModel.Plants[0]);
@@ -1324,12 +1155,7 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task RenamePlantCommand_GivenNullParameter_CanExecuteReturnsFalse()
         {
             // Given: an initialized MainViewModel
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync();
 
             // When: CanExecute is evaluated without a plant
             var canExecute = viewModel.RenamePlantCommand.CanExecute(null);
@@ -1342,15 +1168,11 @@ namespace GreenKeeper.Tests.ViewModels
         public async Task RenamePlantAsync_GivenRepositoryThrows_PropagatesExceptionAndKeepsOldName()
         {
             // Given: a plant and a repository configured to fail on rename
-            var plant = new Plant { Name = "Aloe Vera" };
+            var plant = AloeVera();
             var plantRepository = new FakePlantRepository { ShouldThrowOnRename = true };
             plantRepository.SeedPlants(plant);
 
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-            await viewModel.InitializeAsync();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             var selectedPlant = viewModel.Plants[0];
 
@@ -1364,187 +1186,31 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", selectedPlant.Name);
         }
 
-        // -- Theme Tests --
+        // -- Helpers --
 
-        [Fact]
-        public void IsDarkTheme_GivenBrightThemeIsActive_ReturnsFalse()
+        // Builds a ViewModel on the given fakes; the ones a test does not mention are fresh defaults.
+        private static MainViewModel CreateViewModel(
+            FakePlantRepository? plantRepository = null,
+            FakeDialogService? dialogService = null,
+            FakeTimerService? timerService = null)
         {
-            // Given: a ViewModel whose theme service reports the bright theme
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, new FakeSettingsService());
-
-            // When: IsDarkTheme is read
-            var isDarkTheme = viewModel.IsDarkTheme;
-
-            // Then: it should be false, so the toggle button shows the moon
-            Assert.False(isDarkTheme);
+            return new MainViewModel(
+                plantRepository ?? new FakePlantRepository(),
+                dialogService ?? new FakeDialogService(),
+                timerService ?? new FakeTimerService(),
+                new FakeTimeProvider(Now),
+                new ThemeViewModel(new FakeThemeService(), new FakeSettingsService()));
         }
 
-        [Fact]
-        public void IsDarkTheme_GivenDarkThemeIsActive_ReturnsTrue()
+        // Same, but with the plants of the repository already loaded.
+        private static async Task<MainViewModel> CreateInitializedViewModelAsync(
+            FakePlantRepository? plantRepository = null,
+            FakeDialogService? dialogService = null,
+            FakeTimerService? timerService = null)
         {
-            // Given: a theme service switched to dark before the ViewModel is built.
-            // The fake has no separate seeding method, so its own ApplyTheme sets
-            // up the starting state - exactly what the real service would have
-            // done when App restored a stored theme at startup
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-            themeService.ApplyTheme(Theme.Dark);
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, new FakeSettingsService());
-
-            // When: IsDarkTheme is read
-            var isDarkTheme = viewModel.IsDarkTheme;
-
-            // Then: it should be true, so the toggle button shows the sun
-            Assert.True(isDarkTheme);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_GivenBrightIsActive_AppliesDark()
-        {
-            // Given: a ViewModel running on the bright theme
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, new FakeSettingsService());
-
-            // When: the toggle command is executed
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: the dark theme should have been applied
-            Assert.Equal(Theme.Dark, themeService.CurrentTheme);
-            Assert.True(viewModel.IsDarkTheme);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_GivenDarkIsActive_AppliesBright()
-        {
-            // Given: a ViewModel running on the dark theme
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-            themeService.ApplyTheme(Theme.Dark);
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, new FakeSettingsService());
-
-            // When: the toggle command is executed
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: the bright theme should have been applied - the toggle works
-            // in both directions, not just away from the default
-            Assert.Equal(Theme.Bright, themeService.CurrentTheme);
-            Assert.False(viewModel.IsDarkTheme);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_WhenExecuted_AppliesThemeExactlyOnce()
-        {
-            // Given: a fresh theme service that has not been asked to apply anything
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, new FakeSettingsService());
-
-            // When: the toggle command is executed once
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: ApplyTheme ran exactly once. Applying twice would be invisible
-            // in the end state but would restart the color transition mid-flight
-            Assert.Equal(1, themeService.ApplyThemeCallCount);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_WhenExecuted_RaisesPropertyChangedForIsDarkTheme()
-        {
-            // Given: a ViewModel whose PropertyChanged events are recorded
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-
-            var raisedProperties = new List<string>();
-            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
-
-            // When: the toggle command is executed
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: IsDarkTheme was announced. Without this the colors would change
-            // but the toggle button would keep showing the icon of the old theme
-            Assert.Contains(nameof(MainViewModel.IsDarkTheme), raisedProperties);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_WhenExecuted_PersistsNewThemeToSettings()
-        {
-            // Given: a ViewModel on the bright theme with an empty settings store
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var settingsService = new FakeSettingsService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), settingsService);
-
-            // When: the toggle command is executed
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: the new theme was written once, so it survives the next start
-            Assert.Equal(1, settingsService.SaveCallCount);
-            Assert.Equal(Theme.Dark, settingsService.Settings.Theme);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_WhenExecutedTwice_ReturnsToOriginalThemeAndPersistsIt()
-        {
-            // Given: a ViewModel on the bright theme
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-            var themeService = new FakeThemeService();
-            var settingsService = new FakeSettingsService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, themeService, settingsService);
-
-            // When: the toggle command is executed twice
-            viewModel.ToggleThemeCommand.Execute(null);
-            viewModel.ToggleThemeCommand.Execute(null);
-
-            // Then: both the applied theme and the stored one are back where they
-            // started - the stored value follows every switch, not just the first
-            Assert.Equal(Theme.Bright, themeService.CurrentTheme);
-            Assert.Equal(Theme.Bright, settingsService.Settings.Theme);
-            Assert.Equal(2, settingsService.SaveCallCount);
-        }
-
-        [Fact]
-        public void ToggleThemeCommand_CanExecute_IsAlwaysTrue()
-        {
-            // Given: a ViewModel without any plant selected - the state that
-            // disables the other commands
-            var plantRepository = new FakePlantRepository();
-            var dialogService = new FakeDialogService();
-            var timerService = new FakeTimerService();
-
-            var viewModel = new MainViewModel(plantRepository, dialogService, timerService, new FakeThemeService(), new FakeSettingsService());
-
-            // When: CanExecute is evaluated
-            var canExecute = viewModel.ToggleThemeCommand.CanExecute(null);
-
-            // Then: switching the theme never depends on a selection
-            Assert.True(canExecute);
-            Assert.Null(viewModel.SelectedPlant);
+            var viewModel = CreateViewModel(plantRepository, dialogService, timerService);
+            await viewModel.InitializeAsync();
+            return viewModel;
         }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.Notes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Tests.ViewModels
 {
@@ -35,7 +30,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
         {
             // Given: a plant with existing notes, and EditableNotes changed to a new value
-            var plant = new Plant { Name = "Aloe Vera", Notes ="Old notes"};
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService();
 
             // Captures whatever text the ViewModel attempts to save, so the test

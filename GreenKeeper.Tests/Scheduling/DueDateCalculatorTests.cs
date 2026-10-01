@@ -1,192 +1,78 @@
-﻿using GreenKeeper.Converters;
-using GreenKeeper.Models.Enums;
-using System;
-using System.Collections.Generic;
+﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GreenKeeper.Tests.Converters
+namespace GreenKeeper.Tests.Scheduling
 {
-    public class TimeUnitConvertersTests
+    public class DueDateCalculatorTests
     {
+        // Every text is measured against the same pinned "today", so the results do
+        // not depend on the calendar position of the day the tests happen to run on.
+        private static readonly DateTime Today = new(2025, 5, 1);
 
         [Fact]
         public void ToDueDateText_GivenDueDateIsToday_ReturnsToday()
         {
-            // Given: a due date that falls on the current day
-            var nextDueAt = DateTime.Now;
+            // Given: a due date that falls on the current day, later in the day
+            var nextDueAt = Today.AddHours(15);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
             // Then: the result should read "Today"
             Assert.Equal("Today", result);
         }
 
         /// <summary>
-        /// Regression test for a historical bug: a due date exactly one calendar day
-        /// in the past used to be displayed as "Overdue for 0 days" instead of
-        /// "Overdue for 1 day". The cause was comparing the full, time-of-day-inclusive
-        /// due date directly against an already Date-truncated "today" value - since
-        /// less than 24 full hours had elapsed (due to the leftover time-of-day component),
-        /// the day difference was truncated to 0 instead of being calculated on a
-        /// pure calendar-day basis.
+        /// The one-day case is a regression test for a historical bug: a due date exactly
+        /// one calendar day in the past used to be displayed as "Overdue for 0 days"
+        /// instead of "Overdue for 1 day". The cause was comparing the full,
+        /// time-of-day-inclusive due date directly against an already Date-truncated
+        /// "today" value - since less than 24 full hours had elapsed, the day difference
+        /// was truncated to 0 instead of being calculated on a pure calendar-day basis.
         /// </summary>
-        [Fact]
-        public void ToDueDateText_GivenDueDateOneDayOverdue_ReturnsOverdueForOneDay()
-        {
-            // Given: a due date exactly one calendar day in the past
-            var nextDueAt = DateTime.Now.AddDays(-1);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should read "Overdue for 1 day", not "0 days"
-            Assert.Equal("Overdue for 1 day", result);
-        }
-
-        /// <summary>
-        /// Regression test: 35 days overdue used to be rounded up to "2 months".
-        /// Only whole calendar units count, so everything after the first full
-        /// month is dropped.
-        /// </summary>
-        [Fact]
-        public void ToDueDateText_GivenDueDate35DaysOverdue_ReturnsOverdueForOneMonth()
-        {
-            // Given: a due date 35 days in the past
-            var nextDueAt = DateTime.Now.AddDays(-35);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should read "Overdue for 1 month"
-            Assert.Equal("Overdue for 1 month", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateTwoMonthsOverdue_ReturnsOverdueForTwoMonths()
-        {
-            // Given: a due date exactly two calendar months in the past
-            var nextDueAt = DateTime.Now.AddMonths(-2);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the plural form "Overdue for 2 months"
-            Assert.Equal("Overdue for 2 months", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateOneYearOverdue_ReturnsOverdueForOneYear()
-        {
-            // Given: a due date exactly one calendar year in the past
-            var nextDueAt = DateTime.Now.AddYears(-1);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should read "Overdue for 1 year"
-            Assert.Equal("Overdue for 1 year", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateTwoYearsOverdue_ReturnsOverdueForTwoYears()
-        {
-            // Given: a due date exactly two calendar years in the past
-            var nextDueAt = DateTime.Now.AddYears(-2);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the plural form "Overdue for 2 years"
-            Assert.Equal("Overdue for 2 years", result);
-        }
-
         [Theory]
-        [InlineData(2, "Overdue for 2 days")]
-        [InlineData(7, "Overdue for 1 week")]
-        [InlineData(14, "Overdue for 2 weeks")]
-        public void ToDueDateText_GivenOverdueDueDateInDaysOrWeeks_UsesCorrectSingularOrPluralUnit(int daysOverdue, string expected)
+        [InlineData(1, TimeUnit.Days, "Overdue for 1 day")]
+        [InlineData(2, TimeUnit.Days, "Overdue for 2 days")]
+        [InlineData(1, TimeUnit.Weeks, "Overdue for 1 week")]
+        [InlineData(2, TimeUnit.Weeks, "Overdue for 2 weeks")]
+        [InlineData(35, TimeUnit.Days, "Overdue for 1 month")]
+        [InlineData(2, TimeUnit.Months, "Overdue for 2 months")]
+        [InlineData(1, TimeUnit.Years, "Overdue for 1 year")]
+        [InlineData(2, TimeUnit.Years, "Overdue for 2 years")]
+        public void ToDueDateText_GivenOverdueSpan_ReportsTheCompletedUnitInSingularOrPlural(
+            int amount, TimeUnit unit, string expected)
         {
-            // Given: a due date daysOverdue days in the past
-            var nextDueAt = DateTime.Now.AddDays(-daysOverdue);
+            // Given: a due date that lies the given span in the past
+            var nextDueAt = DueDateCalculator.ToDueDate(Today, -amount, unit);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the unit label should be singular for an amount of 1, plural otherwise
+            // Then: the span reads as overdue, in the largest unit that has completely elapsed
             Assert.Equal(expected, result);
         }
 
         [Theory]
-        [InlineData(1, "1 day")]
-        [InlineData(3, "3 days")]
-        [InlineData(7, "1 week")]
-        [InlineData(14, "2 weeks")]
-        public void ToDueDateText_GivenUpcomingDueDateInDaysOrWeeks_UsesCorrectSingularOrPluralUnit(int daysFromNow, string expected)
+        [InlineData(1, TimeUnit.Days, "1 day")]
+        [InlineData(3, TimeUnit.Days, "3 days")]
+        [InlineData(1, TimeUnit.Weeks, "1 week")]
+        [InlineData(2, TimeUnit.Weeks, "2 weeks")]
+        [InlineData(1, TimeUnit.Months, "1 month")]
+        [InlineData(2, TimeUnit.Months, "2 months")]
+        [InlineData(1, TimeUnit.Years, "1 year")]
+        [InlineData(2, TimeUnit.Years, "2 years")]
+        public void ToDueDateText_GivenUpcomingSpan_ReportsTheCompletedUnitInSingularOrPlural(
+            int amount, TimeUnit unit, string expected)
         {
-            // Given: a due date daysFromNow days in the future
-            var nextDueAt = DateTime.Now.AddDays(daysFromNow);
+            // Given: a due date that lies the given span ahead
+            var nextDueAt = DueDateCalculator.ToDueDate(Today, amount, unit);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the unit label should be singular for an amount of 1, plural otherwise
+            // Then: the span is reported in the largest unit that has completely elapsed
             Assert.Equal(expected, result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateOneMonthInFuture_ReturnsOneMonthSingular()
-        {
-            // Given: a due date exactly one calendar month in the future
-            var nextDueAt = DateTime.Now.AddMonths(1);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the singular form "1 month"
-            Assert.Equal("1 month", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateTwoMonthsInFuture_ReturnsTwoMonthsPlural()
-        {
-            // Given: a due date exactly two calendar months in the future
-            var nextDueAt = DateTime.Now.AddMonths(2);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the plural form "2 months"
-            Assert.Equal("2 months", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateOneYearInFuture_ReturnsOneYearSingular()
-        {
-            // Given: a due date exactly one calendar year in the future
-            var nextDueAt = DateTime.Now.AddYears(1);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the singular form "1 year"
-            Assert.Equal("1 year", result);
-        }
-
-        [Fact]
-        public void ToDueDateText_GivenDueDateTwoYearsInFuture_ReturnsTwoYearsPlural()
-        {
-            // Given: a due date exactly two calendar years in the future
-            var nextDueAt = DateTime.Now.AddYears(2);
-
-            // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
-
-            // Then: the result should use the plural form "2 years"
-            Assert.Equal("2 years", result);
         }
 
         /// <summary>
@@ -216,7 +102,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = DateTime.Parse(due, CultureInfo.InvariantCulture);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: the span counts as a full month, not as four weeks
             Assert.Equal("1 month", result);
@@ -238,7 +124,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = DateTime.Parse(due, CultureInfo.InvariantCulture);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: the span counts as a full month, not as four weeks
             Assert.Equal("Overdue for 1 month", result);
@@ -257,7 +143,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = new DateTime(2024, 2, 29);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: the anniversary counts as a full year
             Assert.Equal("Overdue for 1 year", result);
@@ -281,7 +167,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = DateTime.Parse(due, CultureInfo.InvariantCulture);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: the unit changes exactly at the completed year
             Assert.Equal(expected, result);
@@ -291,10 +177,10 @@ namespace GreenKeeper.Tests.Converters
         public void ToDueDateText_GivenDueDateJustUnderOneYearAway_StillReportsElevenMonths()
         {
             // Given: a due date a week short of a full calendar year in the future
-            var nextDueAt = DateTime.Now.AddMonths(12).AddDays(-7);
+            var nextDueAt = Today.AddMonths(12).AddDays(-7);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
             // Then: the not-yet-completed twelfth month is not counted
             Assert.Equal("11 months", result);
@@ -304,10 +190,10 @@ namespace GreenKeeper.Tests.Converters
         public void ToDueDateText_GivenDueDateJustUnderOneYearOverdue_StillReportsElevenMonths()
         {
             // Given: a due date a week short of a full calendar year in the past
-            var nextDueAt = DateTime.Now.AddMonths(-12).AddDays(7);
+            var nextDueAt = Today.AddMonths(-12).AddDays(7);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
             // Then: the not-yet-completed twelfth month is not counted
             Assert.Equal("Overdue for 11 months", result);
@@ -330,8 +216,8 @@ namespace GreenKeeper.Tests.Converters
                 for (int days = 300; days <= 400; days++)
                 {
                     // When: the due date text is calculated in both directions
-                    var upcoming = TimeUnitConverter.ToDueDateText(reference.AddDays(days), reference);
-                    var overdue = TimeUnitConverter.ToDueDateText(reference.AddDays(-days), reference);
+                    var upcoming = DueDateCalculator.ToDueDateText(reference.AddDays(days), reference);
+                    var overdue = DueDateCalculator.ToDueDateText(reference.AddDays(-days), reference);
 
                     // Then: neither direction ever names twelve months
                     Assert.DoesNotContain("12 months", upcoming);
@@ -358,7 +244,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = reference.AddDays(days);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: only whole weeks are counted, the partial one is dropped
             Assert.Equal(expected, result);
@@ -388,7 +274,7 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = reference.AddDays(days);
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
             // Then: the unit changes exactly one day after the larger one is full
             Assert.Equal(expected, result);
@@ -428,13 +314,13 @@ namespace GreenKeeper.Tests.Converters
             var nextDueAt = isOverdue ? earlier : later;
             var reference = isOverdue ? later : earlier;
 
-            var text = TimeUnitConverter.ToDueDateText(nextDueAt, reference);
+            var text = DueDateCalculator.ToDueDateText(nextDueAt, reference);
             var (amount, unit) = ParseDueDateText(text);
 
-            Assert.True(TimeUnitConverter.ToDueDate(earlier, amount, unit) <= later,
+            Assert.True(DueDateCalculator.ToDueDate(earlier, amount, unit) <= later,
                 $"\"{text}\" claims more time than the span {earlier:yyyy-MM-dd}..{later:yyyy-MM-dd} holds");
 
-            Assert.True(TimeUnitConverter.ToDueDate(earlier, amount + 1, unit) > later,
+            Assert.True(DueDateCalculator.ToDueDate(earlier, amount + 1, unit) > later,
                 $"\"{text}\" understates the span {earlier:yyyy-MM-dd}..{later:yyyy-MM-dd} by a whole unit");
         }
 
@@ -460,7 +346,7 @@ namespace GreenKeeper.Tests.Converters
             DateTime? nextDueAt = null;
 
             // When: the due date text is calculated
-            var result = TimeUnitConverter.ToDueDateText(nextDueAt);
+            var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
             // Then: the result should be an empty string, not an exception or "null"
             Assert.Equal(string.Empty, result);
@@ -480,7 +366,7 @@ namespace GreenKeeper.Tests.Converters
             var start = new DateTime(2025, 5, 1);
 
             // When: the due date is calculated
-            var result = TimeUnitConverter.ToDueDate(start, amount, unit);
+            var result = DueDateCalculator.ToDueDate(start, amount, unit);
 
             // Then: the start date moved by exactly that interval
             Assert.Equal(DateTime.Parse(expected, CultureInfo.InvariantCulture), result);
@@ -502,7 +388,7 @@ namespace GreenKeeper.Tests.Converters
             var startDate = DateTime.Parse(start, CultureInfo.InvariantCulture);
 
             // When: the due date is calculated
-            var result = TimeUnitConverter.ToDueDate(startDate, amount, unit);
+            var result = DueDateCalculator.ToDueDate(startDate, amount, unit);
 
             // Then: it lands on the last day of the shorter month
             Assert.Equal(DateTime.Parse(expected, CultureInfo.InvariantCulture), result);
@@ -518,8 +404,10 @@ namespace GreenKeeper.Tests.Converters
         public void ToTimeSpan_GivenDaysOrWeeks_ReturnsThatManyHours(
             int amount, TimeUnit unit, int expectedHours)
         {
-            // Given / When: the interval is converted into a flat TimeSpan
-            var result = TimeUnitConverter.ToTimeSpan(amount, unit);
+            // Given: an interval of the given amount of days or weeks (InlineData)
+
+            // When: the interval is converted into a flat TimeSpan
+            var result = DueDateCalculator.ToTimeSpan(amount, unit);
 
             // Then: days and weeks have a fixed length, so the hours are exact
             Assert.Equal(TimeSpan.FromHours(expectedHours), result);
@@ -531,7 +419,7 @@ namespace GreenKeeper.Tests.Converters
         public void ToTimeSpan_GivenACalendarUnit_Throws(TimeUnit unit)
         {
             // Given: a unit whose length depends on the calendar
-            Action convert = () => TimeUnitConverter.ToTimeSpan(1, unit);
+            Action convert = () => DueDateCalculator.ToTimeSpan(1, unit);
 
             // When: it is converted into a flat TimeSpan
             var exception = Record.Exception(convert);
