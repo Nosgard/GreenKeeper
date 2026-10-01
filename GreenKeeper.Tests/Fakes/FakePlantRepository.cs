@@ -8,7 +8,14 @@ namespace GreenKeeper.Tests.Fakes
     /// database: every method operates on the same internal list, so tests can
     /// verify realistic sequences (e.g. "after AddPlantAsync, GetPlantsAsync
     /// returns the new plant") without a real SQLite database or DbContext.
-    /// 
+    ///
+    /// Like the real repository, it never shares the objects it stores: what is
+    /// handed in is copied before it is stored, and what is handed out is a copy
+    /// of what is stored. A change to a stored plant therefore does not show up in
+    /// the objects a ViewModel holds, and the other way round - so a test can tell
+    /// whether the ViewModel went through the repository, updated its own objects,
+    /// or did both.
+    ///
     /// Tests can pre-populate the repository via SeedPlants(...) before
     /// creating a MainViewModel, to set up a "Given" state.
     /// </summary>
@@ -22,9 +29,7 @@ namespace GreenKeeper.Tests.Fakes
         public int CompleteCareScheduleAsyncCallCount { get; private set; }
         public int AddOrReplaceCareScheduleAsyncCallCount { get; private set; }
         public int AddOrReplaceSunlightRequirementAsyncCallCount { get; private set; }
-        public int RemoveCareScheduleAsyncCallCount { get; private set; }
-        public int RemoveSunlightRequirementAsyncCallCount { get; private set; }
-        public int UpdatePlantNotesAsyncCallCount { get; private set; }
+        public bool ShouldThrowOnCompleteCareSchedule { get; set; }
         public bool ShouldThrowOnRemoveCareSchedule { get; set; }
         public bool ShouldThrowOnRemoveSunlightRequirement { get; set; }
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
@@ -37,7 +42,7 @@ namespace GreenKeeper.Tests.Fakes
             foreach (var plant in plants)
             {
                 AssignIds(plant);
-                _plants.Add(plant);
+                _plants.Add(Copy(plant));
             }
         }
 
@@ -71,7 +76,7 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task<List<Plant>> GetPlantsAsync()
         {
-            return Task.FromResult(_plants.ToList());
+            return Task.FromResult(_plants.Select(Copy).ToList());
         }
 
         public Task<Plant> AddPlantAsync(Plant plant)
@@ -82,13 +87,18 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             AssignIds(plant);
-            _plants.Add(plant);
+            _plants.Add(Copy(plant));
             return Task.FromResult(plant);
         }
 
         public Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
         {
             CompleteCareScheduleAsyncCallCount++;
+
+            if (ShouldThrowOnCompleteCareSchedule)
+            {
+                throw new InvalidOperationException("Simulated database failure");
+            }
 
             var schedule = _plants
                 .SelectMany(p => p.CareSchedules)
@@ -134,7 +144,7 @@ namespace GreenKeeper.Tests.Fakes
 
             careSchedule.Id = _nextId++;
             careSchedule.PlantId = plantId;
-            plant.CareSchedules.Add(careSchedule);
+            plant.CareSchedules.Add(Copy(careSchedule));
 
             return Task.FromResult(careSchedule);
         }
@@ -153,15 +163,13 @@ namespace GreenKeeper.Tests.Fakes
 
             sunlightRequirement.Id = _nextId++;
             sunlightRequirement.PlantId = plantId;
-            plant.SunlightRequirement = sunlightRequirement;
+            plant.SunlightRequirement = Copy(sunlightRequirement);
 
             return Task.FromResult(sunlightRequirement);
         }
 
         public Task RemoveCareScheduleAsync(int careScheduleId)
         {
-            RemoveCareScheduleAsyncCallCount++;
-
             if (ShouldThrowOnRemoveCareSchedule)
             {
                 throw new InvalidOperationException("Simulated database failure");
@@ -178,8 +186,6 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
-            RemoveSunlightRequirementAsyncCallCount++;
-
             if (ShouldThrowOnRemoveSunlightRequirement)
             {
                 throw new InvalidOperationException("Simulated database failure");
@@ -195,8 +201,6 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task UpdatePlantNotesAsync(int plantId, string notes)
         {
-            UpdatePlantNotesAsyncCallCount++;
-
             if (ShouldThrowOnUpdateNotes)
             {
                 throw new InvalidOperationException("Simulated database failure");
@@ -221,6 +225,62 @@ namespace GreenKeeper.Tests.Fakes
 
             plant.Name = newName;
             return Task.CompletedTask;
+        }
+
+        // -- Copies --
+        // A copy carries every value of its original and is otherwise on its own,
+        // like a row the real repository reads from or writes to the database.
+
+        private static Plant Copy(Plant plant)
+        {
+            var copy = new Plant
+            {
+                Id = plant.Id,
+                Name = plant.Name,
+                ImagePath = plant.ImagePath,
+                Notes = plant.Notes
+            };
+
+            // Like the real repository, a loaded schedule or requirement points back to its plant.
+            foreach (var schedule in plant.CareSchedules)
+            {
+                var scheduleCopy = Copy(schedule);
+                scheduleCopy.SelectedPlant = copy;
+                copy.CareSchedules.Add(scheduleCopy);
+            }
+
+            if (plant.SunlightRequirement != null)
+            {
+                copy.SunlightRequirement = Copy(plant.SunlightRequirement);
+                copy.SunlightRequirement.SelectedPlant = copy;
+            }
+
+            return copy;
+        }
+
+        private static CareSchedule Copy(CareSchedule schedule)
+        {
+            return new CareSchedule
+            {
+                Id = schedule.Id,
+                PlantId = schedule.PlantId,
+                Care = schedule.Care,
+                LastCaredAt = schedule.LastCaredAt,
+                NextDueAt = schedule.NextDueAt,
+                IntervalUnit = schedule.IntervalUnit,
+                IntervalAmount = schedule.IntervalAmount
+            };
+        }
+
+        private static SunlightRequirement Copy(SunlightRequirement requirement)
+        {
+            return new SunlightRequirement
+            {
+                Id = requirement.Id,
+                PlantId = requirement.PlantId,
+                Hours = requirement.Hours,
+                Period = requirement.Period
+            };
         }
     }
 }
