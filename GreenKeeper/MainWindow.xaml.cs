@@ -1,7 +1,5 @@
-﻿using GreenKeeper.Database;
-using GreenKeeper.Models;
+﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
-using GreenKeeper.Repositories;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
 using GreenKeeper.Views.CareStatuses.EditOption;
@@ -9,221 +7,143 @@ using GreenKeeper.Views.Notes;
 using GreenKeeper.Views.RenamePlant;
 using GreenKeeper.Views.Wizards.AddPlantWizard;
 using GreenKeeper.Views.Wizards.AddScheduleWizard;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MainWindow.xaml. Opens the dialogs the ViewModel asks
+    /// for through its events and hands their results back to it - the only place
+    /// where ViewModel and windows meet.
     /// </summary>
     public partial class MainWindow : Window
     {
         private readonly MainViewModel _mainViewModel;
+        private readonly IDialogService _dialogService;
+        private readonly TimeProvider _timeProvider;
 
-        // One instance to be passed on from everywhere.
-        // This DialogService is primarily served for Yes/No-Warnings
-        private readonly IDialogService _dialogService = new MessageBoxDialogService();
-
-        // Concrete, implementation of ITimerService. Created and owned here and then injected
-        // into the MainViewModel via its constructor
-        private readonly ITimerService _timerService = new DispatcherTimerService();
-
-        // Theme and settings are created in App.OnStartup, not here: the stored
-        // theme has to be applied before this window exists, otherwise it would
-        // show one frame in the default theme. Passing the same instances on keeps
-        // ThemeService.CurrentTheme in step with what is actually on screen - a
-        // second instance would report the default and the first toggle would do
-        // nothing visible.
-        private readonly IThemeService _themeService;
-        private readonly ISettingsService _settingsService;
-
-        // Factory for short-lived DbContext-Instances - willed be passed on to the repository
-        private readonly IDbContextFactory<GreenKeeperDbContext> _dbContextFactory = new GreenKeeperDbContextFactory();
-
-        public MainWindow(IThemeService themeService, ISettingsService settingsService)
+        public MainWindow(MainViewModel mainViewModel, IDialogService dialogService, TimeProvider timeProvider)
         {
-            _themeService = themeService;
-            _settingsService = settingsService;
+            _mainViewModel = mainViewModel;
+            _dialogService = dialogService;
+            _timeProvider = timeProvider;
 
             InitializeComponent();
-            _mainViewModel = new MainViewModel(new PlantRepository(_dbContextFactory), _dialogService, _timerService, _themeService, _settingsService);
+
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
-
-            // Subscription to the event that fires "OpenNotesCommand" in the MainViewModel.
-            // Opening a new window for the notes (NotesView) does not happen in the ViewModel
-            // so that it has no window-references and remains testable
-            _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
-
             _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
-
+            _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
             _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
-            // Stops the periodic Status-Card refresh once this window (and therefore the application)
-            // is closed, so the timer doesn't keep firing after the app is meant to shut down
+            // Stops the periodic status card refresh once this window (and therefore the application)
+            // is closed, so the timer doesn't keep firing after the app is meant to shut down.
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
-            // The constructor cannot be async so loading the plants will be fired
-            // via the Loaded-Event, once the window is ready
+            // The constructor cannot be async, so loading the plants will be fired
+            // via the Loaded event once the window is ready.
             Loaded += MainWindow_Loaded;
 
-            this.DataContext = _mainViewModel;
+            DataContext = _mainViewModel;
         }
 
-        // The actual reaction on OpenNotesRequested, caused by the OpenNotesCommand in the ViewModel.
-        // It opens a new window and shows the notes of the given plant
-        private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
+        // -- Dialogs Section --
+        // Event handlers have to be "async void", so nobody can await them: every database
+        // call goes through RunAsync, which reports a failure as an error dialog.
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            var notesView = new NotesView(
-                plant,
-                _dialogService,
-                saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text))
-            {
-                Owner = this
-            };
-            notesView.ShowDialog();
+            await RunAsync(() => _mainViewModel.InitializeAsync(), "Failed to load the plant", "Loading Error");
         }
 
-        /// <summary>
-        /// Opens the Add-Schedule-Wizard. If completed, persists whichever result
-        /// the Wizard produced (CareSchedule or SunlightRequirement, only one is
-        /// ever set) via MainViewModel.
-        /// 
-        /// "async void" required because AddScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
-        /// </summary>
+        // Opens the Add Plant wizard. If the user completed it, the built plant is handed off to be persisted.
+        private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
+        {
+            var wizardView = new AddPlantWizardView();
+
+            if (!ShowDialog(wizardView) || wizardView.CreatedPlant == null)
+            {
+                return;
+            }
+
+            await RunAsync(() => _mainViewModel.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
+        }
+
+        // Opens the Add Schedule wizard. If completed, its result (a care schedule or a sunlight requirement) is persisted.
         private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
-            var wizardView = new AddScheduleWizardView(plant, _dialogService)
-            {
-                Owner = this
-            };
+            var wizardView = new AddScheduleWizardView(plant, _dialogService);
 
-            bool? result = wizardView.ShowDialog();
-
-            if (result != true)
+            if (!ShowDialog(wizardView) || wizardView.Result == null)
             {
                 return;
             }
 
-            try
-            {
-                if (wizardView.CreatedCareSchedule != null)
-                {
-                    await _mainViewModel.AddOrReplaceCareScheduleAsync(wizardView.CreatedCareSchedule);
-                }
-                else if (wizardView.CreatedSunlightRequirement != null)
-                {
-                    await _mainViewModel.AddOrReplaceSunlightRequirementAsync(wizardView.CreatedSunlightRequirement);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Schedule could not be saved:\n{ex.Message}",
-                    "Saving Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
+            await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel), "Schedule could not be saved", "Saving Error");
         }
 
-        /// <summary>
-        /// Opens the Edit-Dialog. If saved, persists whichever result was
-        /// prepared (Care-Schedule or Sunlight-Requirement) by reusing the exact
-        /// same MainViewModel methods the Add-Schedule-Wizard already uses -
-        /// editing a schedule and replacing it with a new one via the Wizard are,
-        /// from database's point of view, the identical operation.
-        /// 
-        /// "async void" required because EditScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
-        /// </summary>
+        // Opens the edit dialog. If saved, its result is persisted the exact same way as a wizard result -
+        // editing a schedule and replacing it via the wizard are, from the database's point of view, the identical operation.
         private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
-            var editView = new EditScheduleView(e.plant, e.care)
-            {
-                Owner = this
-            };
+            var editView = new EditScheduleView(e.plant, e.care, _timeProvider);
 
-            bool? result = editView.ShowDialog();
-
-            if (result != true)
+            if (!ShowDialog(editView) || editView.Result == null)
             {
                 return;
             }
 
-            try
-            {
-                if (editView.EditedCareSchedule != null)
-                {
-                    await _mainViewModel.AddOrReplaceCareScheduleAsync(editView.EditedCareSchedule);
-                }
-                else if (editView.EditedSunlightRequirement != null)
-                {
-                    await _mainViewModel.AddOrReplaceSunlightRequirementAsync(editView.EditedSunlightRequirement);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"The change could not be saved:\n{ex.Message}",
-                    "Saving Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
+            await RunAsync(() => editView.Result.SaveAsync(_mainViewModel), "The change could not be saved", "Saving Error");
         }
 
-        /// <summary>
-        /// Opens the Rename-Dialog for the plant that was right-clicked in the
-        /// sidebar. If the user confirmed a new name, it's handed off to the
-        /// ViewModel to be persisted.
-        /// 
-        /// "async void" required because RenameScheduleRequested
-        /// is an Event-Handler, which mandates a void-returning handler.
-        /// Error handling therefore has to happen entirely inside this method
-        /// </summary>
+        // Opens the notes window. It saves through the callback itself, so there is nothing to persist afterwards.
+        private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
+        {
+            ShowDialog(new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text)));
+        }
+
+        // Opens the rename dialog for the plant that was right-clicked in the sidebar.
         private async void MainViewModel_RenamePlantRequested(object? sender, Plant plant)
         {
-            var renameView = new RenamePlantView(plant)
-            {
-                Owner = this
-            };
+            var renameView = new RenamePlantView(plant);
 
-            bool? result = renameView.ShowDialog();
-
-            if (result != true || renameView.ConfirmedName == null)
+            if (!ShowDialog(renameView) || renameView.ConfirmedName == null)
             {
                 return;
             }
 
+            await RunAsync(
+                () => _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName),
+                "The plant could not be renamed",
+                "Renaming Error");
+        }
+
+        // Shows the window as a modal dialog owned by the main window; true if it was confirmed.
+        private bool ShowDialog(Window dialog)
+        {
+            dialog.Owner = this;
+            return dialog.ShowDialog() == true;
+        }
+
+        private async Task RunAsync(Func<Task> operation, string failureText, string title)
+        {
             try
             {
-                await _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName);
+                await operation();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"The plant could not be renamed:\n{ex.Message}",
-                    "Renaming Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                _dialogService.ShowError($"{failureText}:\n{ex.Message}", title);
             }
         }
 
+        // -- Search Box Focus Section --
+
+        // Clicking anywhere outside the search box takes the keyboard focus away from it.
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!SearchTextBox.IsFocused)
@@ -252,56 +172,6 @@ namespace GreenKeeper
                 current = VisualTreeHelper.GetParent(current);
             }
             return false;
-        }
-
-        // -- Async Section (Database related) --
-
-        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                await _mainViewModel.InitializeAsync();
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(
-                    $"Failed to load the plant:\n{ex.Message}",
-                    "Loading Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// Opens the Add-Plant-Wizard as a modal dialog. If the user
-        /// completed it and a Plant-Object was built, that plant is
-        /// handed off to the ViewModel to be persisted to the database.
-        /// </summary>
-        private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
-        {
-            var WizardView = new AddPlantWizardView
-            {
-                Owner = this
-            };
-
-            bool? hasResult = WizardView.ShowDialog();
-
-            if (hasResult == true && WizardView.CreatedPlant != null)
-            {
-                try
-                {
-                    // Await the database save before doing anything else
-                    await _mainViewModel.AddPlantAsync(WizardView.CreatedPlant);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(
-                        $"Failed to save the plant:\n{ex.Message}",
-                        "Saving Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
-                }
-            }
         }
     }
 }

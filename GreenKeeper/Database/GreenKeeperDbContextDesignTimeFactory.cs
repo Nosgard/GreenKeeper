@@ -1,10 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore.Design;
 
 namespace GreenKeeper.Database
 {
@@ -14,17 +8,15 @@ namespace GreenKeeper.Database
     /// 
     /// Necessary because GreenKeeperDbContext has no parameterless
     /// constructor (it requires DbContextOptions to be passed in)
-    /// and this project has no central DI-Startup configuration
-    /// the tooling could otherwise discover automatically
+    /// and this project has no central DI startup configuration
+    /// the tooling could otherwise discover automatically.
     /// </summary>
     public class GreenKeeperDbContextDesignTimeFactory : IDesignTimeDbContextFactory<GreenKeeperDbContext>
     {
+        // Delegates to the runtime factory, so both always open the same database file.
         public GreenKeeperDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<GreenKeeperDbContext>();
-            optionsBuilder.UseSqlite($"Data Source={DbPathProvider.GetDatabasePath()}");
-
-            return new GreenKeeperDbContext(optionsBuilder.Options);
+            return new GreenKeeperDbContextFactory().CreateDbContext();
         }
     }
 }

@@ -1,119 +1,79 @@
 ﻿using GreenKeeper.Commands;
-using GreenKeeper.Converters;
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Repositories;
+using GreenKeeper.Scheduling;
 using GreenKeeper.Services;
-using GreenKeeper.ViewModels.CareStatuses;
+using GreenKeeper.ViewModels.Base;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
-using System;
-using System.Collections.Generic;
+using GreenKeeper.ViewModels.Themes;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Threading;
+#if DEBUG
+using GreenKeeper.ViewModels.TimeSimulation;
+#endif
 
 namespace GreenKeeper.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged
+    /// <summary>
+    /// Backs the main window: the plant list with its search, the selected plant
+    /// with its status cards, and every change to a plant's care. Windows are only
+    /// requested through events - MainWindow opens them - so this class knows no
+    /// window class and stays testable.
+    /// </summary>
+    public class MainViewModel : ObservableObject, IPlantCareEditor
     {
+        // Keeps the due date texts and the Complete button's enabled state (IsCompletable)
+        // up to date on their own.
+        private static readonly TimeSpan CareStatusRefreshInterval = TimeSpan.FromMinutes(5);
+
         private readonly IPlantRepository _plantRepository;
         private readonly IDialogService _dialogService;
         private readonly ITimerService _timerService;
-        private readonly IThemeService _themeService;
-        private readonly ISettingsService _settingsService;
-        private ObservableCollection<Plant> _plants;
+        private readonly TimeProvider _timeProvider;
+        private Plant? _selectedPlant;
+        private string _searchText = string.Empty;
 
-        // Set all plants for the ListView
-        /// <summary>
-        /// Important notes for OpenNotesCommand:
-        /// Commands always need to be initialized in the constructor.
-        /// The OpenNotesCommand is get-only, which means that if there
-        /// is no allocation it remains 'null', the compiler will
-        /// cause no alarm and WPF ignores the click on a bound command
-        /// set to 'null'.
-        /// 
-        /// execute: Rules what happens after a click.
-        /// You only fire an event (OpenNotesRequested), instead of opening
-        /// a new window directly.
-        /// -> Why? Because the ViewModel should not know anything about the view
-        /// 
-        /// canExecute: Controls the bound button whether to be enabled or disabled.
-        /// If there is no plant selected, the button remains deactivated.
-        /// </summary>
-        /// <param name="plantRepository"></param>
-        public MainViewModel(IPlantRepository plantRepository, IDialogService dialogService, ITimerService timerService, IThemeService themeService, ISettingsService settingsService)
+        public MainViewModel(
+            IPlantRepository plantRepository,
+            IDialogService dialogService,
+            ITimerService timerService,
+            TimeProvider timeProvider,
+            ThemeViewModel theme)
         {
             _plantRepository = plantRepository;
             _dialogService = dialogService;
             _timerService = timerService;
-            _themeService = themeService;
-            _settingsService = settingsService;
-            _plants = new ObservableCollection<Plant>();
-
+            _timeProvider = timeProvider;
+            Theme = theme;
 
             // Register FilterPlants as the filter predicate for the default view of plants.
             // Since both the ListView and the operation are on the same underlying collection instance,
-            // the ListView picks up this filter automatically, without needing to be changed itself
+            // the ListView picks up this filter automatically, without needing to be changed itself.
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
-            // Periodically refreshes the Status-Cards, so due date texts and Complete-Button's
-            // enabled state (IsCompletable) stay up to date automatically
-            _timerService.Start(TimeSpan.FromMinutes(5), RefreshCareStatuses);
+            _timerService.Start(CareStatusRefreshInterval, RefreshCareStatuses);
 
-            // Theme related Command
-            ToggleThemeCommand = new RelayCommand(
-                execute: _ => ToggleTheme());
-
-            // Add Plant Wizard related Command
-            AddPlantCommand = new RelayCommand(
-                execute: _ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
-
-            // Add Schedule Wizard related Command
-            AddScheduleCommand = new RelayCommand(
-                execute: _ => AddScheduleRequested?.Invoke(this, SelectedPlant!),
-                canExecute: _ => SelectedPlant != null);
-
-            // Delete Plant Button related Command
-            DeletePlantCommand = new RelayCommand(
-                execute: _ => DeleteSelectedPlant(),
-                canExecute: _ => SelectedPlant != null);
-
-            // Notes related Command
-            OpenNotesCommand = new RelayCommand(
-                execute: _ => OpenNotesRequested?.Invoke(this, SelectedPlant!),
-                canExecute: _ => SelectedPlant != null);
-
-            // Rename Plant related Command
-            RenamePlantCommand = new RelayCommand(
-                execute: parameter =>
-                {
-                    if (parameter is Plant plant)
-                    {
-                        RenamePlantRequested?.Invoke(this, plant);
-                    }
-                },
-                canExecute: parameter => parameter is Plant);
-
-            // -- Debug-Section --
+            // The commands only signal the intent to open a window; MainWindow subscribes
+            // to the events and opens it, so the ViewModel never sees a window class.
+            AddPlantCommand = new RelayCommand(_ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
+            AddScheduleCommand = new RelayCommand(_ => AddScheduleRequested?.Invoke(this, SelectedPlant!), _ => IsPlantSelected);
+            OpenNotesCommand = new RelayCommand(_ => OpenNotesRequested?.Invoke(this, SelectedPlant!), _ => IsPlantSelected);
+            RenamePlantCommand = new RelayCommand(RequestRename, parameter => parameter is Plant);
+            DeletePlantCommand = new AsyncRelayCommand(_ => DeleteSelectedPlantAsync(), _ => IsPlantSelected);
 
 #if DEBUG
-            SimulateTimePassingCommand = new RelayCommand(
-                execute: _ => SimulateTimePassing(),
-                canExecute: _ => SelectedPlant != null);
+            TimeSimulation = new TimeSimulationViewModel(() => SelectedPlant, RefreshCareStatuses);
 #endif
         }
 
         /// <summary>
-        /// Loads all plants from the database und fills it with plants.
-        /// It needs to be called singularly after the constructor was called
-        /// (The constructor cannot use await)
+        /// Loads all plants from the database and fills the Plants collection with them.
+        /// It needs to be called once after the constructor has been called
+        /// (the constructor cannot use await).
         /// </summary>
         public async Task InitializeAsync()
         {
@@ -124,169 +84,50 @@ namespace GreenKeeper.ViewModels
             }
         }
 
-        // All available plants for the ListView
-        public ObservableCollection<Plant> Plants
-        {
-            get { return _plants; }
-            set { _plants = value; OnPropertyChanged(nameof(Plants)); }
-        }
+        // -- Plant List Section --
 
-        /// <summary>
-        /// One card per defined CareType. Depending on the set care types,
-        /// only the cards of the allocated care types will appear in the status.
-        /// 
-        /// Important!
-        /// The watering schedule is mandatory for all plants, which means that
-        /// it's status card is always visible.
-        /// The fertilizing schedule and the separate sunlight requirement are optional
-        /// and will not show up if they are not set to a plant
-        /// </summary>
-        public IEnumerable<CareStatusViewModel> CareStatuses
-        {
-            get
-            {
-                if (SelectedPlant == null)
-                {
-                    yield break;
-                }
+        // All available plants for the ListView.
+        public ObservableCollection<Plant> Plants { get; } = new();
 
-                CareSchedule? ScheduleFor(CareType type) =>
-                    SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == type);
-
-                // Watering: mandatory for every plant
-                yield return new WateringStatusViewModel(
-                    ScheduleFor(CareType.Watering),
-                    onComplete: () => CompleteCareSchedule(CareType.Watering),
-                    onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Watering)));
-
-                // Fertilizing optional, only show the status if set to a plant
-                var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
-                if (fertilizingSchedule != null)
-                {
-                    yield return new FertilizingStatusViewModel(
-                        fertilizingSchedule,
-                        onComplete: () => CompleteCareSchedule(CareType.Fertilizing),
-                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Fertilizing)),
-                        onRemove: () => RemoveCareSchedule(CareType.Fertilizing, "fertilizing schedule"));
-                }
-
-                // Sunlight: optional
-                if (SelectedPlant.SunlightRequirement != null)
-                {
-                    yield return new SunlightStatusViewModel(
-                        SelectedPlant.SunlightRequirement,
-                        onEdit: () => EditScheduleRequested?.Invoke(this, (SelectedPlant, CareType.Sunlight)),
-                        onRemove: RemoveSunlightRequirement);
-                }
-            }
-        }
-
-        // Selected plant in the ListView
-        /// <summary>
-        /// Reminder:
-        /// An explicit "Requery" of OpenNotesCommand is not necessary.
-        /// RelayCommand is hanging on CommandManager.RequerySuggested,
-        /// which automatically requests CanExecute on most UI-interactions
-        /// </summary>
-        private Plant? _SelectedPlant;
+        // Selected plant in the ListView.
         public Plant? SelectedPlant
         {
-            get { return _SelectedPlant; }
+            get => _selectedPlant;
             set
             {
-                _SelectedPlant = value;
-                OnPropertyChanged(nameof(SelectedPlant));
-                OnPropertyChanged(nameof(CareStatuses));
-                OnPropertyChanged(nameof(IsPlantSelected));
+                if (SetProperty(ref _selectedPlant, value))
+                {
+                    OnPropertyChanged(nameof(CareStatuses));
+                    OnPropertyChanged(nameof(IsPlantSelected));
+                }
             }
         }
 
         // Check if a plant is selected.
-        // Useful for Visibility-Bindings like the Status-Title in the Dashboard
+        // Useful for visibility bindings like the status title in the dashboard.
         public bool IsPlantSelected => SelectedPlant != null;
-
-        // -- Theme Section --
-
-        public ICommand ToggleThemeCommand { get; }
-
-        /// <summary>
-        /// True while the dark theme is active. The toggle button binds its icon
-        /// to this property - showing a sun (switch TO bright) while dark is
-        /// active, and a moon (switch TO dark) while bright is active.
-        /// </summary>
-        public bool IsDarkTheme => _themeService.CurrentTheme == Theme.Dark;
-
-        private void ToggleTheme()
-        {
-            var newTheme = _themeService.CurrentTheme == Theme.Dark
-                ? Theme.Bright
-                : Theme.Dark;
-
-            _themeService.ApplyTheme(newTheme);
-
-            // Remember the choice for the next start. Read-modify-write rather than
-            // writing a fresh object, so later settings are not dropped on the way.
-            // Neither call throws - see SettingsService.
-            var settings = _settingsService.Load();
-            settings.Theme = newTheme;
-            _settingsService.Save(settings);
-
-            OnPropertyChanged(nameof(IsDarkTheme));
-        }
-
-        // -- Notes Section --
-
-        // Essential command to be bound to the Notes-Button in MainWIndow.xaml.
-        // It is ICommand so that the View only binds the interface and
-        // the explicit implementation remains exchangeable
-        public ICommand OpenNotesCommand { get; }
-
-        // Notify the View, that a new Notes-Window for the given plant should be opened.
-        // Will be subscribed by MainWindow.xaml.cs (for more information, go there).
-        // Code-Behind opens the window (View), while the ViewModel does not know any Window-Class
-        public event EventHandler<Plant>? OpenNotesRequested;
-
-        /// <summary>
-        /// Persists new Notes-Text for the given plant, then updates the local,
-        /// in-memory Plant-Object so it reflects the saved state. Called via the
-        /// callback that NotesViewModel receives (see NotesView/MainWindow) -
-        /// not directly bound to a Command, so this stays a plain async Task
-        /// </summary>
-        public async Task UpdatePlantNotesAsync(Plant plant, string notes)
-        {
-            await _plantRepository.UpdatePlantNotesAsync(plant.Id, notes);
-            plant.Notes = notes;
-        }
-
-        // -- Search Plant Section --
-
-        private string _searchText = string.Empty;
 
         /// <summary>
         /// Bound to the search option (TextBox in MainWindow.xaml).
         /// The setter fires on every single keystroke - not just when the
         /// TextBox loses focus. Combined with the Refresh() call, it produces
         /// the live search behavior (similar to a search engine).
-        /// If a plant was selected, the selected plant will be set to null
+        /// If a plant was selected, the selected plant will be set to null,
         /// as no selected plant that doesn't appear in the ListView during
-        /// the search should keep it's selected state
+        /// the search should keep its selected state.
         /// </summary>
         public string SearchText
         {
             get => _searchText;
             set
             {
-                if (_searchText == value)
+                if (SetProperty(ref _searchText, value))
                 {
-                    return;
+                    SelectedPlant = null;
+
+                    // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText.
+                    CollectionViewSource.GetDefaultView(Plants).Refresh();
                 }
-
-                _searchText = value;
-                SelectedPlant = null;
-                OnPropertyChanged(nameof(SearchText));
-
-                // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText
-                CollectionViewSource.GetDefaultView(Plants).Refresh();
             }
         }
 
@@ -294,10 +135,10 @@ namespace GreenKeeper.ViewModels
         /// Filter predicate for the Plants CollectionView (see constructor above).
         /// Called once per plant every time Refresh() runs - returning true keeps
         /// the plant visible in the ListView, false hides it.
-        /// 
+        ///
         /// Empty/whitespace-only search text -> every plant is shown
-        /// (no filtering applied)
-        /// Text entered: case-insensitive substring match against the plant's name
+        /// (no filtering applied).
+        /// Text entered: case-insensitive substring match against the plant's name.
         /// </summary>
         private bool FilterPlants(object item)
         {
@@ -314,165 +155,96 @@ namespace GreenKeeper.ViewModels
             return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
         }
 
-        // -- Rename Plant Section --
-
-        public ICommand RenamePlantCommand { get; }
-
-        // Notifies the View that the Rename-Dialog should be opened for a specific plant.
-        // Follows the same pattern as EditScheduleRequested: the ViewModel only signals the
-        // intent, while MainWindow.xaml.cs actually opens the window
-        public event EventHandler<Plant>? RenamePlantRequested;
+        // -- Care Status Section --
 
         /// <summary>
-        /// Persists a plant's new name and updates the in-memory object so the
-        /// sidebar reflects the change right away.
-        /// 
-        /// Deliberately touches nothing but the name: care schedules, the sunlight requirement
-        /// and all due dates stay exactly as they are. Renaming is purely cosmetic - it must
-        /// never restart a countdown or otherwise disturb the plant's care state
+        /// One card per defined CareType. Depending on which care types are set,
+        /// only the cards of the assigned care types will appear in the status.
+        ///
+        /// Important!
+        /// The watering schedule is mandatory for all plants, which means that
+        /// its status card is always visible.
+        /// The fertilizing schedule and the separate sunlight requirement are optional
+        /// and will not show up if they are not set for a plant.
         /// </summary>
-        public async Task RenamePlantAsync(Plant plant, string newName)
+        public IEnumerable<CareStatusViewModel> CareStatuses
         {
-            await _plantRepository.RenamePlantAsync(plant.Id, newName);
-            plant.Name = newName;
+            get
+            {
+                if (SelectedPlant == null)
+                {
+                    yield break;
+                }
 
-            // Plant implements no INotifyPropertyChanged, so the ListView would
-            // never notice the changed name on its own - same reason for RefreshCareStatuses
-            CollectionViewSource.GetDefaultView(Plants).Refresh();
+                var plant = SelectedPlant;
+                CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-            // The dashboard header binds to SelectedPlant.Name, so it needs an
-            // explicit nudge as well if the renamed plant happens to be selected
-            OnPropertyChanged(nameof(SelectedPlant));
-        }
-        
-        // -- Add Plant Wizard Section --
-        public ICommand AddPlantCommand { get; }
-        public event EventHandler? AddPlantRequested;
+                // Watering: mandatory for every plant.
+                yield return WateringCard(ScheduleFor(CareType.Watering));
 
-        /// <summary>
-        /// Persists a newly created plant (built by the Add-Plant-Wizard)
-        /// to the database via the repository, and only THEN adds it to
-        /// the ObervableCollection that the sidebar's ListView is bound to.
-        /// 
-        /// Doing it in this order matters: if AddPlantAsync (the repository call)
-        /// were to fail - e.g. a database error - the new plant would never reach
-        /// the UI either. This avoids a situation where the UI shows a plant that,
-        /// in reality, was never actually saved
-        /// </summary>
-        public async Task AddPlantAsync(Plant plant)
-        {
-            var savedPlant = await _plantRepository.AddPlantAsync(plant);
-            Plants.Add(savedPlant);
+                // Fertilizing: optional, only show the status if set for a plant.
+                var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
+                if (fertilizingSchedule != null)
+                {
+                    yield return FertilizingCard(fertilizingSchedule);
+                }
+
+                // Sunlight: optional.
+                if (plant.SunlightRequirement != null)
+                {
+                    yield return SunlightCard(plant.SunlightRequirement);
+                }
+            }
         }
 
-        // -- Add Schedule Wizard Section --
-        public ICommand AddScheduleCommand { get; }
-        public event EventHandler<Plant>? AddScheduleRequested;
-
-        /// <summary>
-        /// Calculates NextDueAt/LastCaredAt for a new//replacing Care-Schedule,
-        /// persists it via the repository, then updates the local Care-Schedules
-        /// list so the Status-Card appears immediately without a DB reload.
-        /// Called directly from MainWindow (not via a Command callback), so this
-        /// stays a plain async Task - the caller awaits it in it's own try/catch
-        /// </summary>
-        public async Task AddOrReplaceCareScheduleAsync(CareSchedule newCareSchedule)
+        // The cards get callbacks instead of the plant, so they know neither the plant nor any window.
+        private WateringStatusViewModel WateringCard(CareSchedule? schedule)
         {
-            if ( (SelectedPlant == null || newCareSchedule.IntervalAmount == null || newCareSchedule.IntervalUnit == null))
-            {
-                return;
-            }
+            return new WateringStatusViewModel(
+                schedule,
+                onComplete: () => CompleteCareScheduleAsync(CareType.Watering),
+                onEdit: () => RequestEdit(CareType.Watering),
+                _timeProvider);
+        }
 
-            newCareSchedule.NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, newCareSchedule.IntervalAmount.Value, newCareSchedule.IntervalUnit.Value);
-            newCareSchedule.LastCaredAt = DateTime.Now;
+        private FertilizingStatusViewModel FertilizingCard(CareSchedule schedule)
+        {
+            return new FertilizingStatusViewModel(
+                schedule,
+                onComplete: () => CompleteCareScheduleAsync(CareType.Fertilizing),
+                onEdit: () => RequestEdit(CareType.Fertilizing),
+                onRemove: () => RemoveCareScheduleAsync(CareType.Fertilizing),
+                _timeProvider);
+        }
 
-            var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, newCareSchedule);
+        private SunlightStatusViewModel SunlightCard(SunlightRequirement requirement)
+        {
+            return new SunlightStatusViewModel(
+                requirement,
+                onEdit: () => RequestEdit(CareType.Sunlight),
+                onRemove: RemoveSunlightRequirementAsync);
+        }
 
-            // Swap out any old local entry of the same Care-Type for the saved one
-            var existingLocal = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == saved.Care);
-            if (existingLocal != null)
-            {
-                SelectedPlant.CareSchedules.Remove(existingLocal);
-            }
-            SelectedPlant.CareSchedules.Add(saved);
-
-            RefreshCareStatuses();
+        private void RequestEdit(CareType careType)
+        {
+            EditScheduleRequested?.Invoke(this, (SelectedPlant!, careType));
         }
 
         /// <summary>
-        /// Persists a new/replacing Sunlight-Requirement for the selected plant -
-        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed
-        /// </summary>
-        public async Task AddOrReplaceSunlightRequirementAsync(SunlightRequirement newSunlightRequirement)
-        {
-            if (SelectedPlant == null)
-            {
-                return;
-            }
-
-            var saved = await _plantRepository.AddOrReplaceSunlightRequirementAsync(SelectedPlant.Id, newSunlightRequirement);
-            SelectedPlant.SunlightRequirement = saved;
-
-            RefreshCareStatuses();
-        }
-
-        // -- Delete Plant Button Section --
-        public ICommand DeletePlantCommand { get; }
-
-        
-        // Deletes the currently selected plant, after the user confirms.
-        private async void DeleteSelectedPlant()
-        {
-            if (SelectedPlant == null)
-            {
-                return;
-            }
-
-            bool isConfirmed = _dialogService.Confirm(
-                $"Are you sure you want to delete \"{SelectedPlant.Name}\"? This cannot be undone.",
-                "Delete Plant");
-
-            if (!isConfirmed)
-            {
-                return;
-            }
-
-            try
-            {
-                await _plantRepository.DeletePlantAsync(SelectedPlant.Id);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError(
-                    $"The plant could not be deleted:\n{ex.Message}",
-                    "Delete Error");
-                return;
-            }
-
-            Plants.Remove(SelectedPlant);
-
-            // After removing a plant, there is no "selected" plant.
-            // Prevent the Dashboard from presenting non-existing data
-            SelectedPlant = null;
-        }
-
-        // -- Care-Status related Section --
-
-        /// <summary>
-        /// Refreshes both the Dashboard and the Sidebar after any change to a plant's Care-Schedules or Sunlight-Requirement,
+        /// Refreshes both the dashboard and the sidebar after any change to a plant's care schedules or sunlight requirement,
         /// e.g. after completing, adding, replacing or removing a schedule.
-        /// 
+        ///
         /// Called from multiple places rather than relying on ObservableCollection notifications, because the change happens
-        /// directly on an already-loaded Plant-Object (Plant/CareSchedule don't implement INotifyPropertyChanged).
-        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed
-        /// 
+        /// directly on an already-loaded plant object (Plant/CareSchedule don't implement INotifyPropertyChanged).
+        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed.
+        ///
         /// What both things do:
-        /// 
-        /// OnPropertyChanged: updates the Dashboard's Status-Cards for the currently selected plant
-        /// 
-        /// CollectionViewSource: forces the Sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
+        ///
+        /// OnPropertyChanged: updates the dashboard's status cards for the currently selected plant.
+        ///
+        /// CollectionViewSource: forces the sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
         /// for each plant's status dot - without this, the dot would only ever update by coincidence (e.g. when the ListView happens
-        /// to redraw for an unrelated reason)
+        /// to redraw for an unrelated reason).
         /// </summary>
         public void RefreshCareStatuses()
         {
@@ -481,113 +253,273 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Marks an active Care-Schedule (Watering/Fertilizing) as "done now":
-        /// calculates a new due date starting from the exact moment of the click,
-        /// persists that new due date to the database, and then updates the local,
-        /// in-memory copy so the Status-Card reflects the change immediately
+        /// Stop the periodic status card refresh (see _timerService.Start in the constructor).
+        /// Called by MainWindow.xaml.cs when the main window is closed, so the timer doesn't
+        /// keep running (and referencing this ViewModel) after the application would otherwise
+        /// have shut down.
         /// </summary>
-        private async void CompleteCareSchedule(CareType careType)
+        public void StopCareStatusRefreshTimer()
         {
-            if (SelectedPlant == null)
+            _timerService.Stop();
+        }
+
+        // -- Theme and Debug Section --
+
+        public ThemeViewModel Theme { get; }
+
+#if DEBUG
+        public bool IsDebugBuild => true;
+
+        public TimeSimulationViewModel TimeSimulation { get; }
+#else
+        public bool IsDebugBuild => false;
+#endif
+
+        // -- Window Requests Section --
+
+        public ICommand AddPlantCommand { get; }
+        public ICommand AddScheduleCommand { get; }
+        public ICommand OpenNotesCommand { get; }
+        public ICommand RenamePlantCommand { get; }
+
+        // MainWindow.xaml.cs subscribes to these and opens the respective window (View).
+        public event EventHandler? AddPlantRequested;
+        public event EventHandler<Plant>? AddScheduleRequested;
+        public event EventHandler<Plant>? OpenNotesRequested;
+        public event EventHandler<Plant>? RenamePlantRequested;
+        public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
+
+        // The plant comes from the context menu of the sidebar entry (CommandParameter), not from the selection.
+        private void RequestRename(object? parameter)
+        {
+            if (parameter is Plant plant)
+            {
+                RenamePlantRequested?.Invoke(this, plant);
+            }
+        }
+
+        // -- Plant Changes Section --
+        // Called by MainWindow with the result of a dialog, so the callers await them
+        // in their own try/catch; the ViewModel only persists and updates the local objects.
+
+        /// <summary>
+        /// Persists a newly created plant (built by the Add Plant wizard)
+        /// to the database via the repository, and only THEN adds it to
+        /// the ObservableCollection that the sidebar's ListView is bound to.
+        ///
+        /// Doing it in this order matters: if AddPlantAsync (the repository call)
+        /// were to fail - e.g. a database error - the new plant would never reach
+        /// the UI either. This avoids a situation where the UI shows a plant that,
+        /// in reality, was never actually saved.
+        /// </summary>
+        public async Task AddPlantAsync(Plant plant)
+        {
+            // The wizard only collects the intervals; the countdowns start now, at the moment of saving.
+            var now = Now;
+            foreach (var schedule in plant.CareSchedules.Where(s => s.HasInterval()))
+            {
+                schedule.StartIntervalAt(now);
+            }
+
+            var savedPlant = await _plantRepository.AddPlantAsync(plant);
+            Plants.Add(savedPlant);
+        }
+
+        /// <summary>
+        /// Calculates NextDueAt/LastCaredAt for a new or replacing care schedule,
+        /// persists it via the repository, then updates the local CareSchedules
+        /// list so the status card appears immediately without a DB reload.
+        /// </summary>
+        public async Task AddOrReplaceCareScheduleAsync(CareSchedule careSchedule)
+        {
+            if (SelectedPlant == null || !careSchedule.HasInterval())
             {
                 return;
             }
 
-            var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
-            if (schedule?.IntervalAmount == null || schedule.IntervalUnit == null)
-            {
-                // No saved amount or unit -> No calculation of a new interval
-                return;
-            }
+            careSchedule.StartIntervalAt(Now);
 
-            // Calculated here, so the exact same values that get persisted to the database are
-            // also the ones applied to the local object afterwards
-            var newNextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, schedule.IntervalAmount.Value, schedule.IntervalUnit.Value);
-            var newLastCaredAt = DateTime.Now;
+            var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, careSchedule);
 
-            try
-            {
-                await _plantRepository.CompleteCareScheduleAsync(schedule.Id, newNextDueAt, newLastCaredAt);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError(
-                    $"The Care-Schedule could not be updated:\n{ex.Message}",
-                    "Error");
-                return;
-            }
-
-            schedule.NextDueAt = newNextDueAt;
-            schedule.LastCaredAt = newLastCaredAt;
+            // Swap out any old local entry of the same care type for the saved one.
+            SelectedPlant.CareSchedules.RemoveAll(s => s.Care == saved.Care);
+            SelectedPlant.CareSchedules.Add(saved);
 
             RefreshCareStatuses();
         }
 
-        // Care-Status Edit-Option
-
-        // Notify the View that the Edit-Dialog (EditScheduleView) must be opened for a specific Care-Type of the selected plant
-        public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
-
-
-        // Care-Status Remove-Option
-
         /// <summary>
-        /// Removes the optional care schedule from the selected plant once the user confirmed.
-        /// "async void" because onRemove is wired up via a synchronous Action delegate
-        /// in CareStatuses, so error handling must happen entirely within this method via try/catch,
-        /// since the caller of an async void method cannot catch exceptions from it
+        /// Persists a new/replacing sunlight requirement for the selected plant -
+        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed.
         /// </summary>
-        private async void RemoveCareSchedule(CareType careType, string displayName)
+        public async Task AddOrReplaceSunlightRequirementAsync(SunlightRequirement sunlightRequirement)
         {
             if (SelectedPlant == null)
             {
                 return;
             }
 
+            var saved = await _plantRepository.AddOrReplaceSunlightRequirementAsync(SelectedPlant.Id, sunlightRequirement);
+            SelectedPlant.SunlightRequirement = saved;
+
+            RefreshCareStatuses();
+        }
+
+        /// <summary>
+        /// Persists new notes text for the given plant, then updates the local,
+        /// in-memory plant object so it reflects the saved state.
+        /// </summary>
+        public async Task UpdatePlantNotesAsync(Plant plant, string notes)
+        {
+            await _plantRepository.UpdatePlantNotesAsync(plant.Id, notes);
+            plant.Notes = notes;
+        }
+
+        /// <summary>
+        /// Persists a plant's new name and updates the in-memory object so the
+        /// sidebar reflects the change right away.
+        ///
+        /// Deliberately touches nothing but the name: care schedules, the sunlight requirement
+        /// and all due dates stay exactly as they are. Renaming is purely cosmetic - it must
+        /// never restart a countdown or otherwise disturb the plant's care state.
+        /// </summary>
+        public async Task RenamePlantAsync(Plant plant, string newName)
+        {
+            await _plantRepository.RenamePlantAsync(plant.Id, newName);
+            plant.Name = newName;
+
+            // Plant implements no INotifyPropertyChanged, so the ListView would
+            // never notice the changed name on its own - same reason as for RefreshCareStatuses.
+            CollectionViewSource.GetDefaultView(Plants).Refresh();
+
+            // The dashboard header binds to SelectedPlant.Name, so it needs an
+            // explicit nudge as well if the renamed plant happens to be selected.
+            OnPropertyChanged(nameof(SelectedPlant));
+        }
+
+        // -- Card and Button Actions Section --
+        // Bound to commands, so nobody awaits them: a failure ends in an error dialog here.
+
+        public ICommand DeletePlantCommand { get; }
+
+        // Deletes the currently selected plant, after the user confirms.
+        private async Task DeleteSelectedPlantAsync()
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            var plant = SelectedPlant;
+
             bool isConfirmed = _dialogService.Confirm(
-                $"Are you sure you want to remove the {displayName} for \"{SelectedPlant.Name}\"?",
-                "Remove Schedule");
+                $"Are you sure you want to delete \"{plant.Name}\"? This cannot be undone.",
+                "Delete Plant");
 
             if (!isConfirmed)
             {
                 return;
             }
 
-            var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
-            if (schedule == null)
+            bool isDeleted = await TryPersistAsync(
+                () => _plantRepository.DeletePlantAsync(plant.Id),
+                "The plant could not be deleted",
+                "Delete Error");
+
+            if (!isDeleted)
             {
                 return;
             }
 
-            try
+            Plants.Remove(plant);
+
+            // After removing a plant, there is no "selected" plant.
+            // Prevent the dashboard from presenting non-existent data.
+            SelectedPlant = null;
+        }
+
+        /// <summary>
+        /// Marks an active care schedule (Watering/Fertilizing) as "done now":
+        /// calculates a new due date starting from the exact moment of the click,
+        /// persists that new due date to the database, and then updates the local,
+        /// in-memory copy so the status card reflects the change immediately.
+        /// </summary>
+        private async Task CompleteCareScheduleAsync(CareType careType)
+        {
+            var schedule = SelectedPlant?.CareSchedules.FirstOrDefault(s => s.Care == careType);
+
+            // No saved amount or unit -> No calculation of a new interval.
+            if (schedule == null || !schedule.HasInterval())
             {
-                await _plantRepository.RemoveCareScheduleAsync(schedule.Id);
+                return;
             }
-            catch (Exception ex)
+
+            // Calculated here, so the exact same values that get persisted to the database are
+            // also the ones applied to the local object afterwards.
+            var now = Now;
+            var nextDueAt = schedule.NextDueDateFrom(now);
+
+            bool isCompleted = await TryPersistAsync(
+                () => _plantRepository.CompleteCareScheduleAsync(schedule.Id, nextDueAt, now),
+                "The care schedule could not be updated");
+
+            if (!isCompleted)
             {
-                _dialogService.ShowError(
-                    $"The {displayName} could not be removed:\n{ex.Message}",
-                    "Error");
+                return;
+            }
+
+            schedule.NextDueAt = nextDueAt;
+            schedule.LastCaredAt = now;
+
+            RefreshCareStatuses();
+        }
+
+        // Removes an optional care schedule (Fertilizing) from the selected plant once the user has confirmed.
+        private async Task RemoveCareScheduleAsync(CareType careType)
+        {
+            if (SelectedPlant == null)
+            {
+                return;
+            }
+
+            string scheduleName = careType.ScheduleNameInSentence();
+
+            bool isConfirmed = _dialogService.Confirm(
+                $"Are you sure you want to remove the {scheduleName} for \"{SelectedPlant.Name}\"?",
+                $"Remove {careType.DisplayName()} Schedule");
+
+            var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
+
+            if (!isConfirmed || schedule == null)
+            {
+                return;
+            }
+
+            bool isRemoved = await TryPersistAsync(
+                () => _plantRepository.RemoveCareScheduleAsync(schedule.Id),
+                $"The {scheduleName} could not be removed");
+
+            if (!isRemoved)
+            {
                 return;
             }
 
             SelectedPlant.CareSchedules.Remove(schedule);
 
-            // CareStatuses doesn't have any Backing-Field and reads from the selected plant (SelectedPlant).
-            // The call of RefreshCareStatuses is enough to let the removed Status-Card disappear from the ItemsControl
+            // CareStatuses has no backing field and reads from the selected plant, so the
+            // refresh is enough to let the removed status card disappear from the ItemsControl.
             RefreshCareStatuses();
         }
 
-        /// <summary>
-        /// Removes the sunlight requirement from the selected plant once the user confirmed.
-        /// Same "async void" reasoning as RemoveCareSchedule
-        /// </summary>
-        private async void RemoveSunlightRequirement()
+        // Removes the sunlight requirement from the selected plant once the user has confirmed.
+        private async Task RemoveSunlightRequirementAsync()
         {
             if (SelectedPlant?.SunlightRequirement == null)
             {
                 return;
             }
+
+            var requirement = SelectedPlant.SunlightRequirement;
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to remove the sunlight requirement for \"{SelectedPlant.Name}\"?",
@@ -598,15 +530,12 @@ namespace GreenKeeper.ViewModels
                 return;
             }
 
-            try
+            bool isRemoved = await TryPersistAsync(
+                () => _plantRepository.RemoveSunlightRequirementAsync(requirement.Id),
+                "The sunlight requirement could not be removed");
+
+            if (!isRemoved)
             {
-                await _plantRepository.RemoveSunlightRequirementAsync(SelectedPlant.SunlightRequirement.Id);
-            }
-            catch (Exception ex)
-            {
-                _dialogService.ShowError(
-                    $"The Sunlight-Requirement could not be removed:\n{ex.Message}",
-                    "Error");
                 return;
             }
 
@@ -615,96 +544,22 @@ namespace GreenKeeper.ViewModels
             RefreshCareStatuses();
         }
 
-        /// <summary>
-        /// Stop the periodic Status-Card refresh (see _timerService.Start in the constructor).
-        /// Called by MainWindow.xaml.cs when the main window is closed, so the timer doesn't
-        /// keep running (and referencing this ViewModel) after the application would otherwise
-        /// be shutting down
-        /// </summary>
-        public void StopCareStatusRefreshTimer()
+        // Runs a repository call and turns a failure into an error dialog. Returns whether it succeeded,
+        // so the caller only touches the local objects after the database has taken the change.
+        private async Task<bool> TryPersistAsync(Func<Task> operation, string failureText, string title = "Error")
         {
-            _timerService.Stop();
-        }
-
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        // -- Debug-Section --
-
-#if DEBUG
-        public bool IsDebugBuild => true;
-#else
-        public bool IsDebugBuild => false;
-#endif
-
-#if DEBUG
-        public ICommand SimulateTimePassingCommand { get; }
-
-        // Available jumps in the UI
-        public IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableSimulationUnits { get; } =
-            new List<KeyValuePair<TimeUnit, string>>
+            try
             {
-                new(TimeUnit.Days, "Days"),
-                new(TimeUnit.Weeks, "Weeks"),
-            };
-
-        private TimeUnit _simulationUnit = TimeUnit.Days;
-        public TimeUnit SimulationUnit
-        {
-            get => _simulationUnit;
-            set {
-                _simulationUnit = value;
-                OnPropertyChanged(nameof(SimulationUnit));
+                await operation();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowError($"{failureText}:\n{ex.Message}", title);
+                return false;
             }
         }
 
-        private string _simulationAmountText = "1";
-        public string SimulationAmountText
-        {
-            get => _simulationAmountText;
-            set {
-                _simulationAmountText = value;
-                OnPropertyChanged(nameof(SimulationAmountText));
-            }
-        }
-
-        /// <summary>
-        /// Pulls the Time-Span of NextDueAt (and optionally LastCaredAt, if set)
-        /// for ALL Care-Schedules of the selected plant except the Sunlight-Requirement
-        /// </summary>
-        private void SimulateTimePassing()
-        {
-            if (SelectedPlant == null)
-            {
-                return;
-            }
-
-            if (!int.TryParse(SimulationAmountText, out int amount) || amount <= 0)
-            {
-                return;
-            }
-
-            var span = TimeUnitConverter.ToTimeSpan(amount, SimulationUnit);
-
-            foreach (var schedule in SelectedPlant.CareSchedules)
-            {
-                if (schedule.NextDueAt.HasValue)
-                {
-                    schedule.NextDueAt = schedule.NextDueAt.Value.Subtract(span);
-                }
-                if (schedule.LastCaredAt.HasValue)
-                {
-                    schedule.LastCaredAt = schedule.LastCaredAt.Value.Subtract(span);
-                }
-            }
-
-            RefreshCareStatuses();
-        }
-#endif
+        private DateTime Now => _timeProvider.GetLocalNow().DateTime;
     }
 }

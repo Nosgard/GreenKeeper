@@ -1,32 +1,32 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
+using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Tests.ViewModels
 {
     /// <summary>
     /// Covers the status text of the active care status cards (Watering and Fertilizing).
-    /// The wording of the span itself belongs to TimeUnitConverter and is tested
+    /// The wording of the span itself belongs to DueDateCalculator and is tested
     /// there - what is checked here is the "Due in" prefix the cards put in front
     /// of it, and above all WHEN they do not.
     /// </summary>
     public class ActiveCareStatusViewModelTests
     {
+        // The clock the cards run on, pinned so "today" is the same on every run.
+        private static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
+        private static readonly TimeProvider Clock = new FakeTimeProvider(Now);
+
         // The cards only need a schedule and callbacks they never invoke here,
-        // so the actions are empty stand-ins.
+        // so the callbacks are empty stand-ins.
         private static WateringStatusViewModel WateringCard(DateTime? nextDueAt) =>
             new(new CareSchedule { Care = CareType.Watering, NextDueAt = nextDueAt },
-                onComplete: () => { }, onEdit: () => { });
+                onComplete: () => Task.CompletedTask, onEdit: () => { }, Clock);
 
         private static FertilizingStatusViewModel FertilizingCard(DateTime? nextDueAt) =>
             new(new CareSchedule { Care = CareType.Fertilizing, NextDueAt = nextDueAt },
-                onComplete: () => { }, onEdit: () => { }, onRemove: () => { });
+                onComplete: () => Task.CompletedTask, onEdit: () => { }, onRemove: () => Task.CompletedTask, Clock);
 
         // -- Upcoming due dates get the prefix --
 
@@ -39,7 +39,7 @@ namespace GreenKeeper.Tests.ViewModels
             int daysFromNow, string expected)
         {
             // Given: a watering card whose due date is still ahead
-            var card = WateringCard(DateTime.Now.AddDays(daysFromNow));
+            var card = WateringCard(Now.AddDays(daysFromNow));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -52,7 +52,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenUpcomingDueDateMonthsAway_PrefixesTheSpanWithDueIn()
         {
             // Given: a watering card due two calendar months from now
-            var card = WateringCard(DateTime.Now.AddMonths(2));
+            var card = WateringCard(Now.AddMonths(2));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -65,7 +65,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenUpcomingDueDateYearsAway_PrefixesTheSpanWithDueIn()
         {
             // Given: a watering card due one calendar year from now
-            var card = WateringCard(DateTime.Now.AddYears(1));
+            var card = WateringCard(Now.AddYears(1));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -80,7 +80,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenDueDateIsToday_ReturnsTodayWithoutPrefix()
         {
             // Given: a watering card due today
-            var card = WateringCard(DateTime.Now);
+            var card = WateringCard(Now);
 
             // When: the status text is read
             var result = card.StatusText;
@@ -99,7 +99,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenDueDateLaterOnTheCurrentDay_StillReturnsTodayWithoutPrefix()
         {
             // Given: a watering card due just before midnight of the current day
-            var card = WateringCard(DateTime.Today.AddHours(23).AddMinutes(59));
+            var card = WateringCard(Now.Date.AddHours(23).AddMinutes(59));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -112,7 +112,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenDueDateJustAfterMidnight_PrefixesTheSpanWithDueIn()
         {
             // Given: a watering card due one minute into the next calendar day
-            var card = WateringCard(DateTime.Today.AddDays(1).AddMinutes(1));
+            var card = WateringCard(Now.Date.AddDays(1).AddMinutes(1));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -128,7 +128,7 @@ namespace GreenKeeper.Tests.ViewModels
             int daysOverdue, string expected)
         {
             // Given: a watering card whose due date has passed
-            var card = WateringCard(DateTime.Now.AddDays(-daysOverdue));
+            var card = WateringCard(Now.AddDays(-daysOverdue));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -157,7 +157,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a watering card for a plant that has no watering schedule yet -
             // MainViewModel creates the mandatory card even then, with a null schedule
-            var card = new WateringStatusViewModel(schedule: null, onComplete: () => { }, onEdit: () => { });
+            var card = new WateringStatusViewModel(schedule: null, onComplete: () => Task.CompletedTask, onEdit: () => { }, Clock);
 
             // When: the status text is read
             var result = card.StatusText;
@@ -176,7 +176,7 @@ namespace GreenKeeper.Tests.ViewModels
             int dayOffset, string expected)
         {
             // Given: a fertilizing card - the second card sharing ActiveCareStatusViewModel
-            var card = FertilizingCard(DateTime.Now.AddDays(dayOffset));
+            var card = FertilizingCard(Now.AddDays(dayOffset));
 
             // When: the status text is read
             var result = card.StatusText;
@@ -195,7 +195,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a sunlight card, which has no due date at all
             var requirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
-            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => { });
+            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => Task.CompletedTask);
 
             // When: the status text is read
             var result = card.StatusText;
@@ -204,7 +204,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("6h / day", result);
         }
 
-        // -- Complete button and overdue colouring --
+        // -- Complete button and overdue coloring --
 
         /// <summary>
         /// IsCompletable is bound to the Complete button. A card due today has to be
@@ -218,7 +218,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void IsCompletable_IsTrueFromTheDueDayOnwards(int dayOffset, bool expected)
         {
             // Given: a watering card with a due date around today
-            var card = WateringCard(DateTime.Now.AddDays(dayOffset));
+            var card = WateringCard(Now.AddDays(dayOffset));
 
             // When: the enabled state of the Complete button is read
             var result = card.IsCompletable;
@@ -239,7 +239,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void IsOverdue_IsTrueOnlyAfterTheDueDayHasPassed(int dayOffset, bool expected)
         {
             // Given: a watering card with a due date around today
-            var card = WateringCard(DateTime.Now.AddDays(dayOffset));
+            var card = WateringCard(Now.AddDays(dayOffset));
 
             // When: the overdue state is read
             var result = card.IsOverdue;
@@ -252,7 +252,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void IsCompletableAndIsOverdue_GivenDueDateLaterOnTheCurrentDay_TreatItAsToday()
         {
             // Given: a watering card due just before midnight of the current day
-            var card = WateringCard(DateTime.Today.AddHours(23).AddMinutes(59));
+            var card = WateringCard(Now.Date.AddHours(23).AddMinutes(59));
 
             // When: both states are read
             var isCompletable = card.IsCompletable;
@@ -284,7 +284,7 @@ namespace GreenKeeper.Tests.ViewModels
         {
             // Given: a sunlight card, which has no due date to miss
             var requirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
-            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => { });
+            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => Task.CompletedTask);
 
             // When: the overdue state is read
             var result = card.IsOverdue;

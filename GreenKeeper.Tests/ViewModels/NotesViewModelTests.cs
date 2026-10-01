@@ -1,11 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.Notes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Tests.ViewModels
 {
@@ -19,7 +14,7 @@ namespace GreenKeeper.Tests.ViewModels
             var dialogService = new FakeDialogService();
 
             // A callback stand-in for the actual save logic - not expected to
-            // be called in this test, since we're only checking the initial state
+            // be called in this test, since we're only checking the initial state.
             Func<string, Task> saveNotesAsync = _ => Task.CompletedTask;
 
             // When: a NotesViewModel is created for this plant
@@ -34,12 +29,12 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
         {
-            // Given a plant with existing notes, and EditableNotes changed to a new value
-            var plant = new Plant { Name = "Aloe Vera", Notes ="Old notes"};
+            // Given: a plant with existing notes, and EditableNotes changed to a new value
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService();
 
             // Captures whatever text the ViewModel attempts to save, so the test
-            // can verify it without needing a real repository/database
+            // can verify it without needing a real repository/database.
             string? savedText = null;
             Func<string, Task> saveNotesAsync = text =>
             {
@@ -144,17 +139,17 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
             viewModel.EditableNotes = "New notes";
 
-            bool? closeResult = null;
-            viewModel.RequestClose += (_, result) => closeResult = result;
+            var closeResults = new List<bool?>();
+            viewModel.RequestClose += (_, result) => closeResults.Add(result);
 
             // When: CancelCommand is executed
             viewModel.CancelCommand.Execute(null);
 
             // Then: the user was asked, but the change was discarded (never saved),
-            // and the window closes with false
+            // and the window closes exactly once with false
             Assert.True(dialogService.ConfirmWasCalled);
             Assert.False(saveWasCalled);
-            Assert.Equal(false, closeResult);
+            Assert.Equal(new bool?[] { false }, closeResults);
         }
 
         [Fact]

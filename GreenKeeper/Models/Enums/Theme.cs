@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GreenKeeper.Models.Enums
+﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
     /// The available color themes. Unlike CareType, these values are never

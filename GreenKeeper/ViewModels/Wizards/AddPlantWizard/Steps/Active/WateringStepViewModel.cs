@@ -1,17 +1,10 @@
-﻿using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.Wizards.Base.Abstract;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GreenKeeper.ViewModels.Wizards.Base.Abstract;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active
 {
     public class WateringStepViewModel : ActiveStepViewModel
     {
-        // Mandatory field: Next will be active, when a valid number was entered
+        // Mandatory field: Next will be active when a valid number is entered.
         public override bool CanProceed => HasValidAmount;
     }
 }

@@ -16,7 +16,7 @@
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
-                        <!-- Hover for an entry in the unfolded list -->
+                        <!-- Hover for an entry in the expanded list -->
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
@@ -40,7 +40,7 @@
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="8, 6" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource ThemedComboBoxItem}" />
-        <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior by WPF -->
+        <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior in WPF -->
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -74,7 +74,7 @@
                                                 <ColumnDefinition Width="24" />
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- Dropdown-Arrow -->
+                                            <!-- Dropdown arrow -->
                                             <Path Grid.Column="1"
                                                   Data="M 0 0 L 4 4 L 8 0 Z"
                                                   Fill="{DynamicResource SecondaryText}"
@@ -86,7 +86,7 @@
                             </ToggleButton.Template>
                         </ToggleButton>
 
-                        <!-- Show the selected value, when the dropdown is closed -->
+                        <!-- Show the selected value when the dropdown is closed -->
                         <ContentPresenter x:Name="contentPresenter"
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
@@ -95,7 +95,7 @@
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left" />
 
-                        <!-- Unfoldable list of options -->
+                        <!-- Dropdown list of options -->
                         <Popup x:Name="popup"
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                Placement="Bottom"
@@ -121,7 +121,7 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
-                        <!-- Disabled-State -->
+                        <!-- Disabled state -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonDisabledBackground}" />
                             <Setter TargetName="toggleButton" Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}" />

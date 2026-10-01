@@ -1,10 +1,5 @@
 ﻿using GreenKeeper.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Database
 {
@@ -13,7 +8,6 @@ namespace GreenKeeper.Database
         public GreenKeeperDbContext(DbContextOptions<GreenKeeperDbContext> options)
             : base(options)
         {
-            
         }
 
         public DbSet<Plant> Plants => Set<Plant>();
@@ -34,8 +28,8 @@ namespace GreenKeeper.Database
                 .HasForeignKey<SunlightRequirement>(sr => sr.PlantId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Prevent that two Care-Schedules of the same Care-Type will be
-            // accidentally created for the same Plant-Object
+            // Prevents two care schedules of the same care type from being
+            // accidentally created for the same plant object.
             modelBuilder.Entity<CareSchedule>()
                 .HasIndex(cs => new { cs.PlantId, cs.Care })
                 .IsUnique();

@@ -1,50 +1,51 @@
 ﻿using GreenKeeper.Models;
-using System;
-using System.Collections.Generic;
+using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 
 namespace GreenKeeper.Converters
 {
-
     /// <summary>
     /// Determines which status dot icon to show next to a plant in the
     /// sidebar, based on the most urgent state among its Watering and
     /// Fertilizing schedules (Sunlight is irrelevant, since it has no
     /// due date). Overdue takes priority over "due today", which in turn
-    /// takes priority over the default green state
+    /// takes priority over the default green state.
     /// </summary>
     public class PlantStatusDotConverter : IValueConverter
     {
+        private const string GreenDot = "/Resources/Icons/Dots/GreenDot.png";
+        private const string YellowDot = "/Resources/Icons/Dots/YellowDot.png";
+        private const string RedDot = "/Resources/Icons/Dots/RedDot.png";
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not Plant plant)
             {
-                return "/Resources/Icons/Dots/GreenDot.png";
+                return GreenDot;
             }
 
-            var relevantSchedules = plant.CareSchedules
-                .Where(s => s.Care == Models.Enums.CareType.Watering || s.Care == Models.Enums.CareType.Fertilizing)
-                .Where(s => s.NextDueAt.HasValue);
+            var dueDates = plant.CareSchedules
+                .Where(s => s.Care == CareType.Watering || s.Care == CareType.Fertilizing)
+                .Where(s => s.NextDueAt.HasValue)
+                .Select(s => s.NextDueAt!.Value.Date)
+                .ToList();
 
-            var today = DateTime.Now.Date;
+            // A converter is created by XAML, so there is no clock to inject here.
+            var today = DateTime.Now;
 
-            bool anyOverdue = relevantSchedules.Any(s => s.NextDueAt!.Value.Date < today);
-            if (anyOverdue)
+            if (dueDates.Any(due => DueDateRules.IsOverdue(due, today)))
             {
-                return "/Resources/Icons/Dots/RedDot.png";
+                return RedDot;
             }
 
-            bool anyDueToday = relevantSchedules.Any(s => s.NextDueAt!.Value.Date == today);
-            if (anyDueToday)
+            if (dueDates.Any(due => DueDateRules.IsDueToday(due, today)))
             {
-                return "/Resources/Icons/Dots/YellowDot.png";
+                return YellowDot;
             }
 
-            return "/Resources/Icons/Dots/GreenDot.png";
+            return GreenDot;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

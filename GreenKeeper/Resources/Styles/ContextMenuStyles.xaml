@@ -14,7 +14,7 @@
                             BorderThickness="{TemplateBinding BorderThickness}"
                             Padding="{TemplateBinding Padding}"
                             CornerRadius="6">
-                        <!-- IsItemsHost is mandatory, because without it, there's no panel to place the menu items in-->
+                        <!-- IsItemsHost is mandatory because without it there's no panel to place the menu items in-->
                         <StackPanel IsItemsHost="True" />
                     </Border>
                 </ControlTemplate>
@@ -35,7 +35,7 @@
                             Background="{TemplateBinding Background}"
                             CornerRadius="4">
                         <Grid>
-                            <!-- Two columns, the left one reserves the classic icon-gutter, the right column holds the actual text-->
+                            <!-- Two columns: the left one reserves the classic icon gutter; the right column holds the actual text-->
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="24" />
                                 <ColumnDefinition Width="*" />

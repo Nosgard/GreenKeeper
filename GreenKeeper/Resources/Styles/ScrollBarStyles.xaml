@@ -22,7 +22,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <!-- RepeatButton (Area between Thumb and ScrollBar-End) -->
+    <!-- RepeatButton (Area between Thumb and ScrollBar end) -->
     <Style x:Key="ThemedScrollBarPageButton" TargetType="RepeatButton">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Focusable" Value="False" />
@@ -45,7 +45,7 @@
                 <ControlTemplate TargetType="ScrollBar">
                     <Grid Background="{TemplateBinding Background}">
 
-                        <!-- Track: Represents the hole scrollable track -->
+                        <!-- Track: Represents the whole scrollable track -->
                         <Track x:Name="PART_Track"
                                IsDirectionReversed="True">
                             <Track.DecreaseRepeatButton>

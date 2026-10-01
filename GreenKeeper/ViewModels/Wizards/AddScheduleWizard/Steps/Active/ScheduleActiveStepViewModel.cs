@@ -1,29 +1,33 @@
-﻿using GreenKeeper.ViewModels.Wizards.Base.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
+using GreenKeeper.ViewModels.Wizards.Base.Abstract;
 
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active
 {
     /// <summary>
-    /// Will be used for both Watering and Fertilizing, if the user
-    /// decided for one of both statuses.
+    /// Is used for both Watering and Fertilizing, if the user
+    /// chose one of these two statuses.
     /// Unlike in the AddPlantWizard, entering a value is always mandatory
-    /// because the user selected the status on purpose
+    /// because the user selected the status on purpose.
     /// </summary>
-    public class ScheduleActiveStepViewModel : ActiveStepViewModel
+    public class ScheduleActiveStepViewModel : ActiveStepViewModel, IScheduleWizardStep
     {
-        public string Title { get; }
+        public CareType Care { get; }
 
-        public ScheduleActiveStepViewModel(string title)
+        public string Title => Care.DisplayName();
+
+        public ScheduleActiveStepViewModel(CareType care)
         {
-            Title = title;
+            Care = care;
         }
 
         public override bool CanProceed => HasValidAmount;
 
         public override string NextButtonLabel => "Finish";
+
+        public ScheduleInput CreateInput()
+        {
+            return new CareScheduleInput(ToCareSchedule(Care));
+        }
     }
 }

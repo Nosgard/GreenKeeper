@@ -1,36 +1,30 @@
-﻿using GreenKeeper.Commands;
-using GreenKeeper.Converters;
-using GreenKeeper.Models;
+﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
 using GreenKeeper.Services;
+using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active;
-using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Base;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 {
-    public class AddScheduleWizardViewModel : INotifyPropertyChanged
+    /// <summary>
+    /// Two steps: the user picks a care type, then enters its values. Unlike the
+    /// Add Plant wizard there is no fixed list of steps - the second one depends
+    /// on the choice made in the first.
+    /// </summary>
+    public class AddScheduleWizardViewModel : WizardViewModel
     {
         private readonly Plant _plant;
         private readonly IDialogService _dialogService;
-
-        // Holds the finished result, one of the two ends up set, never both.
-        public CareSchedule? CreatedCareSchedule { get; private set; }
-        public SunlightRequirement? CreatedSunlightRequirement { get; private set; }
-
         private readonly CareTypeSelectionStepViewModel _selectionStep = new();
 
-        // Will be instantiated, once the user made his decision on the first step.
-        // Unlike the AddPlantWizard there is no explicit order because the next step will be set dynamically
-        private IWizardStepViewModel? _detailStep;
+        // Created once the user has made their decision on the first step.
+        private IScheduleWizardStep? _detailStep;
+
+        // Holds the finished result. Null until the wizard has been finished.
+        public ScheduleInput? Result { get; private set; }
 
         public AddScheduleWizardViewModel(Plant plant, IDialogService dialogService)
         {
@@ -38,152 +32,57 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             _dialogService = dialogService;
 
             CurrentStep = _selectionStep;
-
-            NextCommand = new RelayCommand(
-                execute: _ => GoNext(),
-                canExecute: _ => CurrentStep.CanProceed);
-
-            BackCommand = new RelayCommand(
-                execute: _ => GoBack(),
-                canExecute: _ => CurrentStep != _selectionStep);
-
-            CancelCommand = new RelayCommand(
-                execute: _ => Cancel());
         }
 
-        private IWizardStepViewModel _currentStep = null!;
-        public IWizardStepViewModel CurrentStep
-        {
-            get => _currentStep;
-            private set
-            {
-                _currentStep = value;
-                OnPropertyChanged(nameof(CurrentStep));
-                (NextCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
-            }
-        }
+        protected override bool CanGoBack => CurrentStep != _selectionStep;
 
-        public ICommand NextCommand { get; }
-        public ICommand BackCommand { get; }
-        public ICommand CancelCommand { get; }
-
-        public event EventHandler<bool>? RequestClose;
-
-        private void GoNext()
+        protected override void GoNext()
         {
             if (CurrentStep == _selectionStep)
             {
-                // Set the next step depending on the selection in the previous step
-                _detailStep = _selectionStep.SelectedCareType switch
-                {
-                    CareType.Watering => new ScheduleActiveStepViewModel("Watering"),
-                    CareType.Fertilizing => new ScheduleActiveStepViewModel("Fertilizing"),
-                    CareType.Sunlight => new ScheduleSunlightStepViewModel(),
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                _detailStep = CreateDetailStep(_selectionStep.SelectedCareType);
                 CurrentStep = _detailStep;
+                return;
             }
-            else
+
+            // "Finish" tries to apply the entry, but can abort without closing the
+            // wizard, e.g. when the user answers "No" to the overwrite warning.
+            if (TryApply())
             {
-                // "Finish" is trying to apply the status, but can abort
-                // without closing the Wizard e.g. when the user enters "No" in the warning to overwrite
-                if (TryApply())
-                {
-                    RequestClose?.Invoke(this, true);
-                }
+                Close(true);
             }
         }
 
-        private void GoBack()
+        // Back to the first step: the detail step is discarded. An entered value is not
+        // kept, as that is not worth the effort for only two steps.
+        protected override void GoBack()
         {
-            // Back to the first step: The Detail-Step will be discarded.
-            // If a value was entered, it's not going to be cached as it's not necessary for only two steps
             CurrentStep = _selectionStep;
         }
 
-        private void Cancel()
+        // The one place that has to know which step belongs to which care type.
+        private static IScheduleWizardStep CreateDetailStep(CareType careType)
         {
-            RequestClose?.Invoke(this, false);
+            return careType switch
+            {
+                CareType.Watering or CareType.Fertilizing => new ScheduleActiveStepViewModel(careType),
+                CareType.Sunlight => new ScheduleSunlightStepViewModel(),
+                _ => throw new ArgumentOutOfRangeException(nameof(careType), careType, null)
+            };
         }
 
-        // Handle the entry in the Detail-Step.
-        // In case the user refused to overwrite the Wizard remains open, otherwise it will be closed
+        // Keeps the wizard open when the user refuses to overwrite an existing entry.
         private bool TryApply()
         {
-            return _selectionStep.SelectedCareType switch
+            var input = _detailStep!.CreateInput();
+
+            if (input.ExistsOn(_plant) && !_dialogService.Confirm(input.OverwriteQuestion, input.OverwriteTitle))
             {
-                CareType.Watering => PrepareCareSchedule(CareType.Watering, (ScheduleActiveStepViewModel)_detailStep!),
-                CareType.Fertilizing => PrepareCareSchedule(CareType.Fertilizing, (ScheduleActiveStepViewModel)_detailStep!),
-                CareType.Sunlight => PrepareSunlightRequirement((ScheduleSunlightStepViewModel)_detailStep!)
-            };
-        }
-
-        // Overwrite-confirmation stays local (only needs the in-memory _plant),
-        // only the actual "apply" step changed from mutation to data prep
-        private bool PrepareCareSchedule(CareType careType, ScheduleActiveStepViewModel step)
-        {
-            var existing = _plant.CareSchedules.FirstOrDefault(s => s.Care == careType);
-
-            if (existing != null)
-            {
-                bool shouldReplace = _dialogService.Confirm(
-                    $"There is already a {step.Title} schedule for this plant. Do you want to replace it?",
-                    "Schedule already exists");
-
-                if (!shouldReplace)
-                {
-                    // Keep the Wizard open
-                    return false;
-                }
+                return false;
             }
 
-            // No NextDueAt/LastCaredAt set here - the calculation stays centralized in MainViewModel
-            CreatedCareSchedule = new CareSchedule
-            {
-                Care = careType,
-                IntervalAmount = int.Parse(step.AmountText),
-                IntervalUnit = step.SelectedUnit,
-            };
-
+            Result = input;
             return true;
-        }
-
-        /// <summary>
-        /// Similar to PrepareCareSchedule. The only difference is that there is no due date
-        /// to be calculated. That's why it will already be filled completely with the
-        /// related data
-        /// </summary>
-        private bool PrepareSunlightRequirement(ScheduleSunlightStepViewModel step)
-        {
-            if (_plant.SunlightRequirement != null)
-            {
-                bool shouldReplace = _dialogService.Confirm(
-                    "There is already a sunlight requirement for this plant. Do you want to replace it?",
-                    "Sunlight requirement already exists");
-
-                if (!shouldReplace)
-                {
-                    // Keep the Wizard open
-                    return false;
-                }
-            }
-
-            CreatedSunlightRequirement = new SunlightRequirement
-            {
-                Hours = int.Parse(step.AmountText),
-                Period = step.SelectedPeriod
-            };
-
-            return true;
-        }
-
-
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

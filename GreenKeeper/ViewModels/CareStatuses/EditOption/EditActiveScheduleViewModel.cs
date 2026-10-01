@@ -1,47 +1,65 @@
-﻿using GreenKeeper.Converters;
-using GreenKeeper.Models.Enums;
+﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
 using GreenKeeper.ViewModels.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Base of the Edit-Option for all active statuses (Watering / Fertilizing).
+    /// Input of the Edit button for the active statuses (Watering / Fertilizing).
     /// </summary>
-    public class EditActiveScheduleViewModel : AmountAndUnitInputViewModel
+    public class EditActiveScheduleViewModel : AmountAndUnitInputViewModel, IScheduleInputStep
     {
-        public string Title { get; }
+        private readonly TimeProvider _timeProvider;
 
-        public EditActiveScheduleViewModel(string title, int? initialAmount, TimeUnit initialUnit)
+        public CareType Care { get; }
+
+        // Title of the care type (Watering / Fertilizing).
+        public string Title => Care.DisplayName();
+
+        public EditActiveScheduleViewModel(CareType care, int? initialAmount, TimeUnit initialUnit, TimeProvider timeProvider)
         {
-            // Title of the Care-Type (Watering / Fertilizing)
-            Title = title;
+            Care = care;
+            _timeProvider = timeProvider;
 
-            // Fill the amount text with the original value, that was set in the Wizard beforehand
+            // Fill the amount text with the original value that was set in the wizard beforehand.
             if (initialAmount.HasValue)
             {
-                AmountText = initialAmount.Value.ToString();
+                AmountText = initialAmount.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             SelectedUnit = initialUnit;
+        }
+
+        /// <summary>
+        /// Shows the next expected due date.
+        /// This is important so that the user knows that the countdown is NOW running.
+        /// The calculation of the next due date takes place NOW and not at the old due date.
+        /// </summary>
+        public string PreviewText
+        {
+            get
+            {
+                if (!HasValidAmount)
+                {
+                    return string.Empty;
+                }
+
+                var now = _timeProvider.GetLocalNow().DateTime;
+                var nextDueAt = DueDateCalculator.ToDueDate(now, Amount!.Value, SelectedUnit);
+
+                return $"New due date: {DueDateCalculator.ToDueDateText(nextDueAt, now)}";
+            }
+        }
+
+        public ScheduleInput CreateInput()
+        {
+            return new CareScheduleInput(ToCareSchedule(Care));
         }
 
         protected override void OnAmountOrUnitChanged()
         {
             OnPropertyChanged(nameof(PreviewText));
         }
-
-        /// <summary>
-        /// Shows the next expected due date.
-        /// This is important so that the user knows, that the countdown is NOW running.
-        /// The calculation of the next due date takes place NOW and not at the old due date
-        /// </summary>
-        public string PreviewText => HasValidAmount
-            ? $"New due date: {TimeUnitConverter.ToDueDateText(TimeUnitConverter.ToDueDate(DateTime.Now, int.Parse(AmountText), SelectedUnit))}"
-            : string.Empty;
     }
 }

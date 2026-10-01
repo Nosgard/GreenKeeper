@@ -1,10 +1,5 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Tests.Fakes
 {
@@ -15,7 +10,7 @@ namespace GreenKeeper.Tests.Fakes
     /// returns the new plant") without a real SQLite database or DbContext.
     /// 
     /// Tests can pre-populate the repository via SeedPlants(...) before
-    /// creating a MainViewModel, to set up a "Given" state
+    /// creating a MainViewModel, to set up a "Given" state.
     /// </summary>
     public class FakePlantRepository : IPlantRepository
     {
@@ -35,33 +30,42 @@ namespace GreenKeeper.Tests.Fakes
         public bool ShouldThrowOnAddOrReplaceCareSchedule { get; set; }
         public bool ShouldThrowOnAddOrReplaceSunlightRequirement { get; set; }
         public bool ShouldThrowOnUpdateNotes { get; set; }
-        public bool ShouldThrowOnRename {  get; set; }
+        public bool ShouldThrowOnRename { get; set; }
 
         public void SeedPlants(params Plant[] plants)
         {
             foreach (var plant in plants)
             {
-                if (plant.Id == 0)
-                {
-                    plant.Id = _nextId++;
-                }
+                AssignIds(plant);
+                _plants.Add(plant);
+            }
+        }
 
-                foreach (var schedule in plant.CareSchedules)
-                {
-                    if (schedule.Id == 0)
-                    {
-                        schedule.Id = _nextId++;
-                    }
-                    schedule.PlantId = plant.Id;
-                }
+        // Gives the plant and everything attached to it an Id, like the database
+        // would on insert. Ids that are already set stay as they are.
+        private void AssignIds(Plant plant)
+        {
+            if (plant.Id == 0)
+            {
+                plant.Id = _nextId++;
+            }
 
-                if (plant.SunlightRequirement != null && plant.SunlightRequirement.Id == 0)
+            foreach (var schedule in plant.CareSchedules)
+            {
+                if (schedule.Id == 0)
+                {
+                    schedule.Id = _nextId++;
+                }
+                schedule.PlantId = plant.Id;
+            }
+
+            if (plant.SunlightRequirement != null)
+            {
+                if (plant.SunlightRequirement.Id == 0)
                 {
                     plant.SunlightRequirement.Id = _nextId++;
-                    plant.SunlightRequirement.PlantId = plant.Id;
                 }
-
-                _plants.Add(plant);
+                plant.SunlightRequirement.PlantId = plant.Id;
             }
         }
 
@@ -77,20 +81,7 @@ namespace GreenKeeper.Tests.Fakes
                 throw new InvalidOperationException("Simulated database failure");
             }
 
-            plant.Id = _nextId++;
-
-            foreach (var schedule in plant.CareSchedules)
-            {
-                schedule.Id = _nextId++;
-                schedule.PlantId = plant.Id;
-            }
-
-            if (plant.SunlightRequirement != null)
-            {
-                plant.SunlightRequirement.Id = _nextId++;
-                plant.SunlightRequirement.PlantId = plant.Id;
-            }
-
+            AssignIds(plant);
             _plants.Add(plant);
             return Task.FromResult(plant);
         }
@@ -101,12 +92,8 @@ namespace GreenKeeper.Tests.Fakes
 
             var schedule = _plants
                 .SelectMany(p => p.CareSchedules)
-                .FirstOrDefault(s => s.Id == careScheduleId);
-
-            if (schedule == null)
-            {
-                throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
-            }
+                .FirstOrDefault(s => s.Id == careScheduleId)
+                ?? throw new InvalidOperationException($"Care schedule with Id {careScheduleId} was not found.");
 
             schedule.NextDueAt = nextDueAt;
             schedule.LastCaredAt = lastCaredAt;
@@ -120,12 +107,8 @@ namespace GreenKeeper.Tests.Fakes
                 throw new InvalidOperationException("Simulated database failure");
             }
 
-            var plant = _plants.FirstOrDefault(p => p.Id == plantId);
-
-            if (plant == null)
-            {
-                throw new InvalidOperationException($"Plant with Id {plantId} was not found");
-            }
+            var plant = _plants.FirstOrDefault(p => p.Id == plantId)
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
             _plants.Remove(plant);
             return Task.CompletedTask;
@@ -141,7 +124,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.Id == plantId)
-                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
             var existing = plant.CareSchedules.FirstOrDefault(s => s.Care == careSchedule.Care);
             if (existing != null)
@@ -158,7 +141,7 @@ namespace GreenKeeper.Tests.Fakes
 
         public Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
-            AddOrReplaceCareScheduleAsyncCallCount++;
+            AddOrReplaceSunlightRequirementAsyncCallCount++;
 
             if (ShouldThrowOnAddOrReplaceSunlightRequirement)
             {
@@ -166,7 +149,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.Id == plantId)
-            ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
             sunlightRequirement.Id = _nextId++;
             sunlightRequirement.PlantId = plantId;
@@ -185,7 +168,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.CareSchedules.Any(s => s.Id == careScheduleId))
-            ?? throw new InvalidOperationException($"CareSchedule with Id {careScheduleId} was not found.");
+                ?? throw new InvalidOperationException($"Care schedule with Id {careScheduleId} was not found.");
 
             var schedule = plant.CareSchedules.First(s => s.Id == careScheduleId);
             plant.CareSchedules.Remove(schedule);
@@ -203,7 +186,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.SunlightRequirement?.Id == sunlightRequirementId)
-            ?? throw new InvalidOperationException($"SunlightRequirement with Id {sunlightRequirementId} was not found.");
+                ?? throw new InvalidOperationException($"Sunlight requirement with Id {sunlightRequirementId} was not found.");
 
             plant.SunlightRequirement = null;
 
@@ -220,7 +203,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.Id == plantId)
-                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
             plant.Notes = notes;
             return Task.CompletedTask;
@@ -234,7 +217,7 @@ namespace GreenKeeper.Tests.Fakes
             }
 
             var plant = _plants.FirstOrDefault(p => p.Id == plantId)
-                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found");
+                ?? throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
 
             plant.Name = newName;
             return Task.CompletedTask;
