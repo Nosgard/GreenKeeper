@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace GreenKeeper.Commands
 {
@@ -35,12 +30,12 @@ namespace GreenKeeper.Commands
         }
 
         /// <summary>
-        /// Manually fires CanExecuteChanged in case CanExecute
-        /// can change when a state was changed (e.g. switching steps in the wizard)
-        /// and not by a direct UI interaction, which CommandManager.RequerySuggested would
-        /// react to anyway.
+        /// Asks WPF to re-evaluate CanExecute of every command, for state changes
+        /// that no UI interaction announces (e.g. switching steps in the wizard).
+        /// Static because CommandManager.RequerySuggested is global: one call
+        /// refreshes all commands, not only a single instance.
         /// </summary>
-        public void RaiseCanExecuteChanged()
+        public static void RaiseCanExecuteChanged()
         {
             CommandManager.InvalidateRequerySuggested();
         }

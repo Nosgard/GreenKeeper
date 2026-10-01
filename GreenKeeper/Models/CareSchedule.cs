@@ -1,13 +1,8 @@
 ﻿using GreenKeeper.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Models
 {
-    public class CareSchedule
+    public class CareSchedule : IPlantOwned
     {
         public int Id { get; set; }
         public int PlantId { get; set; }

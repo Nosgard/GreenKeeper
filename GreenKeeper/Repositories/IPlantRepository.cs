@@ -1,9 +1,4 @@
 ﻿using GreenKeeper.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.Repositories
 {
@@ -24,7 +19,7 @@ namespace GreenKeeper.Repositories
         /// <summary>
         /// Persists the "completed now" state of an existing care schedule:
         /// Updates its next due date (NextDueAt) to the given values.
-        /// The actual calculation of these new values (via TimeUnitConverter)
+        /// The actual calculation of these new values (via DueDateCalculator)
         /// happens in the MainViewModel. This method is a pure persistence
         /// operation. It doesn't contain any business logic about HOW the new
         /// due date is determined.

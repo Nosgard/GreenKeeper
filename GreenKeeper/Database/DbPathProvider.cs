@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace GreenKeeper.Database
 {
@@ -21,10 +16,9 @@ namespace GreenKeeper.Database
         /// of install location or permissions and survives app updates/reinstalls
         /// since it's independent of where the executable itself lives.
         /// </summary>
-        /// <returns></returns>
         public static string GetDatabasePath()
         {
-            return Path.Combine(GetAppDataFolder(), "greenkeeper.db");
+            return Path.Combine(EnsureAppDataFolder(), "greenkeeper.db");
         }
 
         /// <summary>
@@ -35,14 +29,14 @@ namespace GreenKeeper.Database
         /// </summary>
         public static string GetSettingsPath()
         {
-            return Path.Combine(GetAppDataFolder(), "settings.json");
+            return Path.Combine(EnsureAppDataFolder(), "settings.json");
         }
 
         /// <summary>
         /// Creates the folder if it is not there yet and returns it. Both paths go
         /// through here, so the location is defined in exactly one place.
         /// </summary>
-        private static string GetAppDataFolder()
+        private static string EnsureAppDataFolder()
         {
             string folder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

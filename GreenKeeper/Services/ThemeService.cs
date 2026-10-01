@@ -1,9 +1,4 @@
 ﻿using GreenKeeper.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -53,8 +48,10 @@ namespace GreenKeeper.Services
 
             foreach (var key in live.Keys.Cast<object>().ToList())
             {
-                if (live[key] is not SolidColorBrush brush) continue;
-                if (target[key] is not SolidColorBrush targetBrush) continue;
+                if (live[key] is not SolidColorBrush brush || target[key] is not SolidColorBrush targetBrush)
+                {
+                    continue;
+                }
 
                 AnimateTo(live, key, brush, targetBrush.Color);
             }
@@ -71,7 +68,7 @@ namespace GreenKeeper.Services
         /// Fades one brush to its new color. DynamicResource resolves to the brush
         /// object, so every control using it follows along without a resource lookup.
         /// </summary>
-        private void AnimateTo(ResourceDictionary live, object key, SolidColorBrush brush, Color targetColor)
+        private static void AnimateTo(ResourceDictionary live, object key, SolidColorBrush brush, Color targetColor)
         {
             var animation = new ColorAnimation
             {

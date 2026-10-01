@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GreenKeeper.Models.Enums
+﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
     /// All possible types of care schedules. The values are numbered explicitly because EF Core stores

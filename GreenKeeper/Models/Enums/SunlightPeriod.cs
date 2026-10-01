@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GreenKeeper.Models.Enums
+﻿namespace GreenKeeper.Models.Enums
 {
+    /// <summary>
+    /// The period the hours of sunlight refer to. Stored as an integer by
+    /// EF Core, so the numbers are part of the persisted data format - see CareType.
+    /// </summary>
     public enum SunlightPeriod
     {
-        Day,
-        Week,
-        Month,
-        Year
+        Day = 0,
+        Week = 1,
+        Month = 2,
+        Year = 3
     }
 }

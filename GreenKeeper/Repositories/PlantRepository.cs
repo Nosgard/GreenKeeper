@@ -1,12 +1,7 @@
 ﻿using GreenKeeper.Database;
 using GreenKeeper.Models;
-using GreenKeeper.Models.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace GreenKeeper.Repositories
 {
@@ -42,7 +37,7 @@ namespace GreenKeeper.Repositories
         /// Saves a new plant object - together with everything the Add Plant wizard
         /// may have already attached to it in memory - to the database in one single
         /// operation.
-        /// 
+        ///
         /// How this works under the hood:
         /// EF Core's "change tracker" walks the entire object graph reachable
         /// from "plant" once it's added (plant itself, every care schedule in
@@ -55,8 +50,6 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task<Plant> AddPlantAsync(Plant plant)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
             // Marks "plant" as newly added, pending data to be written to the
@@ -76,18 +69,10 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var schedule = await context.CareSchedules.FindAsync(careScheduleId);
-
-            if (schedule == null)
-            {
-                // The schedule could get deleted in some other way than via the Remove button,
-                // so give the user an explanatory exception in this case.
-                throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
-            }
+            var schedule = await context.CareSchedules.FindAsync(careScheduleId)
+                ?? throw NotFound("Care schedule", careScheduleId);
 
             schedule.NextDueAt = nextDueAt;
             schedule.LastCaredAt = lastCaredAt;
@@ -102,18 +87,10 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task DeletePlantAsync(int plantId)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var plant = await context.Plants.FindAsync(plantId);
-
-            if (plant == null)
-            {
-                // It can happen that the plant was already deleted through some
-                // other means in the meantime.
-                throw new InvalidOperationException($"Plant with Id {plantId} was not found.");
-            }
+            var plant = await context.Plants.FindAsync(plantId)
+                ?? throw NotFound("Plant", plantId);
 
             context.Plants.Remove(plant);
             await context.SaveChangesAsync();
@@ -127,35 +104,13 @@ namespace GreenKeeper.Repositories
         /// have the next due date (NextDueAt) and the last date of care (LastCaredAt)
         /// calculated by the caller (MainViewModel); this method only persists it.
         /// </summary>
-        public async Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
+        public Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
-            await using var context = await _contextFactory.CreateDbContextAsync();
-
-            // Runs the removal and the insert below as one unit: if the insert fails, the
-            // transaction is disposed without a commit and the removal is rolled back too.
-            await using var transaction = await context.Database.BeginTransactionAsync();
-
-            var existing = await context.CareSchedules
-                .FirstOrDefaultAsync(cs => cs.PlantId == plantId && cs.Care == careSchedule.Care);
-
-            if (existing != null)
-            {
-                // Remove + own SaveChangesAsync BEFORE the Add:
-                // guarantees the old row is gone
-                // before the new one is inserted, avoiding a brief clash with the unique index on (PlantId, Care).
-                context.CareSchedules.Remove(existing);
-                await context.SaveChangesAsync();
-            }
-
-            careSchedule.PlantId = plantId;
-            context.CareSchedules.Add(careSchedule);
-            await context.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-
-            return careSchedule;
+            return ReplaceAsync(
+                plantId,
+                careSchedule,
+                context => context.CareSchedules,
+                existing => existing.PlantId == plantId && existing.Care == careSchedule.Care);
         }
 
         /// <summary>
@@ -164,32 +119,48 @@ namespace GreenKeeper.Repositories
         /// just for the 1:1 sunlight requirement relationship instead of the
         /// 1:many care schedules.
         /// </summary>
-        public async Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
+        public Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
-            await using var context = await _contextFactory.CreateDbContextAsync();
+            return ReplaceAsync(
+                plantId,
+                sunlightRequirement,
+                context => context.SunlightRequirements,
+                existing => existing.PlantId == plantId);
+        }
 
-            // Removal and insert as one unit, same as AddOrReplaceCareScheduleAsync.
+        /// <summary>
+        /// Removes the row matched by isExisting (if any) and inserts the replacement
+        /// for the given plant, as one unit: if the insert fails, the transaction is
+        /// disposed without a commit and the removal is rolled back too.
+        /// </summary>
+        private async Task<TEntity> ReplaceAsync<TEntity>(
+            int plantId,
+            TEntity replacement,
+            Func<GreenKeeperDbContext, DbSet<TEntity>> entitiesOf,
+            Expression<Func<TEntity, bool>> isExisting)
+            where TEntity : class, IPlantOwned
+        {
+            await using var context = await _contextFactory.CreateDbContextAsync();
             await using var transaction = await context.Database.BeginTransactionAsync();
 
-            var existing = await context.SunlightRequirements
-                .FirstOrDefaultAsync(sr => sr.PlantId == plantId);
+            var entities = entitiesOf(context);
+            var existing = await entities.FirstOrDefaultAsync(isExisting);
 
             if (existing != null)
             {
-                // Remove + save first, then insert, same as AddOrReplaceCareScheduleAsync.
-                context.SunlightRequirements.Remove(existing);
+                // Remove + own SaveChangesAsync BEFORE the Add: guarantees the old row is gone
+                // before the new one is inserted, avoiding a brief clash with the unique index.
+                entities.Remove(existing);
                 await context.SaveChangesAsync();
             }
 
-            sunlightRequirement.PlantId = plantId;
-            context.SunlightRequirements.Add(sunlightRequirement);
+            replacement.PlantId = plantId;
+            entities.Add(replacement);
             await context.SaveChangesAsync();
 
             await transaction.CommitAsync();
 
-            return sunlightRequirement;
+            return replacement;
         }
 
         /// <summary>
@@ -198,16 +169,10 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task RemoveCareScheduleAsync(int careScheduleId)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var schedule = await context.CareSchedules.FindAsync(careScheduleId);
-
-            if (schedule == null)
-            {
-                throw new InvalidOperationException($"Care-Schedule with Id {careScheduleId} was not found");
-            }
+            var schedule = await context.CareSchedules.FindAsync(careScheduleId)
+                ?? throw NotFound("Care schedule", careScheduleId);
 
             context.CareSchedules.Remove(schedule);
             await context.SaveChangesAsync();
@@ -219,16 +184,10 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var requirement = await context.SunlightRequirements.FindAsync(sunlightRequirementId);
-
-            if (requirement == null)
-            {
-                throw new InvalidOperationException($"Sunlight-Requirement with Id {sunlightRequirementId} was not found");
-            }
+            var requirement = await context.SunlightRequirements.FindAsync(sunlightRequirementId)
+                ?? throw NotFound("Sunlight requirement", sunlightRequirementId);
 
             context.SunlightRequirements.Remove(requirement);
             await context.SaveChangesAsync();
@@ -240,16 +199,10 @@ namespace GreenKeeper.Repositories
         /// </summary>
         public async Task UpdatePlantNotesAsync(int plantId, string notes)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var plant = await context.Plants.FindAsync(plantId);
-
-            if (plant == null)
-            {
-                throw new InvalidOperationException($"Plant with Id {plantId} was not found");
-            }
+            var plant = await context.Plants.FindAsync(plantId)
+                ?? throw NotFound("Plant", plantId);
 
             plant.Notes = notes;
             await context.SaveChangesAsync();
@@ -257,19 +210,20 @@ namespace GreenKeeper.Repositories
 
         public async Task RenamePlantAsync(int plantId, string newName)
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            var plant = await context.Plants.FindAsync(plantId);
-
-            if (plant == null)
-            {
-                throw new InvalidOperationException($"Plant with Id {plantId} was not found");
-            }
+            var plant = await context.Plants.FindAsync(plantId)
+                ?? throw NotFound("Plant", plantId);
 
             plant.Name = newName;
             await context.SaveChangesAsync();
+        }
+
+        // A row can disappear through other means in the meantime (e.g. a deleted plant
+        // takes its schedules with it), so the user gets an explanatory exception.
+        private static InvalidOperationException NotFound(string entityName, int id)
+        {
+            return new InvalidOperationException($"{entityName} with Id {id} was not found.");
         }
     }
 }
