@@ -1,106 +1,23 @@
-﻿using GreenKeeper.Models.Enums;
+﻿using GreenKeeper.ViewModels.Base;
 using GreenKeeper.ViewModels.Wizards.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
 {
-    public class SunlightStepViewModel : IWizardStepViewModel
+    /// <summary>
+    /// Optional sunlight step of the Add Plant wizard: the user either enters
+    /// a positive amount of hours per period or leaves it empty and skips.
+    /// </summary>
+    public class SunlightStepViewModel : HoursPerPeriodInputViewModel, IWizardStepViewModel
     {
-        private string _amountText = string.Empty;
-        public string AmountText
-        {
-            get => _amountText;
-            set
-            {
-                if (_amountText == value)
-                {
-                    return;
-                }
-                _amountText = value;
-                OnPropertyChanged(nameof(AmountText));
-                OnPropertyChanged(nameof(CanProceed));
-                OnPropertyChanged(nameof(NextButtonLabel));
-            }
-        }
-
-        private SunlightPeriod _selectedPeriod = SunlightPeriod.Day;
-        public SunlightPeriod SelectedPeriod
-        {
-            get => _selectedPeriod;
-            set
-            {
-                if (_selectedPeriod == value)
-                {
-                    return;
-                }
-                _selectedPeriod = value;
-                OnPropertyChanged(nameof(SelectedPeriod));
-                OnPropertyChanged(nameof(MaxAmount));
-
-                // An entered amount can be invalid with the new period (e.g. 100 is valid for weeks but not for days).
-                // Therefore CanProceed is indispensable when changing the unit.
-                OnPropertyChanged(nameof(CanProceed));
-                OnPropertyChanged(nameof(NextButtonLabel));
-            }
-        }
-
-        /// <summary>
-        /// Options for the ComboBox.
-        /// 
-        /// Key: Actual enum value (will be bound)
-        /// Value: Text that the user sees.
-        /// </summary>
-        public IReadOnlyList<KeyValuePair<SunlightPeriod, string>> AvailablePeriods { get; } =
-            new List<KeyValuePair<SunlightPeriod, string>>
-            {
-                new(SunlightPeriod.Day, "/ Day"),
-                new(SunlightPeriod.Week, "/ Week"),
-                new(SunlightPeriod.Month, "/ Month"),
-                new(SunlightPeriod.Year, "/ Year"),
-            };
-
-        /// <summary>
-        /// Every available unit has a maximum amount to prevent misuse.
-        /// The limits are declared in hours per period and
-        /// can be set from here.
-        /// </summary>
-        private static readonly Dictionary<SunlightPeriod, int> MaxHoursByPeriod = new()
-        {
-            { SunlightPeriod.Day, 24 },
-            { SunlightPeriod.Week, 168 },       // 7 * 24
-            { SunlightPeriod.Month, 744 },      // 31 * 24
-            { SunlightPeriod.Year, 8760 },      // 365 * 24
-        };
-
-        // Set the limit for the selected period.
-        public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
-
-        /// <summary>
-        /// The amount needs to be a positive number.
-        /// Sunlight is a special case because it's passive.
-        /// You enter a positive amount of hours per period
-        /// that is below the maximum.
-        /// </summary>
-        public bool HasValidAmount =>
-            int.TryParse(AmountText, out int hours) && hours >= 1 && hours <= MaxAmount;
-
-        // Basically the same as for the active steps (watering and fertilizing).
-        // The only difference is that you enter a positive amount of hours per period (as mentioned above) or keep it empty.
+        // The step is optional, so the button is always active; only its label changes.
         public bool CanProceed => true;
 
         // Depending on the entered amount of hours per period, show "Next" or "Skip".
         public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";
 
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
+        protected override void OnHoursOrPeriodChanged()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(nameof(NextButtonLabel));
         }
     }
 }

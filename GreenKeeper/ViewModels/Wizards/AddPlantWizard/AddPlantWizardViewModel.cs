@@ -1,189 +1,91 @@
-﻿using GreenKeeper.Commands;
-using GreenKeeper.Converters;
-using GreenKeeper.Models;
+﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.CareStatuses;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
 {
-    public class AddPlantWizardViewModel : INotifyPropertyChanged
+    /// <summary>
+    /// Five fixed steps - name, watering, fertilizing, sunlight, summary - whose
+    /// entries are turned into a plant object when the wizard is finished.
+    /// </summary>
+    public class AddPlantWizardViewModel : WizardViewModel
     {
-        // Collected data across all steps.
-        // Will be turned into a plant object at the end of the wizard.
-        private readonly PlantNameStepViewModel _plantNameStepViewModel = new PlantNameStepViewModel();
-        private readonly WateringStepViewModel _wateringStepViewModel = new WateringStepViewModel();
-        private readonly FertilizingStepViewModel _fertilizingStepViewModel = new FertilizingStepViewModel();
-        private readonly SunlightStepViewModel _sunlightStepViewModel = new SunlightStepViewModel();
-        private readonly SummaryStepViewModel _summaryStepViewModel;
+        private readonly PlantNameStepViewModel _plantNameStep = new();
+        private readonly WateringStepViewModel _wateringStep = new();
+        private readonly FertilizingStepViewModel _fertilizingStep = new();
+        private readonly SunlightStepViewModel _sunlightStep = new();
 
         private readonly List<IWizardStepViewModel> _steps;
         private int _currentStepIndex;
 
-        public AddPlantWizardViewModel()
-        {
-            _summaryStepViewModel = new SummaryStepViewModel(
-                _plantNameStepViewModel,
-                _wateringStepViewModel,
-                _fertilizingStepViewModel,
-                _sunlightStepViewModel);
-
-            // Order of the steps (ViewModels)
-            _steps = new List<IWizardStepViewModel>
-            {
-                _plantNameStepViewModel,
-                _wateringStepViewModel,
-                _fertilizingStepViewModel,
-                _sunlightStepViewModel,
-                _summaryStepViewModel,
-            };
-
-            // Make the current step ready.
-            _currentStepIndex = 0;
-            CurrentStep = _steps[_currentStepIndex];
-
-            NextCommand = new RelayCommand(
-                execute: _ => GoNext(),
-                canExecute: _ => CurrentStep.CanProceed);
-
-            BackCommand = new RelayCommand(
-                execute: _ => GoBack(),
-                canExecute: _ => _currentStepIndex > 0);
-
-            CancelCommand = new RelayCommand(
-                execute: _ => Cancel());
-        }
-
-        private IWizardStepViewModel _currentStep = null!;
-
-        public IWizardStepViewModel CurrentStep
-        {
-            get => _currentStep;
-            private set
-            {
-                _currentStep = value;
-                OnPropertyChanged(nameof(CurrentStep));
-                (NextCommand as RelayCommand)?.RaiseCanExecuteChanged();
-                (BackCommand as RelayCommand)?.RaiseCanExecuteChanged();
-
-                // Once you reach the summary step, all values from the prior properties
-                // must be read (e.g. in case the user presses the Back button and changes the values).
-                if (value is SummaryStepViewModel summary)
-                {
-                    summary.Refresh();
-                }
-            }
-        }
-
-        public ICommand NextCommand { get; }
-        public ICommand BackCommand { get; }
-        public ICommand CancelCommand { get; }
-
-        // Signals the View that the wizard will be closed.
-        public event EventHandler<bool>? RequestClose;
-
         // After finishing the wizard, the View reads the property when RequestClose has closed the window.
-        // Only this ViewModel is allowed to set the created plant.
+        // Null if the wizard was canceled.
         public Plant? CreatedPlant { get; private set; }
 
-        private void GoNext()
+        public AddPlantWizardViewModel()
         {
-            if (_currentStepIndex < _steps.Count - 1)
+            _steps = new List<IWizardStepViewModel>
             {
-                _currentStepIndex++;
-                CurrentStep = _steps[_currentStepIndex];
-            }
-            else
-            {
-                Finish();
-            }
-        }
-
-        private void GoBack()
-        {
-            // Usually canExecute makes sure GoBack() is never called at index 0,
-            // but in case GoBack() is called elsewhere in the future, cover this case.
-            if (_currentStepIndex > 0)
-            {
-                _currentStepIndex--;
-                CurrentStep = _steps[_currentStepIndex];
-            }
-        }
-
-        private void Finish()
-        {
-            CreatedPlant = BuildPlant();
-            RequestClose?.Invoke(this, true);
-        }
-
-        private void Cancel()
-        {
-            RequestClose?.Invoke(this, false);
-        }
-
-        // Section for building a plant
-
-        private Plant BuildPlant()
-        {
-            var plant = new Plant
-            {
-                Name = _plantNameStepViewModel.PlantName
+                _plantNameStep,
+                _wateringStep,
+                _fertilizingStep,
+                _sunlightStep,
+                new SummaryStepViewModel(_plantNameStep, _wateringStep, _fertilizingStep, _sunlightStep),
             };
 
-            // Watering: Mandatory field, so no further check is needed.
-            // IntervalUnit: Saves the selected time unit for calculating the next due date later on (for more go to TimeUnitConverter -> ToDueDate).
-            // NextDueAt = now + the amount and unit of the related step, calendar-exact via ToDueDate.
-            int wateringAmount = int.Parse(_wateringStepViewModel.AmountText);
-            plant.CareSchedules.Add(new CareSchedule
-            {
-                Care = CareType.Watering,
-                IntervalAmount = wateringAmount,
-                IntervalUnit = _wateringStepViewModel.SelectedUnit,
-                NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, wateringAmount, _wateringStepViewModel.SelectedUnit)
-            });
+            CurrentStep = _steps[_currentStepIndex];
+        }
 
-            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value.
-            if (_fertilizingStepViewModel.HasValidAmount)
+        protected override bool CanGoBack => _currentStepIndex > 0;
+
+        protected override void GoNext()
+        {
+            if (_currentStepIndex == _steps.Count - 1)
             {
-                int fertilizingAmount = int.Parse(_fertilizingStepViewModel.AmountText);
-                plant.CareSchedules.Add(new CareSchedule
-                {
-                    Care = CareType.Fertilizing,
-                    IntervalAmount = fertilizingAmount,
-                    IntervalUnit = _fertilizingStepViewModel.SelectedUnit,
-                    NextDueAt = TimeUnitConverter.ToDueDate(DateTime.Now, fertilizingAmount, _fertilizingStepViewModel.SelectedUnit)
-                });
+                CreatedPlant = BuildPlant();
+                Close(true);
+                return;
             }
 
-            // Sunlight: Optional. Unlike Watering/Fertilizing you don't need any calculation.
-            // The wizard already asks for values in the exact same structure (Hours + Period).
-            if (_sunlightStepViewModel.HasValidAmount)
+            _currentStepIndex++;
+            CurrentStep = _steps[_currentStepIndex];
+        }
+
+        protected override void GoBack()
+        {
+            if (!CanGoBack)
             {
-                plant.SunlightRequirement = new SunlightRequirement
-                {
-                    Hours = int.Parse(_sunlightStepViewModel.AmountText),
-                    Period = _sunlightStepViewModel.SelectedPeriod
-                };
+                return;
+            }
+
+            _currentStepIndex--;
+            CurrentStep = _steps[_currentStepIndex];
+        }
+
+        // The wizard only collects the intervals; the due dates are set when the plant is saved (MainViewModel).
+        private Plant BuildPlant()
+        {
+            var plant = new Plant { Name = _plantNameStep.PlantName };
+
+            // Watering: Mandatory field, so no further check is needed.
+            plant.CareSchedules.Add(_wateringStep.ToCareSchedule(CareType.Watering));
+
+            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value.
+            if (_fertilizingStep.HasValidAmount)
+            {
+                plant.CareSchedules.Add(_fertilizingStep.ToCareSchedule(CareType.Fertilizing));
+            }
+
+            // Sunlight: Optional, same rule as Fertilizing.
+            if (_sunlightStep.HasValidAmount)
+            {
+                plant.SunlightRequirement = _sunlightStep.ToSunlightRequirement();
             }
 
             return plant;
-        }
-
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

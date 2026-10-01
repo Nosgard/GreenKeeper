@@ -1,36 +1,26 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.CareStatuses.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.CareStatuses.Active
 {
+    /// <summary>
+    /// Set the status card for Fertilizing via the given schedule.
+    /// onComplete / onEdit / onRemove: Are provided by MainViewModel and encapsulate the
+    /// completion, the EditScheduleView for this care type and the confirmation + removal.
+    ///
+    /// Note: The ViewModel knows neither the plant object nor any window class;
+    /// it only triggers the given callbacks.
+    /// </summary>
     public class FertilizingStatusViewModel : ActiveCareStatusViewModel
     {
-        /// <summary>
-        /// Set the status card for Fertilizing via the given schedule.
-        /// onEdit: Is provided by MainViewModel and encapsulates the EditScheduleView for this care type
-        /// onRemove: Is provided by MainViewModel and encapsulates the confirmation + removal.
-        /// 
-        /// Note: The ViewModel knows neither the plant object nor any window class;
-        /// it only triggers the given Action.
-        /// </summary>
-        public FertilizingStatusViewModel(CareSchedule? schedule, Action onComplete, Action onEdit, Action onRemove)
-            : base(CareType.Fertilizing, schedule, "Fertilizing", "/Resources/Icons/Pill.png", "#ff695b")
+        public FertilizingStatusViewModel(
+            CareSchedule? schedule, Func<Task> onComplete, Action onEdit, Func<Task> onRemove, TimeProvider timeProvider)
+            : base(CareType.Fertilizing, schedule, timeProvider)
         {
-            CompleteCommand = new RelayCommand(
-                _ => onComplete());
-
-            EditCommand = new RelayCommand(
-                _ => onEdit());
-
-            RemoveCommand = new RelayCommand(
-                _ => onRemove());
+            CompleteCommand = new AsyncRelayCommand(_ => onComplete());
+            EditCommand = new RelayCommand(_ => onEdit());
+            RemoveCommand = new AsyncRelayCommand(_ => onRemove());
         }
     }
 }

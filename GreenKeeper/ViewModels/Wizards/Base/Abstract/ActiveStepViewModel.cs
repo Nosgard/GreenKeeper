@@ -1,12 +1,4 @@
-﻿using GreenKeeper.Models.Enums;
-using GreenKeeper.ViewModels.Base;
-using GreenKeeper.ViewModels.Wizards.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GreenKeeper.ViewModels.Base;
 
 namespace GreenKeeper.ViewModels.Wizards.Base.Abstract
 {
@@ -19,7 +11,6 @@ namespace GreenKeeper.ViewModels.Wizards.Base.Abstract
         // Default: "Next"
         // In the context of fertilizing: "Skip" or "Next"
         public virtual string NextButtonLabel => "Next";
-
 
         protected override void OnAmountOrUnitChanged()
         {

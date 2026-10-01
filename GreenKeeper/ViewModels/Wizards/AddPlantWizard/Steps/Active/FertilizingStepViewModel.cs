@@ -1,9 +1,4 @@
 ﻿using GreenKeeper.ViewModels.Wizards.Base.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active
 {

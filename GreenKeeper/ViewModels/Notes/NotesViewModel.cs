@@ -1,18 +1,12 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.Models;
 using GreenKeeper.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+using GreenKeeper.ViewModels.Base;
 using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.Notes
 {
-    public class NotesViewModel : INotifyPropertyChanged
+    public class NotesViewModel : ObservableObject, IDialogViewModel
     {
         private readonly Plant _plant;
 
@@ -23,7 +17,7 @@ namespace GreenKeeper.ViewModels.Notes
         /// <summary>
         /// Handles the actual persistence via MainViewModel.UpdatePlantNotesAsync -
         /// NotesViewModel itself still knows neither the repository nor the database.
-        /// Func is used instead of Action because Save() needs to await the result
+        /// Func is used instead of Action because saving needs to await the result
         /// to keep the dialog open on failure.
         /// </summary>
         private readonly Func<string, Task> _saveNotesAsync;
@@ -41,27 +35,12 @@ namespace GreenKeeper.ViewModels.Notes
         private string _editableNotes;
 
         /// <summary>
-        /// Important notes for SaveCommand and CancelCommand:
-        /// SaveCommand in detail:
-        /// 
-        /// execute: Controls what happens when you click the Save button -> fire the Save() method.
-        /// 
-        /// canExecute: The Save button is only active when IsDirty is true.
-        /// What does that mean? The notes are considered dirty if the notes differ from
-        /// the original.
-        /// 
-        /// Important info for IsDirty!
-        /// The assignment of IsDirty must be in the constructor; otherwise WPF ignores
-        /// the click on a command set to 'null'.
-        /// 
-        /// CancelCommand in detail:
-        /// 
-        /// execute: Fires the Cancel() method
-        /// Why no canExecute? Because Cancel must always be executable, even if there are
-        /// no changes. This simply leads to closing the View without any warning.
-        /// 
+        /// SaveCommand: saves via the callback; only active while IsDirty is true,
+        /// i.e. while the notes differ from the original.
+        ///
+        /// CancelCommand: always executable, even if there are no changes - then it
+        /// simply closes the View without any warning.
         /// </summary>
-        /// <param name="plant"></param>
         public NotesViewModel(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
         {
             _plant = plant;
@@ -70,13 +49,12 @@ namespace GreenKeeper.ViewModels.Notes
             _originalNotes = plant.Notes ?? string.Empty;
             _editableNotes = _originalNotes;
 
-
-            SaveCommand = new RelayCommand(
-                execute: _ => Save(),
+            SaveCommand = new AsyncRelayCommand(
+                execute: _ => TrySaveAsync(),
                 canExecute: _ => IsDirty);
 
-            CancelCommand = new RelayCommand(
-                execute: _ => Cancel());
+            CancelCommand = new AsyncRelayCommand(
+                execute: _ => CancelAsync());
         }
 
         public string PlantName => _plant.Name;
@@ -84,23 +62,18 @@ namespace GreenKeeper.ViewModels.Notes
         /// <summary>
         /// Extract the Notes property from the plant model to present it in the related view
         /// and make it editable. Changes to the original notes will be recognized by OnPropertyChanged.
-        /// The setter always fires on every button click.
         /// </summary>
         public string EditableNotes
         {
             get => _editableNotes;
             set
             {
-                if (_editableNotes == value)
+                if (SetProperty(ref _editableNotes, value))
                 {
-                    return;
+                    // IsDirty depends on _editableNotes.
+                    // Manually signal that IsDirty could change, and with that the Save button as well.
+                    OnPropertyChanged(nameof(IsDirty));
                 }
-                _editableNotes = value;
-                OnPropertyChanged(nameof(EditableNotes));
-
-                // IsDirty depends on _editableNotes.
-                // Manually signal that IsDirty could change, and with that the Save button as well.
-                OnPropertyChanged(nameof(IsDirty));
             }
         }
 
@@ -116,23 +89,13 @@ namespace GreenKeeper.ViewModels.Notes
         /// Signals the NotesView that the window is about to be closed.
         /// This is necessary to warn the user about unsaved changes.
         /// NotesView.xaml.cs subscribes to it.
-        /// Only fired by the Cancel() method.
-        /// 
-        /// bool? represents Window.DialogResult (true = save and close, false = discard and close).
+        /// Only fired by CancelAsync: true = saved and close, false = discard and close.
         /// </summary>
-        public event EventHandler<bool?>? RequestClose;
-
-
-        // Sets the edited text in the plant object by calling TrySaveAsync.
-        // Error handling happens inside TrySaveAsync.
-        private async void Save()
-        {
-            await TrySaveAsync();
-        }
+        public event EventHandler<bool>? RequestClose;
 
         /// <summary>
         /// Runs the actual save via the callback, updates _originalNotes on success (resets IsDirty)
-        /// and returns whether it worked. Used by both Save() and Cancel() so both share the same
+        /// and returns whether it worked. Used by both commands so both share the same
         /// error behavior - on failure the entered text stays untouched instead of being lost.
         /// </summary>
         private async Task<bool> TrySaveAsync()
@@ -155,48 +118,32 @@ namespace GreenKeeper.ViewModels.Notes
         }
 
         /// <summary>
-        /// Called when the Cancel button is clicked.
-        /// A warning shows up if IsDirty recognizes changes to the notes.
-        /// In case the user tries to cancel while there are unsaved changes,
-        /// TrySaveAsync() will be awaited before actually closing.
-        /// This is for error handling.
+        /// Called when the Cancel button is clicked (or the window is closed otherwise).
+        /// Without changes the window simply closes. With unsaved changes the user is
+        /// asked: "Yes" saves first and closes only if that worked, "No" discards.
         /// </summary>
-        private async void Cancel()
+        private async Task CancelAsync()
         {
-            if (IsDirty)
+            if (!IsDirty)
             {
-                // A cleaner alternative to MessageBox.Show() through
-                // the injected abstraction. The ViewModel only knows that there
-                // is a yes or a no.
-                bool shouldSave = _dialogService.Confirm(
-                    "There are unsaved changes. Do you want to save?",
-                    "Unsaved Changes");
-
-                // Act like Save + Close the View together.
-                if (shouldSave)
-                {
-                    bool saved = await TrySaveAsync();
-                    if (saved)
-                    {
-                        RequestClose?.Invoke(this, true);
-                    }
-                    return;
-                }
-
-                // User chose "No"? Discard all changes and close.
                 RequestClose?.Invoke(this, false);
                 return;
             }
 
-            // No changes? Simply close.
-            RequestClose?.Invoke(this, false);
-        }
+            bool shouldSave = _dialogService.Confirm(
+                "There are unsaved changes. Do you want to save?",
+                "Unsaved Changes");
 
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            if (!shouldSave)
+            {
+                RequestClose?.Invoke(this, false);
+                return;
+            }
+
+            if (await TrySaveAsync())
+            {
+                RequestClose?.Invoke(this, true);
+            }
         }
     }
 }

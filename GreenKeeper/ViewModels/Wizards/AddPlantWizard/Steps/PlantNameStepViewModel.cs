@@ -1,58 +1,36 @@
-﻿using GreenKeeper.ViewModels.Wizards.Base;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GreenKeeper.Models;
+using GreenKeeper.ViewModels.Base;
+using GreenKeeper.ViewModels.Wizards.Base;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 {
-    public class PlantNameStepViewModel : IWizardStepViewModel
+    public class PlantNameStepViewModel : ObservableObject, IWizardStepViewModel
     {
-        private const int MAXNAMELENGTH = 50;
-
         private string _plantName = string.Empty;
 
-        public string PlantName {
+        public string PlantName
+        {
             get => _plantName;
             set
             {
-                if (_plantName == value)
+                if (SetProperty(ref _plantName, value))
                 {
-                    return;
+                    // The Next button and the live counter for the remaining
+                    // characters both depend on the name.
+                    OnPropertyChanged(nameof(CanProceed));
+                    OnPropertyChanged(nameof(CharactersRemaining));
                 }
-                _plantName = value;
-                OnPropertyChanged(nameof(PlantName));
-
-                // CanProceed depends on PlantName.
-                // Notify so that the Next button can be activated/deactivated.
-                OnPropertyChanged(nameof(CanProceed));
-
-                // Update the UI on every change so that a live counter
-                // for the remaining characters can follow along.
-                OnPropertyChanged(nameof(CharactersRemaining));
-
-
             }
         }
 
         // Helper that is used to show the remaining characters in the UI.
-        public int CharactersRemaining => MAXNAMELENGTH - PlantName.Length;
-
+        public int CharactersRemaining => Plant.MaxNameLength - PlantName.Length;
 
         // Mandatory: Only active when the name is not empty and is within
         // the maximum length.
-        public bool CanProceed => !string.IsNullOrWhiteSpace(PlantName) && PlantName.Length <= MAXNAMELENGTH;
+        public bool CanProceed => Plant.IsValidName(PlantName);
 
         // Because the step is mandatory, the button always shows "Next".
         public string NextButtonLabel => "Next";
-
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

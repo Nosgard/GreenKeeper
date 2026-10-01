@@ -1,11 +1,6 @@
 ﻿using GreenKeeper.Commands;
 using GreenKeeper.Models;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using GreenKeeper.ViewModels.Base;
 using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.RenamePlant
@@ -16,12 +11,9 @@ namespace GreenKeeper.ViewModels.RenamePlant
     /// happens in the MainViewModel via the repository, so this class knows
     /// nothing about databases or windows.
     /// </summary>
-    public class RenamePlantViewModel : INotifyPropertyChanged
+    public class RenamePlantViewModel : ObservableObject, IDialogViewModel
     {
-
-        // Same limit as the Add Plant wizard's name step - it would be
-        // inconsistent to allow longer names when renaming.
-        public const int MaxNameLength = 50;
+        private string _newName;
 
         // Holds the confirmed new name once the user has clicked Save.
         // Stays null if the dialog was canceled.
@@ -41,33 +33,27 @@ namespace GreenKeeper.ViewModels.RenamePlant
                 execute: _ => RequestClose?.Invoke(this, false));
         }
 
-        private string _newName;
         public string NewName
         {
             get => _newName;
             set
             {
-                if (_newName == value)
+                if (SetProperty(ref _newName, value))
                 {
-                    return;
+                    // Both depend on _newName and must be re-evaluated whenever
+                    // the text changes.
+                    OnPropertyChanged(nameof(CharactersRemaining));
+                    OnPropertyChanged(nameof(HasValidName));
                 }
-
-                _newName = value;
-                OnPropertyChanged(nameof(NewName));
-
-                // Both depend on _newName and must be re-evaluated whenever
-                // the text changes.
-                OnPropertyChanged(nameof(CharactersRemaining));
-                OnPropertyChanged(nameof(HasValidName));
             }
         }
 
         // Shown below the input field.
-        public int CharactersRemaining => MaxNameLength - (_newName?.Length ?? 0);
+        public int CharactersRemaining => Plant.MaxNameLength - _newName.Length;
 
-        // A name consisting only of spaces would look empty in the sidebar
-        // but still pass a simple null/empty check.
-        public bool HasValidName => !string.IsNullOrWhiteSpace(_newName);
+        // Same rule as the Add Plant wizard's name step - it would be
+        // inconsistent to accept other names when renaming.
+        public bool HasValidName => Plant.IsValidName(_newName);
 
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
@@ -81,13 +67,6 @@ namespace GreenKeeper.ViewModels.RenamePlant
             ConfirmedName = _newName.Trim();
 
             RequestClose?.Invoke(this, true);
-        }
-
-        // Implementation of INotifyPropertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

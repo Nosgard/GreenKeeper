@@ -1,17 +1,19 @@
-﻿using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
+﻿using GreenKeeper.ViewModels.Base;
+using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.Base;
 using GreenKeeper.ViewModels.Wizards.Base.Abstract;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 {
-    public class SummaryStepViewModel : IWizardStepViewModel
+    /// <summary>
+    /// The last step, which repeats what was entered in the steps before. Its
+    /// properties have no backing fields but read the other steps directly, and
+    /// it listens to them, so going back and changing a value shows up here
+    /// without anyone having to refresh the summary by hand.
+    /// </summary>
+    public class SummaryStepViewModel : ObservableObject, IWizardStepViewModel
     {
         private readonly PlantNameStepViewModel _nameStepViewModel;
         private readonly WateringStepViewModel _wateringStepViewModel;
@@ -27,6 +29,11 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
             _wateringStepViewModel = wateringStepViewModel;
             _fertilizingStepViewModel = fertilizingStepViewModel;
             _sunlightStepViewModel = sunlightStepViewModel;
+
+            nameStepViewModel.PropertyChanged += (_, _) => OnPropertyChanged(nameof(PlantName));
+            wateringStepViewModel.PropertyChanged += (_, _) => OnPropertyChanged(nameof(Watering));
+            fertilizingStepViewModel.PropertyChanged += OnFertilizingChanged;
+            sunlightStepViewModel.PropertyChanged += OnSunlightChanged;
         }
 
         public string PlantName => _nameStepViewModel.PlantName;
@@ -45,40 +52,29 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
 
-        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days").
-        private static string GetUnit(ActiveStepViewModel step) =>
-            step.AvailableUnits.First(u => u.Key == step.SelectedUnit).Value;
-
-        private static string GetPeriod(SunlightStepViewModel step) =>
-            step.AvailablePeriods.First(p => p.Key == step.SelectedPeriod).Value;
-
         // The summary step is the last step, so proceeding is always possible.
         public bool CanProceed => true;
 
         // Last step -> always "Finish".
         public string NextButtonLabel => "Finish";
 
-        /// <summary>
-        /// Is called by the wizard once this step (the summary step) is reached.
-        /// This is necessary because all values of Watering/Fertilizing/Sunlight can get
-        /// changed in the meantime (e.g. by using the Back button + entering a new value).
-        /// The summary properties don't have their own backing field. Instead, they actively
-        /// read from the other steps.
-        /// </summary>
-        public void Refresh()
+        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days").
+        private static string GetUnit(ActiveStepViewModel step) =>
+            AmountAndUnitInputViewModel.AvailableUnits.First(u => u.Key == step.SelectedUnit).Value;
+
+        private static string GetPeriod(SunlightStepViewModel step) =>
+            HoursPerPeriodInputViewModel.AvailablePeriods.First(p => p.Key == step.SelectedPeriod).Value;
+
+        private void OnFertilizingChanged(object? sender, PropertyChangedEventArgs e)
         {
-            OnPropertyChanged(nameof(PlantName));
-            OnPropertyChanged(nameof(Watering));
             OnPropertyChanged(nameof(HasFertilizing));
             OnPropertyChanged(nameof(Fertilizing));
-            OnPropertyChanged(nameof(HasSunlight));
-            OnPropertyChanged(nameof(Sunlight));
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void OnPropertyChanged(string propertyName)
+        private void OnSunlightChanged(object? sender, PropertyChangedEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(nameof(HasSunlight));
+            OnPropertyChanged(nameof(Sunlight));
         }
     }
 }

@@ -2,48 +2,34 @@
 using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GreenKeeper.ViewModels.CareStatuses.Passive
 {
+    /// <summary>
+    /// Set the status card for Sunlight via the related sunlight requirement (passive care status).
+    /// onEdit / onRemove: Are provided by MainViewModel and encapsulate the EditScheduleView
+    /// for this care type and the confirmation + removal.
+    ///
+    /// Note: The ViewModel knows neither the plant object nor any window class;
+    /// it only triggers the given callbacks.
+    /// </summary>
     public class SunlightStatusViewModel : CareStatusViewModel
     {
-        private readonly SunlightRequirement? _sunlightRequirement;
+        private readonly SunlightRequirement _sunlightRequirement;
 
-        /// <summary>
-        /// Set the status card for Sunlight via the related sunlight requirement (passive care status).
-        /// onEdit: Is provided by MainViewModel and encapsulates the EditScheduleView for this care type
-        /// onRemove: Is provided by MainViewModel and encapsulates the confirmation + removal.
-        /// 
-        /// Note: The ViewModel knows neither the plant object nor any window class;
-        /// it only triggers the given Action.
-        /// </summary>
-        public SunlightStatusViewModel(SunlightRequirement sunlightRequirement, Action onEdit, Action onRemove)
-            : base(CareType.Sunlight, "Sunlight", "/Resources/Icons/Sun.png", "#ffcc00")
+        public SunlightStatusViewModel(SunlightRequirement sunlightRequirement, Action onEdit, Func<Task> onRemove)
+            : base(CareType.Sunlight)
         {
             _sunlightRequirement = sunlightRequirement;
 
-            EditCommand = new RelayCommand(
-                _ => onEdit());
-
-            RemoveCommand = new RelayCommand(
-                _ => onRemove());
+            EditCommand = new RelayCommand(_ => onEdit());
+            RemoveCommand = new AsyncRelayCommand(_ => onRemove());
         }
 
         public override string StatusText
         {
             get
             {
-                if (_sunlightRequirement == null)
-                {
-                    return string.Empty;
-                }
-
                 string periodText = _sunlightRequirement.Period switch
                 {
                     SunlightPeriod.Day => "day",
