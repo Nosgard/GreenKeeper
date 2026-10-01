@@ -12,7 +12,7 @@ namespace GreenKeeper.Scheduling
             CareSchedule = careSchedule;
         }
 
-        public override string ExistingEntryName => $"{CareSchedule.Care.DisplayName()} schedule";
+        public override string ExistingEntryName => CareSchedule.Care.ScheduleNameInSentence();
 
         public override string OverwriteTitle => "Schedule already exists";
 

@@ -482,10 +482,10 @@ namespace GreenKeeper.ViewModels
                 return;
             }
 
-            string displayName = $"{careType.DisplayName().ToLowerInvariant()} schedule";
+            string scheduleName = careType.ScheduleNameInSentence();
 
             bool isConfirmed = _dialogService.Confirm(
-                $"Are you sure you want to remove the {displayName} for \"{SelectedPlant.Name}\"?",
+                $"Are you sure you want to remove the {scheduleName} for \"{SelectedPlant.Name}\"?",
                 $"Remove {careType.DisplayName()} Schedule");
 
             var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
@@ -497,7 +497,7 @@ namespace GreenKeeper.ViewModels
 
             bool isRemoved = await TryPersistAsync(
                 () => _plantRepository.RemoveCareScheduleAsync(schedule.Id),
-                $"The {displayName} could not be removed");
+                $"The {scheduleName} could not be removed");
 
             if (!isRemoved)
             {
