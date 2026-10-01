@@ -1,40 +1,18 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Status card action button -->
+    <!-- Status card action button: the small button with its own, lighter disabled look.
+         Style triggers outrank the template triggers of BigButton, so only the disabled
+         colors are overridden here and the template stays shared. -->
     <Style x:Key="StatusCardActionButton" TargetType="Button" BasedOn="{StaticResource SmallButton}">
         <Setter Property="Width" Value="85" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
-        
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="border"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
-                            Padding="{TemplateBinding Padding}">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <!-- Hover -->
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
-                        </Trigger>
-                        <!-- Pressed -->
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
-                        </Trigger>
-                        <!-- Disabled -->
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Background" Value="Transparent" />
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource StatusButtonDisabledBorder}" />
-                            <Setter Property="Foreground" Value="{DynamicResource StatusButtonDisabledForeground}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
+
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="{DynamicResource StatusButtonDisabledBorder}" />
+                <Setter Property="Foreground" Value="{DynamicResource StatusButtonDisabledForeground}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
 </ResourceDictionary>

@@ -1,45 +1,26 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
+using GreenKeeper.Scheduling;
 using GreenKeeper.ViewModels.CareStatuses.EditOption;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace GreenKeeper.Views.CareStatuses.EditOption
 {
     /// <summary>
     /// Interaction logic for EditScheduleView.xaml.
     /// </summary>
-    public partial class EditScheduleView : Window
+    public partial class EditScheduleView : DialogWindow
     {
         private readonly EditScheduleViewModel _viewModel;
 
         // The parameters determine which care schedule or sunlight requirement gets edited.
-        public EditScheduleView(Plant plant, CareType careType)
+        public EditScheduleView(Plant plant, CareType careType, TimeProvider timeProvider)
         {
             InitializeComponent();
-            _viewModel = new EditScheduleViewModel(plant, careType);
-            _viewModel.RequestClose += ViewModel_RequestClose;
-            this.DataContext = _viewModel;
+            _viewModel = new EditScheduleViewModel(plant, careType, timeProvider);
+            Attach(_viewModel);
         }
 
-        // Provide the result for either the selected care schedule or the sunlight requirement.
-        public CareSchedule? EditedCareSchedule => _viewModel.EditedCareSchedule;
-        public SunlightRequirement? EditedSunlightRequirement => _viewModel.EditedSunlightRequirement;
-        private void ViewModel_RequestClose(object? sender, bool dialogResult)
-        {
-            _viewModel.RequestClose -= ViewModel_RequestClose;
-            DialogResult = dialogResult;
-        }
+        // Exposes the edited entry to the caller (MainWindow); the persistence happens in the MainViewModel.
+        public ScheduleInput? Result => _viewModel.Result;
     }
 }

@@ -34,11 +34,12 @@
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
 
-                        <!-- Disabled -->
+                        <!-- Disabled: set on the control (not on the border), so that a style
+                             based on this one can override the colors with its own triggers -->
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonDisabledBackground}"/>
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}"/>
+                            <Setter Property="Background" Value="{DynamicResource ButtonDisabledBackground}" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}" />
+                            <Setter Property="Foreground" Value="{DynamicResource ButtonDisabledForeground}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
