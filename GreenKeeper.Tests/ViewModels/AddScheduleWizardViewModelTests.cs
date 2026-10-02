@@ -45,6 +45,25 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.False(wizard.BackCommand.CanExecute(null));
         }
 
+        [Fact]
+        public void SelectionStep_OffersAllThreeCareTypesUnderTheirNames()
+        {
+            // Given: the selection step, whose options are the same for every plant
+
+            // When: the options of the care type selection are read
+            var options = CareTypeSelectionStepViewModel.AvailableCareTypes;
+
+            // Then: watering, fertilizing and sunlight can be chosen, each under its name
+            Assert.Equal(
+                new[]
+                {
+                    KeyValuePair.Create(CareType.Watering, "Watering"),
+                    KeyValuePair.Create(CareType.Fertilizing, "Fertilizing"),
+                    KeyValuePair.Create(CareType.Sunlight, "Sunlight"),
+                },
+                options);
+        }
+
         [Theory]
         [InlineData(CareType.Watering, "Watering")]
         [InlineData(CareType.Fertilizing, "Fertilizing")]

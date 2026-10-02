@@ -27,6 +27,22 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public void Constructor_GivenPlantWithoutNotes_StartsWithEmptyTextAndIsNotDirty()
+        {
+            // Given: a plant that has no notes yet
+            var plant = new Plant { Name = "Aloe Vera", Notes = null };
+            var dialogService = new FakeDialogService();
+            Func<string, Task> saveNotesAsync = _ => Task.CompletedTask;
+
+            // When: a NotesViewModel is created for this plant
+            var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
+
+            // Then: the text starts empty instead of missing, and nothing counts as changed
+            Assert.Equal(string.Empty, viewModel.EditableNotes);
+            Assert.False(viewModel.IsDirty);
+        }
+
+        [Fact]
         public void SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
         {
             // Given: a plant with existing notes, and EditableNotes changed to a new value
@@ -173,6 +189,33 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: an error is shown, the change is NOT marked as saved, and the
             // dialog stays open (no RequestClose) so the user doesn't lose their input
+            Assert.True(dialogService.ShowErrorWasCalled);
+            Assert.True(viewModel.IsDirty);
+            Assert.False(closeWasRequested);
+        }
+
+        [Fact]
+        public void CancelCommand_GivenModifiedNotesAndSavingFails_ShowsErrorAndKeepsTheWindowOpen()
+        {
+            // Given: a plant with notes, EditableNotes changed, the dialog service
+            // configured to simulate the user choosing "Yes", and a callback that
+            // simulates a failing save
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+
+            Func<string, Task> saveNotesAsync = _ => throw new InvalidOperationException("Simulated save failure");
+
+            var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
+            viewModel.EditableNotes = "New notes";
+
+            bool closeWasRequested = false;
+            viewModel.RequestClose += (_, _) => closeWasRequested = true;
+
+            // When: CancelCommand is executed
+            viewModel.CancelCommand.Execute(null);
+
+            // Then: an error is shown, and the window stays open with the change still
+            // unsaved - closing now would throw away the text the user asked to keep
             Assert.True(dialogService.ShowErrorWasCalled);
             Assert.True(viewModel.IsDirty);
             Assert.False(closeWasRequested);

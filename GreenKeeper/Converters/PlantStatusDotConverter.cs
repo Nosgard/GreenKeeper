@@ -19,6 +19,19 @@ namespace GreenKeeper.Converters
         private const string YellowDot = "/Resources/Icons/Dots/YellowDot.png";
         private const string RedDot = "/Resources/Icons/Dots/RedDot.png";
 
+        private readonly TimeProvider _timeProvider;
+
+        // XAML creates the converter through this constructor, so the app judges by the system clock.
+        public PlantStatusDotConverter()
+            : this(TimeProvider.System)
+        {
+        }
+
+        public PlantStatusDotConverter(TimeProvider timeProvider)
+        {
+            _timeProvider = timeProvider;
+        }
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not Plant plant)
@@ -32,8 +45,7 @@ namespace GreenKeeper.Converters
                 .Select(s => s.NextDueAt!.Value.Date)
                 .ToList();
 
-            // A converter is created by XAML, so there is no clock to inject here.
-            var today = DateTime.Now;
+            var today = _timeProvider.GetLocalNow().DateTime;
 
             if (dueDates.Any(due => DueDateRules.IsOverdue(due, today)))
             {

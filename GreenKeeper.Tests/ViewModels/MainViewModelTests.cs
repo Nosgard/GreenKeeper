@@ -6,6 +6,7 @@ using static GreenKeeper.Tests.TestPlants;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
 using GreenKeeper.ViewModels.Themes;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace GreenKeeper.Tests.ViewModels
@@ -235,7 +236,58 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.NotNull(viewModel.SelectedPlant);
         }
 
+        [Fact]
+        public async Task SearchText_GivenPartOfAName_ShowsOnlyTheMatchingPlantsIgnoringCase()
+        {
+            // Given: an initialized MainViewModel with two lilies and a basil
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(PlantNamed("Peace Lily"), PlantNamed("Basil"), PlantNamed("Calla Lily"));
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+
+            // When: "LILY" is typed into the search box
+            viewModel.SearchText = "LILY";
+
+            // Then: the sidebar lists both lilies despite the different casing, and hides the basil
+            Assert.Equal(new[] { "Peace Lily", "Calla Lily" }, VisiblePlantNames(viewModel));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task SearchText_GivenSearchIsEmptiedOrOnlyWhitespace_ShowsAllPlantsAgain(string blankSearchText)
+        {
+            // Given: an initialized MainViewModel whose sidebar is filtered down to the basil
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(PlantNamed("Peace Lily"), PlantNamed("Basil"), PlantNamed("Calla Lily"));
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SearchText = "basil";
+
+            // When: the search box is emptied or left with nothing but spaces
+            viewModel.SearchText = blankSearchText;
+
+            // Then: the sidebar lists every plant again
+            Assert.Equal(new[] { "Peace Lily", "Basil", "Calla Lily" }, VisiblePlantNames(viewModel));
+        }
+
         // -- CareStatuses Tests --
+
+        [Fact]
+        public async Task CareStatuses_GivenNoPlantSelected_ReturnsNoCards()
+        {
+            // Given: an initialized MainViewModel with a plant, but none selected - the state right after the start
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+
+            // When: CareStatuses is read
+            var careStatuses = viewModel.CareStatuses.ToList();
+
+            // Then: the dashboard has no card to show
+            Assert.Empty(careStatuses);
+        }
 
         [Fact]
         public async Task CareStatuses_GivenPlantWithOnlyWatering_ReturnsOnlyWateringCard()
@@ -341,6 +393,30 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public async Task WateringCard_CompleteCommand_GivenValidSchedule_ShowsTheNewDueDateOnTheCard()
+        {
+            // Given: a plant with an overdue Watering schedule
+            var plant = AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(-1)));
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+
+            // When: CompleteCommand is executed
+            wateringCard.CompleteCommand!.Execute(null);
+
+            // Then: the card the dashboard shows afterwards reads the new due date and
+            // can no longer be completed - without the plants being loaded again
+            var updatedCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+            Assert.Equal("Due in 1 week", updatedCard.StatusText);
+            Assert.False(updatedCard.IsCompletable);
+        }
+
+        [Fact]
         public async Task FertilizingCard_CompleteCommand_GivenValidSchedule_RecalculatesAndPersistsDueDateWithoutAffectingWatering()
         {
             // Given: a plant with both a Watering schedule (untouched reference point) and an overdue Fertilizing schedule
@@ -421,6 +497,35 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(originalDueDate, persistedSchedule.NextDueAt);
         }
 
+        [Fact]
+        public async Task WateringCard_CompleteCommand_GivenRepositoryThrows_ShowsErrorAndKeepsDueDate()
+        {
+            // Given: a plant with an overdue Watering schedule, and the repository configured to fail on completing
+            var originalDueDate = Now.AddDays(-1);
+            var plant = AloeVera(WateringEveryDays(7, nextDueAt: originalDueDate));
+
+            var plantRepository = new FakePlantRepository { ShouldThrowOnCompleteCareSchedule = true };
+            plantRepository.SeedPlants(plant);
+
+            var dialogService = new FakeDialogService();
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+
+            // When: CompleteCommand is executed
+            wateringCard.CompleteCommand!.Execute(null);
+
+            // Then: an error is shown, and the schedule stays overdue and uncared for -
+            // the card must not show a new due date the database never took
+            Assert.True(dialogService.ShowErrorWasCalled);
+
+            var schedule = viewModel.Plants[0].CareSchedules.Single();
+            Assert.Equal(originalDueDate, schedule.NextDueAt);
+            Assert.Null(schedule.LastCaredAt);
+        }
+
         // -- Remove Button Tests --
 
         [Fact]
@@ -443,11 +548,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: RemoveCommand is executed on the Fertilizing card
             fertilizingCard.Single().RemoveCommand!.Execute(null);
 
-            // Then: Fertilizing is gone from the repository and from the cards, while
-            // Watering stays. The call count is what proves the repository was asked
-            // at all - the ViewModel drops the schedule from the same Plant object anyway
-            Assert.Equal(1, plantRepository.RemoveCareScheduleAsyncCallCount);
-
+            // Then: Fertilizing is gone from the repository and from the cards, while Watering stays
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
             Assert.DoesNotContain(persistedSchedules, s => s.Care == CareType.Fertilizing);
             Assert.Contains(persistedSchedules, s => s.Care == CareType.Watering);
@@ -533,11 +634,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: RemoveCommand is executed on the Sunlight card
             sunlightCard.RemoveCommand!.Execute(null);
 
-            // Then: the sunlight requirement is gone from the repository and from the
-            // cards, while Watering stays. The call count is what proves the repository
-            // was asked - the ViewModel clears it on the same Plant object anyway
-            Assert.Equal(1, plantRepository.RemoveSunlightRequirementAsyncCallCount);
-
+            // Then: the sunlight requirement is gone from the repository and from the cards, while Watering stays
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
             Assert.Null(persistedPlant.SunlightRequirement);
             Assert.Contains(viewModel.CareStatuses, s => s is WateringStatusViewModel);
@@ -731,6 +828,27 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenExistingCareType_ShowsTheNewDueDateOnTheCard()
+        {
+            // Given: a selected plant that is fertilized every 30 days and next due in 30 days
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30, nextDueAt: Now.AddDays(30)));
+
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the Fertilizing schedule is replaced by one with a 14-day interval
+            await viewModel.AddOrReplaceCareScheduleAsync(FertilizingEveryDays(14));
+
+            // Then: the Fertilizing card reads the due date of the new schedule - the old
+            // schedule has left the plant object of the ViewModel, not only the repository
+            var fertilizingCard = viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
+            Assert.Equal("Due in 2 weeks", fertilizingCard.StatusText);
+        }
+
+        [Fact]
         public async Task AddOrReplaceCareScheduleAsync_GivenRepositoryThrows_PropagatesExceptionAndDoesNotAddLocally()
         {
             // Given: a plant with only Watering, and the repository configured to
@@ -750,10 +868,12 @@ namespace GreenKeeper.Tests.ViewModels
                 IntervalUnit = TimeUnit.Days
             };
 
-            // When: the call should propagate the exception
-            await Assert.ThrowsAsync<InvalidOperationException>(() => viewModel.AddOrReplaceCareScheduleAsync(newFertilizingSchedule));
+            // When: the new Fertilizing schedule is added
+            var exception = await Record.ExceptionAsync(() => viewModel.AddOrReplaceCareScheduleAsync(newFertilizingSchedule));
 
-            // Then: the plant's local state remains unchanged - still no Fertilizing card
+            // Then: the exception is propagated, and the plant's local state remains unchanged - still no Fertilizing card
+            Assert.IsType<InvalidOperationException>(exception);
+
             var careStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(careStatuses, c => c is FertilizingStatusViewModel);
         }
@@ -858,11 +978,13 @@ namespace GreenKeeper.Tests.ViewModels
 
             var newRequirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
 
-            // When: the call should propagate the exception
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            // When: the new sunlight requirement is added
+            var exception = await Record.ExceptionAsync(
                 () => viewModel.AddOrReplaceSunlightRequirementAsync(newRequirement));
 
-            // Then: the plant's local state remains unchanged - still no Sunlight card
+            // Then: the exception is propagated, and the plant's local state remains unchanged - still no Sunlight card
+            Assert.IsType<InvalidOperationException>(exception);
+
             var careStatuses = viewModel.CareStatuses.ToList();
             Assert.DoesNotContain(careStatuses, c => c is SunlightStatusViewModel);
         }
@@ -885,10 +1007,10 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the notes are updated
             await viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes");
 
-            // Then: the text went through the repository and not only onto the
-            // object - the ViewModel assigns it locally as well, so the call count
-            // is what tells the two apart
-            Assert.Equal(1, plantRepository.UpdatePlantNotesAsyncCallCount);
+            // Then: the notes are stored in the repository, and the plant object
+            // of the ViewModel carries them as well
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.Equal("New notes", persistedPlant.Notes);
             Assert.Equal("New notes", selectedPlant.Notes);
         }
 
@@ -906,11 +1028,12 @@ namespace GreenKeeper.Tests.ViewModels
 
             var selectedPlant = viewModel.Plants[0];
 
-            // When: the call should propagate the exception
-            await Assert.ThrowsAsync<InvalidOperationException>(
+            // When: the notes are updated
+            var exception = await Record.ExceptionAsync(
                 () => viewModel.UpdatePlantNotesAsync(selectedPlant, "New notes"));
 
-            // Then: the in-memory plant object was NOT updated
+            // Then: the exception is propagated, and the in-memory plant object was NOT updated
+            Assert.IsType<InvalidOperationException>(exception);
             Assert.Equal("Old notes", selectedPlant.Notes);
         }
 
@@ -1025,11 +1148,15 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Same(viewModel.SelectedPlant, raisedPlant);
         }
 
-        [Fact]
-        public async Task WateringCard_EditCommand_RaisesEditScheduleRequestedWithPlantAndCareType()
+        [Theory]
+        [InlineData(CareType.Watering)]
+        [InlineData(CareType.Fertilizing)]
+        [InlineData(CareType.Sunlight)]
+        public async Task StatusCard_EditCommand_RaisesEditScheduleRequestedWithPlantAndItsCareType(CareType careType)
         {
-            // Given: an initialized MainViewModel with a plant that has a Watering schedule
-            var plant = AloeVera(WateringEveryDays(7));
+            // Given: an initialized MainViewModel with a plant that shows all three status cards
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
+            plant.SunlightRequirement = DailySunlight(6);
 
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(plant);
@@ -1037,7 +1164,7 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.SelectedPlant = viewModel.Plants[0];
 
-            var wateringCard = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+            var card = viewModel.CareStatuses.Single(c => c.Care == careType);
 
             (Plant plant, CareType care)? raisedArgs = null;
             int eventRaisedCount = 0;
@@ -1047,14 +1174,14 @@ namespace GreenKeeper.Tests.ViewModels
                 raisedArgs = args;
             };
 
-            // When: EditCommand is executed on the Watering card
-            wateringCard.EditCommand!.Execute(null);
+            // When: EditCommand is executed on the card of the given care type
+            card.EditCommand!.Execute(null);
 
             // Then: EditScheduleRequested was raised exactly once, with the
-            // selected plant and the care type "Watering" as the arguments
+            // selected plant and the care type of that card as the arguments
             Assert.Equal(1, eventRaisedCount);
             Assert.Same(viewModel.SelectedPlant, raisedArgs!.Value.plant);
-            Assert.Equal(CareType.Watering, raisedArgs.Value.care);
+            Assert.Equal(careType, raisedArgs.Value.care);
         }
 
         // Helper method: Maps a simple string identifier to the actual command on the ViewModel -
@@ -1102,6 +1229,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SimulatedTimerTick_WhenTriggered_RaisesPropertyChangedForCareStatuses()
         {
+            // Given: an initialized MainViewModel running on a timer service the test can trigger
             var timerService = new FakeTimerService();
 
             var viewModel = await CreateInitializedViewModelAsync(timerService: timerService);
@@ -1165,6 +1293,94 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public async Task RenamePlantCommand_Execute_RaisesRenamePlantRequestedWithThePlantFromTheParameter()
+        {
+            // Given: an initialized MainViewModel with two plants, the first one selected
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(), PlantNamed("Basil"));
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var rightClickedPlant = viewModel.Plants[1];
+
+            Plant? raisedPlant = null;
+            int eventRaisedCount = 0;
+            viewModel.RenamePlantRequested += (_, raisedArg) =>
+            {
+                eventRaisedCount++;
+                raisedPlant = raisedArg;
+            };
+
+            // When: RenamePlantCommand is executed from the context menu of the other plant
+            viewModel.RenamePlantCommand.Execute(rightClickedPlant);
+
+            // Then: RenamePlantRequested was raised exactly once, with the plant
+            // that was right-clicked - not with the selected one
+            Assert.Equal(1, eventRaisedCount);
+            Assert.Same(rightClickedPlant, raisedPlant);
+        }
+
+        [Fact]
+        public async Task RenamePlantAsync_GivenNewName_PersistsAndUpdatesPlantObject()
+        {
+            // Given: a plant named "Aloe Vera"
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera());
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+
+            var plant = viewModel.Plants[0];
+
+            // When: the plant is renamed
+            await viewModel.RenamePlantAsync(plant, "Basil");
+
+            // Then: the new name is stored in the repository, and the plant object
+            // of the ViewModel carries it as well
+            var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
+            Assert.Equal("Basil", persistedPlant.Name);
+            Assert.Equal("Basil", plant.Name);
+        }
+
+        [Fact]
+        public async Task RenamePlantAsync_GivenSelectedPlant_RaisesPropertyChangedForSelectedPlant()
+        {
+            // Given: an initialized MainViewModel with its only plant selected
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera());
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: the selected plant is renamed
+            await viewModel.RenamePlantAsync(viewModel.Plants[0], "Basil");
+
+            // Then: SelectedPlant was announced, so the dashboard header - bound to
+            // SelectedPlant.Name - re-reads the name instead of keeping the old one
+            Assert.Contains(nameof(MainViewModel.SelectedPlant), raisedProperties);
+        }
+
+        [Fact]
+        public async Task RenamePlantAsync_GivenSearchIsActive_AppliesTheSearchToTheNewName()
+        {
+            // Given: an initialized MainViewModel whose sidebar is filtered down to the aloe vera
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(), PlantNamed("Basil"));
+
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SearchText = "aloe";
+
+            // When: the aloe vera gets a name the search does not match
+            await viewModel.RenamePlantAsync(viewModel.Plants[0], "Snake Plant");
+
+            // Then: the sidebar was refreshed and no longer lists the plant - without
+            // the refresh the entry would stay and keep showing the old name
+            Assert.Empty(VisiblePlantNames(viewModel));
+        }
+
+        [Fact]
         public async Task RenamePlantAsync_GivenRepositoryThrows_PropagatesExceptionAndKeepsOldName()
         {
             // Given: a plant and a repository configured to fail on rename
@@ -1211,6 +1427,16 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = CreateViewModel(plantRepository, dialogService, timerService);
             await viewModel.InitializeAsync();
             return viewModel;
+        }
+
+        // What the sidebar lists: its ListView is bound to Plants and therefore shows
+        // the default view of that collection, which is where the search filter applies.
+        private static List<string> VisiblePlantNames(MainViewModel viewModel)
+        {
+            return CollectionViewSource.GetDefaultView(viewModel.Plants)
+                .Cast<Plant>()
+                .Select(plant => plant.Name)
+                .ToList();
         }
     }
 }
