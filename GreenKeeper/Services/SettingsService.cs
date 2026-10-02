@@ -25,11 +25,25 @@ namespace GreenKeeper.Services
             Converters = { new JsonStringEnumConverter() }
         };
 
+        private readonly Func<string> _settingsPath;
+
+        public SettingsService()
+            : this(DbPathProvider.GetSettingsPath)
+        {
+        }
+
+        // The path is asked for on every Load and Save rather than once, so a folder
+        // that cannot be created is handled there like any other failure.
+        public SettingsService(Func<string> settingsPath)
+        {
+            _settingsPath = settingsPath;
+        }
+
         public AppSettings Load()
         {
             try
             {
-                var path = DbPathProvider.GetSettingsPath();
+                var path = _settingsPath();
 
                 // First start on this machine - no file yet, and that is normal.
                 if (!File.Exists(path))
@@ -57,7 +71,7 @@ namespace GreenKeeper.Services
             try
             {
                 var json = JsonSerializer.Serialize(settings, Options);
-                File.WriteAllText(DbPathProvider.GetSettingsPath(), json);
+                File.WriteAllText(_settingsPath(), json);
             }
             catch (Exception)
             {
