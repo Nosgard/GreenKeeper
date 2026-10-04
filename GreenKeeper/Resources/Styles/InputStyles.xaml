@@ -24,6 +24,7 @@
 
     <!-- Text input on a themed surface -->
     <Style x:Key="ThemedTextBox" TargetType="TextBox">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="CaretBrush" Value="{DynamicResource PrimaryText}" />

@@ -24,6 +24,7 @@
     
     <!-- Context menu entry -->
     <Style x:Key="ThemedMenuItem" TargetType="MenuItem">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="FontSize" Value="14" />

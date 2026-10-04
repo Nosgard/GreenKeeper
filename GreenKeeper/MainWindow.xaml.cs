@@ -22,6 +22,10 @@ namespace GreenKeeper
     /// </summary>
     public partial class MainWindow : Window
     {
+        // How far the focus ring reaches beyond a control: 5 (Margin="-5" of FocusRing in
+        // FocusStyles.xaml) and 3 of air.
+        private const double FocusRingReach = 8;
+
         private readonly MainViewModel _mainViewModel;
         private readonly IDialogService _dialogService;
         private readonly TimeProvider _timeProvider;
@@ -149,6 +153,25 @@ namespace GreenKeeper
             {
                 StatusScrollViewer.ScrollToTop();
             }
+        }
+
+        // A card button the keyboard scrolls into view comes in only up to its own edge,
+        // and the scroll area would cut its focus ring off. So the ring comes along.
+        private void StatusPanel_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        {
+            // Requests that already name a rectangle, including the one raised below, and
+            // those of the panel itself go on to the scroll area unchanged.
+            if (!e.TargetRect.IsEmpty || e.TargetObject is not FrameworkElement target || ReferenceEquals(target, sender))
+            {
+                return;
+            }
+
+            e.Handled = true;
+            target.BringIntoView(new Rect(
+                -FocusRingReach,
+                -FocusRingReach,
+                target.ActualWidth + (2 * FocusRingReach),
+                target.ActualHeight + (2 * FocusRingReach)));
         }
 
         // -- Dialogs Section --

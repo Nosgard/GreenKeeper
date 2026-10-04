@@ -7,6 +7,7 @@
         <!-- Every option list is a list of KeyValuePairs: without this, a screen reader
              would read an entry as "[Days, Days]" instead of the text it shows -->
         <Setter Property="AutomationProperties.Name" Value="{Binding Value}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Padding" Value="8, 6" />
@@ -35,6 +36,7 @@
 
     <!-- ComboBox Main Part -->
     <Style x:Key="ThemedComboBox" TargetType="ComboBox">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
         <Setter Property="BorderThickness" Value="1" />
