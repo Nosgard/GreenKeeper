@@ -169,8 +169,8 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Theory]
-        [InlineData(false, 1)]
-        [InlineData(true, 0)]
+        [InlineData(false, 1)]   // the save works -> one signal
+        [InlineData(true, 0)]    // the save fails -> no signal
         public void SaveCommand_GivenSaveWorksOrFails_SignalsSavedOnlyWhenItWorked(bool callbackThrows, int expectedSignals)
         {
             // Given: changed notes, a save that works or fails, and a listener for the signal

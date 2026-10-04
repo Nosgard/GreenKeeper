@@ -9,13 +9,19 @@ namespace GreenKeeper.Tests.Layout
     /// </summary>
     public class FluidScaleTests
     {
+        // The size MainWindow.xaml is designed at.
         private static readonly Size DesignSize = new(900, 650);
+
+        // The rates of Layout.xaml with limits wider than the app's 0.78 and 1.5, so the
+        // rate alone decides the factor in the tests below.
+        private static FluidScale ScaleWithoutLimits() =>
+            new() { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
 
         [Fact]
         public void FactorFor_GivenTheDesignSize_DrawsTheUiAsDesigned()
         {
             // Given: a scale that follows larger and smaller windows
-            var scale = new FluidScale { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
+            var scale = ScaleWithoutLimits();
 
             // When: the factor for a window of exactly the design size is calculated
             var factor = scale.FactorFor(DesignSize, DesignSize);
@@ -28,13 +34,14 @@ namespace GreenKeeper.Tests.Layout
         public void FactorFor_GivenLargerWindow_FollowsTheDifferenceAtTheGrowRate()
         {
             // Given: a scale that follows a larger window at a rate of 0.5
-            var scale = new FluidScale { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
+            var scale = ScaleWithoutLimits();
             var twiceTheDesignSize = new Size(1800, 1300);
 
             // When: the factor for a window of twice the design size is calculated
             var factor = scale.FactorFor(DesignSize, twiceTheDesignSize);
 
-            // Then: half of the difference to the design size makes the UI larger
+            // Then: half of the difference to the design size makes the UI larger. 1.5 is
+            // also the app's upper limit, but no limit applies in this test
             Assert.Equal(1.5, factor, precision: 10);
         }
 
@@ -42,7 +49,7 @@ namespace GreenKeeper.Tests.Layout
         public void FactorFor_GivenSmallerWindow_FollowsTheDifferenceAtTheShrinkRate()
         {
             // Given: a scale that follows a smaller window at a rate of 0.75
-            var scale = new FluidScale { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
+            var scale = ScaleWithoutLimits();
             var halfTheDesignSize = new Size(450, 325);
 
             // When: the factor for a window of half the design size is calculated
@@ -58,7 +65,7 @@ namespace GreenKeeper.Tests.Layout
         public void FactorFor_GivenWindowGrownOnOneSide_LetsTheTighterSideDecide(double width, double height)
         {
             // Given: a scale that follows a larger window at a rate of 0.5
-            var scale = new FluidScale { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
+            var scale = ScaleWithoutLimits();
 
             // When: the factor for a window that grew on one side only is calculated
             var factor = scale.FactorFor(DesignSize, new Size(width, height));

@@ -4,6 +4,10 @@ using GreenKeeper.ViewModels.CareStatuses.Passive;
 
 namespace GreenKeeper.Tests.ViewModels
 {
+    /// <summary>
+    /// The sunlight card: the short form on screen and the spelled-out form a screen
+    /// reader announces.
+    /// </summary>
     public class SunlightStatusViewModelTests
     {
         [Theory]

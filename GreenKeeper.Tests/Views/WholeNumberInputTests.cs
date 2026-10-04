@@ -16,7 +16,8 @@ namespace GreenKeeper.Tests.Views
         [InlineData("-5", "5")]
         public void Clean_GivenOtherCharacters_KeepsOnlyTheDigits(string text, string expected)
         {
-            // Given: a field that takes up to four digits
+            // Given: a field that takes up to four digits, as the amount fields do
+            // (AmountAndUnitInputViewModel.MaxAmountLength)
             int maxDigits = 4;
 
             // When: the text is cleaned
@@ -29,11 +30,12 @@ namespace GreenKeeper.Tests.Views
         [Theory]
         [InlineData("0365", "365")]
         [InlineData("007", "7")]
-        [InlineData("0", "")]
+        [InlineData("0", "")]        // no real digit at all, so nothing is left
         [InlineData("100", "100")]
         public void Clean_GivenLeadingZeros_RemovesThem(string text, string expected)
         {
-            // Given: a field that takes up to four digits
+            // Given: a field that takes up to four digits, as the amount fields do
+            // (AmountAndUnitInputViewModel.MaxAmountLength)
             int maxDigits = 4;
 
             // When: the text is cleaned
@@ -49,7 +51,8 @@ namespace GreenKeeper.Tests.Views
         [InlineData("000012345", "1234")]
         public void Clean_GivenMoreDigitsThanTheFieldTakes_CutsTheRest(string text, string expected)
         {
-            // Given: a field that takes up to four digits
+            // Given: a field that takes up to four digits, as the amount fields do
+            // (AmountAndUnitInputViewModel.MaxAmountLength)
             int maxDigits = 4;
 
             // When: the text is cleaned

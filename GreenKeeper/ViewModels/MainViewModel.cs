@@ -617,8 +617,7 @@ namespace GreenKeeper.ViewModels
 
             SelectedPlant.CareSchedules.Remove(schedule);
 
-            // CareStatuses has no backing field and reads from the selected plant, so the
-            // refresh is enough to let the removed status card disappear from the ItemsControl.
+            // The refresh rebuilds the cards of the selected plant, so the removed card disappears.
             RefreshCareStatuses();
             Announce($"{careType.DisplayName()} schedule removed");
         }

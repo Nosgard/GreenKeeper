@@ -91,7 +91,7 @@ namespace GreenKeeper.Tests.ViewModels
 
         /// <summary>
         /// The prefix is decided on the calendar date, not on the timestamp - the
-        /// same rule "Today" and the Complete button already follow. A due date
+        /// same rule "Due today" and the Complete button already follow. A due date
         /// later on the current day is still today and must not turn into
         /// "Due in ...", and the first minute of the next day must.
         /// </summary>

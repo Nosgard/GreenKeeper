@@ -1229,28 +1229,6 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SimulatedTimerTick_WhenTriggered_ReachesTheCardsOfTheSelectedPlant()
-        {
-            // Given: a selected plant, on a timer service the test can trigger
-            var plantRepository = new FakePlantRepository();
-            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
-            var timerService = new FakeTimerService();
-            var viewModel = await CreateInitializedViewModelAsync(plantRepository, timerService: timerService);
-            viewModel.SelectedPlant = viewModel.Plants[0];
-
-            var card = viewModel.CareStatuses.Single();
-            var raisedProperties = new List<string>();
-            card.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
-
-            // When: a timer tick is simulated, without waiting for a real 5-minute interval
-            timerService.TriggerTick();
-
-            // Then: the callback given to _timerService.Start in the constructor refreshes
-            // the card instead of replacing it
-            Assert.Contains(nameof(CareStatusViewModel.StatusText), raisedProperties);
-        }
-
-        [Fact]
         public async Task StopCareStatusRefreshTimer_WhenCalled_StopsTheTimerService()
         {
             // Given: an initialized MainViewModel
@@ -1564,7 +1542,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Theory]
-        [InlineData("LILY", "2 plants found")]
+        [InlineData("LILY", "2 plants found")]   // in capitals: the search ignores case
         [InlineData("bas", "1 plant found")]
         [InlineData("xyz", "No plants found")]
         public async Task SearchText_GivenSearchTerm_AnnouncesHowManyPlantsMatch(string searchText, string expected)
@@ -1604,6 +1582,28 @@ namespace GreenKeeper.Tests.ViewModels
         // the focused element again. A tick must leave untouched what did not change.
 
         [Fact]
+        public async Task TimerTick_WhenTriggered_ReachesTheCardsOfTheSelectedPlant()
+        {
+            // Given: a selected plant, on a timer service the test can trigger
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
+            var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, timerService: timerService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var card = viewModel.CareStatuses.Single();
+            var raisedProperties = new List<string>();
+            card.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: a timer tick is simulated, without waiting for a real 5-minute interval
+            timerService.TriggerTick();
+
+            // Then: the callback given to _timerService.Start in the constructor refreshes
+            // the card instead of replacing it
+            Assert.Contains(nameof(CareStatusViewModel.StatusText), raisedProperties);
+        }
+
+        [Fact]
         public async Task CareStatuses_ReadTwice_HandsOutTheSameCards()
         {
             // Given: a selected plant with all three cards
@@ -1619,7 +1619,8 @@ namespace GreenKeeper.Tests.ViewModels
             var second = viewModel.CareStatuses.ToList();
 
             // Then: the same card objects. A new one would make the UI build a new element,
-            // which a screen reader reads out again
+            // which a screen reader reads out again. Cards define no equality of their own,
+            // so this compares the objects themselves
             Assert.Equal(first, second);
         }
 
@@ -1720,7 +1721,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the watering interval is replaced by one of a single day
             await viewModel.AddOrReplaceCareScheduleAsync(WateringEveryDays(1));
 
-            // Then: the card reads the new schedule, not the replaced one it was built on
+            // Then: the card reads the new schedule, not the replaced one it was built on.
+            // Unlike a tick, changed data must still rebuild the cards
             var card = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
             Assert.Equal("Due in 1 day", card.StatusText);
         }
@@ -1728,7 +1730,8 @@ namespace GreenKeeper.Tests.ViewModels
         // -- Helpers --
 
         // How often the sidebar's view is rebuilt from now on. A rebuild replaces every
-        // entry, which makes a screen reader read one out again.
+        // entry, which makes a screen reader read one out again. WPF reports
+        // ICollectionView.Refresh() as a Reset, so that is the action counted.
         private static Func<int> SidebarRebuildsOf(MainViewModel viewModel)
         {
             int rebuilds = 0;

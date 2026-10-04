@@ -8,7 +8,7 @@ namespace GreenKeeper.Tests.Converters
 {
     /// <summary>
     /// What a screen reader announces for a plant entry in the sidebar: the name,
-    /// then the state its status dot shows only by its color.
+    /// then the state of its status dot.
     /// </summary>
     public class PlantAccessibleNameConverterTests
     {
@@ -32,10 +32,10 @@ namespace GreenKeeper.Tests.Converters
         }
 
         // Converts the way the entry's binding does: the plant is the bound value.
-        private static object AccessibleNameOf(Plant plant)
+        private static string AccessibleNameOf(Plant plant)
         {
             var converter = new PlantAccessibleNameConverter(new FakeTimeProvider(Now));
-            return converter.Convert(plant, typeof(string), parameter: null!, CultureInfo.InvariantCulture);
+            return (string)converter.Convert(plant, typeof(string), parameter: null!, CultureInfo.InvariantCulture);
         }
     }
 }

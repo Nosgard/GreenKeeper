@@ -164,11 +164,11 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Theory]
-        [InlineData(50, "50 characters remaining")]
+        [InlineData(50, "50 characters remaining")]   // nothing typed yet
         [InlineData(2, "2 characters remaining")]
         [InlineData(1, "1 character remaining")]
-        [InlineData(0, "0 characters remaining")]
-        public void NameStep_GivenRemainingCharacters_CountsDownInWords(int remaining, string expected)
+        [InlineData(0, "0 characters remaining")]     // the name reached the length limit
+        public void PlantNameStep_GivenRemainingCharacters_CountsDownInWords(int remaining, string expected)
         {
             // Given: the name step with a name that leaves the given number of characters
             var step = new PlantNameStepViewModel { PlantName = new string('a', Plant.MaxNameLength - remaining) };
@@ -270,7 +270,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the sunlight line is read the way a screen reader announces it
             var spoken = ((SummaryStepViewModel)wizard.CurrentStep).SpokenSunlight;
 
-            // Then: "6 Hours / Day" is written out, the same way the sunlight card says it
+            // Then: the line names the field and spells "6 Hours / Day" out like the sunlight card
             Assert.Equal("Sunlight: 6 hours per day", spoken);
         }
 

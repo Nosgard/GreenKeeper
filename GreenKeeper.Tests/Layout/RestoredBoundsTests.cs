@@ -65,7 +65,7 @@ namespace GreenKeeper.Tests.Layout
             // When: the bounds for the next start are calculated
             var bounds = RestoredBounds.For(stored, Screen);
 
-            // Then: the start does not fail; the window gets no size and opens at its minimum
+            // Then: the stored size is dropped and the window's own minimum applies
             Assert.Equal(new Rect(300, 200, 0, 0), bounds);
         }
     }

@@ -38,6 +38,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(isDarkTheme);
         }
 
+        // The visible wording says "light" where the code says Bright.
         [Theory]
         [InlineData(Theme.Bright, "Switch to dark theme")]
         [InlineData(Theme.Dark, "Switch to light theme")]

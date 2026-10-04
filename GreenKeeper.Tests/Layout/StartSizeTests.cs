@@ -9,6 +9,7 @@ namespace GreenKeeper.Tests.Layout
     /// </summary>
     public class StartSizeTests
     {
+        // The size MainWindow.xaml is designed at, on the screen it is designed for.
         private static readonly Size DesignSize = new(900, 650);
         private static readonly Size ReferenceScreen = new(1920, 1080);
 
@@ -44,9 +45,9 @@ namespace GreenKeeper.Tests.Layout
         }
 
         [Theory]
-        [InlineData(1093, 574, 900, 574)]   // too low for the design size
-        [InlineData(800, 728, 800, 650)]    // too narrow for the design size
-        public void For_GivenScreenSmallerThanTheDesignSize_StaysInsideTheWorkArea(
+        [InlineData(1200, 574, 900, 574)]   // wide enough, but too low for the design size
+        [InlineData(800, 728, 800, 650)]    // tall enough, but too narrow for the design size
+        public void For_GivenScreenTooSmallOnOneSide_StaysInsideTheWorkArea(
             double workAreaWidth, double workAreaHeight, double expectedWidth, double expectedHeight)
         {
             // Given: the work area of the screen
