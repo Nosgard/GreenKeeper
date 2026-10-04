@@ -5,7 +5,7 @@ namespace GreenKeeper.Tests.ViewModels
 {
     /// <summary>
     /// Covers the interval input that the wizard steps and the edit dialog share
-    /// for Watering and Fertilizing: which amounts it accepts.
+    /// for Watering and Fertilizing: which amounts it accepts and how many digits they may have.
     /// </summary>
     public class AmountAndUnitInputViewModelTests
     {
@@ -47,6 +47,19 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: the maximum of the unit is the last amount that counts
             Assert.Equal(expected, isValid);
+        }
+
+        [Fact]
+        public void MaxAmountLength_GivenAllUnits_IsTheLengthOfTheLongestMaximum()
+        {
+            // Given: the longest maximum of all units, 365 days, has three digits
+            const int longestMaximumDigits = 3;
+
+            // When: the length limit of the amount field is read
+            var limit = AmountAndUnitInputViewModel.MaxAmountLength;
+
+            // Then: the longest maximum just fits; nothing valid is cut short, nothing longer can be typed
+            Assert.Equal(longestMaximumDigits, limit);
         }
 
         [Fact]

@@ -22,6 +22,9 @@ namespace GreenKeeper.ViewModels.Base
             { TimeUnit.Years, 10 },
         };
 
+        // The length limit of the amount field, see AmountLimit.
+        public static int MaxAmountLength { get; } = AmountLimit.FieldLengthFor(MaxAmountsByUnit.Values);
+
         /// <summary>
         /// Options for the ComboBox.
         ///

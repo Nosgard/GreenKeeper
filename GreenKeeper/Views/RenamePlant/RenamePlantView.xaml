@@ -27,7 +27,8 @@
             <TextBox x:Name="NameTextBox"
                      Style="{StaticResource ThemedTextBox}"
                      Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="{x:Static models:Plant.MaxNameLength}" />
+                     MaxLength="{x:Static models:Plant.MaxNameLength}"
+                     TextWrapping="Wrap" />
 
             <TextBlock Style="{StaticResource InputHint}"
                        Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />

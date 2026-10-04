@@ -58,30 +58,34 @@
                     <Image Style="{StaticResource CareIcon}" />
                 </Border>
 
-                <!-- Subtitle container -->
-                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                <!-- Subtitle container; its margin keeps the text off the buttons
+                     where the card gets narrow -->
+                <StackPanel Grid.Column="1"
+                            Grid.ColumnSpan="2"
+                            VerticalAlignment="Center"
+                            Margin="0, 0, 8, 0">
                     <TextBlock Text="{Binding Title}"
                        Foreground="{DynamicResource PrimaryText}"
                        FontSize="16"
                        FontWeight="SemiBold" />
 
-                    <StackPanel Orientation="Horizontal">
-                        <!-- Foreground belongs in the style, not on the element: a
-                             local value would outrank the trigger below. -->
-                        <TextBlock Text="{Binding StatusText}"
-                           FontSize="14">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsOverdue}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource OverdueText}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
+                    <!-- Wraps where the buttons leave too little room for one line.
+                         Foreground belongs in the style, not on the element: a
+                         local value would outrank the trigger below. -->
+                    <TextBlock Text="{Binding StatusText}"
+                       FontSize="14"
+                       TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource SecondaryText}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsOverdue}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource OverdueText}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
 
                 <!-- Buttons-->

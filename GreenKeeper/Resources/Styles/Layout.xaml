@@ -1,0 +1,41 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:layout="clr-namespace:GreenKeeper.Layout">
+    <!-- Layout tokens: how the UI adapts to the window and the screen. All sizes are
+         in units of the design (scale 1). -->
+
+    <!-- Smallest window the layout is built for; 640 is a common small breakpoint -->
+    <sys:Double x:Key="WindowMinWidth">640</sys:Double>
+    <sys:Double x:Key="WindowMinHeight">480</sys:Double>
+
+    <!-- The screen the design size of the main window (Width and Height in
+         MainWindow.xaml) is meant for. On a larger screen the window opens larger in
+         the same proportion. -->
+    <Size x:Key="ReferenceScreenSize">1920,1080</Size>
+
+    <!-- How the UI follows the size of the window. Larger than designed: half of the
+         difference enlarges the UI, the other half gives it room. Smaller than designed:
+         three quarters shrink the UI, so the status texts still fit next to their
+         buttons at the smallest window. The limits are the scales of the smallest
+         window (640 x 480) and of a window twice the design size; beyond them the UI
+         keeps its size. -->
+    <layout:FluidScale x:Key="WindowScale"
+                       Minimum="0.78"
+                       Maximum="1.5"
+                       GrowRate="0.5"
+                       ShrinkRate="0.75" />
+
+    <!-- Sidebar: keeps its share of the width within these limits, never narrower than
+         designed, because its header needs that width. -->
+    <sys:Double x:Key="SidebarMinWidth">250</sys:Double>
+    <sys:Double x:Key="SidebarMaxWidth">320</sys:Double>
+
+    <!-- Dashboard: the content grows up to this width and stays centered beyond it.
+         1024 is a common large container width, and the longest plant name still fits
+         next to the buttons. -->
+    <sys:Double x:Key="ContentMaxWidth">1024</sys:Double>
+
+    <!-- Tooltip: a longer text wraps instead of running across the screen -->
+    <sys:Double x:Key="ToolTipMaxWidth">360</sys:Double>
+</ResourceDictionary>

@@ -3,12 +3,14 @@
                     xmlns:base="clr-namespace:GreenKeeper.ViewModels.Base">
     <!-- Shared building blocks of the dialogs and wizard steps -->
 
-    <!-- Heading of a dialog or wizard step -->
+    <!-- Heading of a dialog or wizard step. It wraps instead of being cut off, since
+         the Notes window shows the plant name in it. -->
     <Style x:Key="DialogHeading" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin" Value="0, 0, 0, 12" />
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
     <!-- Hint below an input field, e.g. the limit or the remaining characters -->
@@ -34,12 +36,14 @@
         <Setter Property="Padding" Value="10" />
     </Style>
 
-    <!-- Amount + time unit, bound to an AmountAndUnitInputViewModel -->
+    <!-- Amount and time unit, bound to an AmountAndUnitInputViewModel. The field takes
+         no more characters than fit into it, so its content stays visible. -->
     <DataTemplate x:Key="AmountAndUnitInput">
         <StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="{x:Static base:AmountAndUnitInputViewModel.MaxAmountLength}"
                          Width="80" />
 
                 <ComboBox Style="{StaticResource ThemedComboBox}"
@@ -56,12 +60,14 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- Hours + period, bound to a HoursPerPeriodInputViewModel -->
+    <!-- Hours and period, bound to a HoursPerPeriodInputViewModel. The field is limited
+         the same way. -->
     <DataTemplate x:Key="HoursPerPeriodInput">
         <StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="{x:Static base:HoursPerPeriodInputViewModel.MaxAmountLength}"
                          Width="80" />
 
                 <TextBlock Text="Hours"

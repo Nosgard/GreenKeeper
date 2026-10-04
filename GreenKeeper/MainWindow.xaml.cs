@@ -1,4 +1,5 @@
-﻿using GreenKeeper.Models;
+﻿using GreenKeeper.Layout;
+using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
@@ -31,6 +32,7 @@ namespace GreenKeeper
             _timeProvider = timeProvider;
 
             InitializeComponent();
+            InitializeResponsiveSize();
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
@@ -51,6 +53,27 @@ namespace GreenKeeper
             DataContext = _mainViewModel;
         }
 
+        // -- Responsive Size Section --
+
+        // The size in the XAML is the design size. The window opens at it, or at the size
+        // that suits the screen, and draws its content at the scale of its current size.
+        private void InitializeResponsiveSize()
+        {
+            var designSize = new Size(Width, Height);
+            var referenceScreen = (Size)FindResource("ReferenceScreenSize");
+            var scale = (FluidScale)FindResource("WindowScale");
+
+            var startSize = StartSize.For(designSize, referenceScreen, SystemParameters.WorkArea.Size);
+            Width = startSize.Width;
+            Height = startSize.Height;
+
+            // On a screen smaller than the minimum size, the window still has to fit.
+            MinWidth = Math.Min(MinWidth, startSize.Width);
+            MinHeight = Math.Min(MinHeight, startSize.Height);
+
+            SizeChanged += (_, e) => UiScale.SetFactor(this, scale.FactorFor(designSize, e.NewSize));
+        }
+
         // -- Dialogs Section --
         // Event handlers have to be "async void", so nobody can await them: every database
         // call goes through RunAsync, which reports a failure as an error dialog.
@@ -65,7 +88,7 @@ namespace GreenKeeper
         {
             var wizardView = new AddPlantWizardView();
 
-            if (!ShowDialog(wizardView) || wizardView.CreatedPlant == null)
+            if (!wizardView.ShowDialog(this) || wizardView.CreatedPlant == null)
             {
                 return;
             }
@@ -78,7 +101,7 @@ namespace GreenKeeper
         {
             var wizardView = new AddScheduleWizardView(plant, _dialogService);
 
-            if (!ShowDialog(wizardView) || wizardView.Result == null)
+            if (!wizardView.ShowDialog(this) || wizardView.Result == null)
             {
                 return;
             }
@@ -92,7 +115,7 @@ namespace GreenKeeper
         {
             var editView = new EditScheduleView(e.plant, e.care, _timeProvider);
 
-            if (!ShowDialog(editView) || editView.Result == null)
+            if (!editView.ShowDialog(this) || editView.Result == null)
             {
                 return;
             }
@@ -103,7 +126,9 @@ namespace GreenKeeper
         // Opens the notes window. It saves through the callback itself, so there is nothing to persist afterwards.
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
-            ShowDialog(new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text)));
+            var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text));
+
+            notesView.ShowDialog(this);
         }
 
         // Opens the rename dialog for the plant that was right-clicked in the sidebar.
@@ -111,7 +136,7 @@ namespace GreenKeeper
         {
             var renameView = new RenamePlantView(plant);
 
-            if (!ShowDialog(renameView) || renameView.ConfirmedName == null)
+            if (!renameView.ShowDialog(this) || renameView.ConfirmedName == null)
             {
                 return;
             }
@@ -120,13 +145,6 @@ namespace GreenKeeper
                 () => _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName),
                 "The plant could not be renamed",
                 "Renaming Error");
-        }
-
-        // Shows the window as a modal dialog owned by the main window; true if it was confirmed.
-        private bool ShowDialog(Window dialog)
-        {
-            dialog.Owner = this;
-            return dialog.ShowDialog() == true;
         }
 
         private async Task RunAsync(Func<Task> operation, string failureText, string title)

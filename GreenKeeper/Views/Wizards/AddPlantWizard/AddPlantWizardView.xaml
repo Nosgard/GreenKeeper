@@ -25,7 +25,8 @@
 
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="{x:Static models:Plant.MaxNameLength}" />
+                         MaxLength="{x:Static models:Plant.MaxNameLength}"
+                         TextWrapping="Wrap" />
 
                 <TextBlock Style="{StaticResource InputHint}"
                            Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />
@@ -78,7 +79,8 @@
                 <TextBlock Text="{Binding PlantName}"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="14"
-                           Margin="0, 0, 0, 6" />
+                           Margin="0, 0, 0, 6"
+                           TextWrapping="Wrap" />
 
                 <!-- Watering Line -->
                 <TextBlock Text="{Binding Watering, StringFormat='Watering: {0}'}"

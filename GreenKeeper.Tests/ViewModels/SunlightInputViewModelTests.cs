@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.ViewModels.Base;
 using GreenKeeper.ViewModels.CareStatuses.EditOption;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive;
@@ -34,6 +35,19 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(expectedMaxHours, wizardLimit);
             Assert.Equal(expectedMaxHours, scheduleLimit);
             Assert.Equal(expectedMaxHours, editLimit);
+        }
+
+        [Fact]
+        public void MaxAmountLength_GivenAllPeriods_IsTheLengthOfTheLongestMaximum()
+        {
+            // Given: the longest maximum of all periods, 8760 hours per year, has four digits
+            const int longestMaximumDigits = 4;
+
+            // When: the length limit of the hours field is read
+            var limit = HoursPerPeriodInputViewModel.MaxAmountLength;
+
+            // Then: the longest maximum just fits; nothing valid is cut short, nothing longer can be typed
+            Assert.Equal(longestMaximumDigits, limit);
         }
 
         [Theory]

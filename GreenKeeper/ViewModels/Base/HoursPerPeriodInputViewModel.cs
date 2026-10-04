@@ -22,6 +22,9 @@ namespace GreenKeeper.ViewModels.Base
             { SunlightPeriod.Year, 8760 },      // 365 * 24
         };
 
+        // The length limit of the hours field, see AmountLimit.
+        public static int MaxAmountLength { get; } = AmountLimit.FieldLengthFor(MaxHoursByPeriod.Values);
+
         /// <summary>
         /// Options for the ComboBox.
         ///
