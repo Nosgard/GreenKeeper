@@ -50,6 +50,7 @@
             <Button Style="{StaticResource DialogButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"
+                    IsCancel="True"
                     Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>

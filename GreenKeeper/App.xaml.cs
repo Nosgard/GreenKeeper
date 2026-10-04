@@ -18,7 +18,7 @@ namespace GreenKeeper
         {
             base.OnStartup(e);
 
-            var dialogService = new MessageBoxDialogService();
+            var dialogService = new MessageDialogService();
             var contextFactory = new GreenKeeperDbContextFactory();
 
             if (!await TryPrepareDatabaseAsync(contextFactory, dialogService))
@@ -46,7 +46,7 @@ namespace GreenKeeper
 
             // Create the main window manually. StartupUri would show the window immediately
             // before the code above had any chance to run.
-            var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System);
+            var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System, settingsService);
             mainWindow.Show();
         }
 

@@ -10,12 +10,13 @@ namespace GreenKeeper.ViewModels.Base
     public static class AmountLimit
     {
         /// <summary>
-        /// How many characters an amount field accepts: as many digits as the longest
-        /// maximum has. Every valid amount can be typed, and nothing longer fits in.
+        /// How many digits an amount field accepts: one more than the longest maximum. The
+        /// content stays fully visible, and an amount above the limit still shows as too
+        /// large instead of being cut down to a valid one.
         /// </summary>
         public static int FieldLengthFor(IEnumerable<int> maximums)
         {
-            return maximums.Max().ToString(CultureInfo.InvariantCulture).Length;
+            return maximums.Max().ToString(CultureInfo.InvariantCulture).Length + 1;
         }
     }
 }

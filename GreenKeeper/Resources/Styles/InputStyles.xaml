@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:base="clr-namespace:GreenKeeper.ViewModels.Base">
+                    xmlns:base="clr-namespace:GreenKeeper.ViewModels.Base"
+                    xmlns:views="clr-namespace:GreenKeeper.Views">
     <!-- Shared building blocks of the dialogs and wizard steps -->
 
     <!-- Heading of a dialog or wizard step. It wraps instead of being cut off, since
@@ -16,7 +17,7 @@
     <!-- Hint below an input field, e.g. the limit or the remaining characters -->
     <Style x:Key="InputHint" TargetType="TextBlock">
         <Setter Property="Foreground" Value="{DynamicResource MutedText}" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Margin" Value="0, 6, 0, 0" />
     </Style>
 
@@ -43,7 +44,7 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="{x:Static base:AmountAndUnitInputViewModel.MaxAmountLength}"
+                         views:WholeNumberInput.MaxDigits="{x:Static base:AmountAndUnitInputViewModel.MaxAmountLength}"
                          Width="80" />
 
                 <ComboBox Style="{StaticResource ThemedComboBox}"
@@ -67,11 +68,12 @@
             <StackPanel Orientation="Horizontal">
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="{x:Static base:HoursPerPeriodInputViewModel.MaxAmountLength}"
+                         views:WholeNumberInput.MaxDigits="{x:Static base:HoursPerPeriodInputViewModel.MaxAmountLength}"
                          Width="80" />
 
                 <TextBlock Text="Hours"
                            Foreground="{DynamicResource SecondaryText}"
+                           FontSize="14"
                            VerticalAlignment="Center"
                            Margin="8, 0, 0, 0" />
 

@@ -38,7 +38,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void MaxAmountLength_GivenAllPeriods_IsTheLengthOfTheLongestMaximum()
+        public void MaxAmountLength_GivenAllPeriods_IsOneDigitMoreThanTheLongestMaximum()
         {
             // Given: the longest maximum of all periods, 8760 hours per year, has four digits
             const int longestMaximumDigits = 4;
@@ -46,8 +46,9 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the length limit of the hours field is read
             var limit = HoursPerPeriodInputViewModel.MaxAmountLength;
 
-            // Then: the longest maximum just fits; nothing valid is cut short, nothing longer can be typed
-            Assert.Equal(longestMaximumDigits, limit);
+            // Then: one digit more fits, so an amount above the limit stays visible instead
+            // of being cut down to a valid one
+            Assert.Equal(longestMaximumDigits + 1, limit);
         }
 
         [Theory]

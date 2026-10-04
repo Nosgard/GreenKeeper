@@ -1,6 +1,7 @@
 ﻿using GreenKeeper.Layout;
 using GreenKeeper.ViewModels.Base;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace GreenKeeper.Views
 {
@@ -8,13 +9,18 @@ namespace GreenKeeper.Views
     /// Base of every modal window. It opens at the scale of its owner, binds its
     /// ViewModel and closes with the result the ViewModel asks for, so a code-behind
     /// only creates its ViewModel and exposes the result. A dialog with a fixed size
-    /// grows in height where its content needs the room.
+    /// grows in height where its content needs the room, and the cursor waits in the
+    /// first field.
     /// </summary>
     public class DialogWindow : Window
     {
         public DialogWindow()
         {
-            Loaded += (_, _) => GrowWithContent();
+            Loaded += (_, _) =>
+            {
+                GrowWithContent();
+                TryFocusFirstInput();
+            };
         }
 
         /// <summary>
@@ -75,6 +81,29 @@ namespace GreenKeeper.Views
 
             MinHeight = ActualHeight;
             SizeToContent = SizeToContent.Height;
+        }
+
+        // The first field of the dialog gets the focus, with the cursor after its text;
+        // false if the dialog has no field. Then the focus stays where it is, so Enter
+        // still reaches the default button.
+        protected bool TryFocusFirstInput()
+        {
+            var input = VisualTree.Descendants<Control>(this)
+                .FirstOrDefault(control => control is TextBox or ComboBox && control.IsVisible && control.IsEnabled);
+
+            if (input == null)
+            {
+                return false;
+            }
+
+            input.Focus();
+
+            if (input is TextBox box)
+            {
+                box.CaretIndex = box.Text.Length;
+            }
+
+            return true;
         }
 
         protected void Attach(IDialogViewModel viewModel)

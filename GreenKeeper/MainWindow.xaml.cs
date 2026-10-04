@@ -9,6 +9,7 @@ using GreenKeeper.Views.RenamePlant;
 using GreenKeeper.Views.Wizards.AddPlantWizard;
 using GreenKeeper.Views.Wizards.AddScheduleWizard;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -24,15 +25,24 @@ namespace GreenKeeper
         private readonly MainViewModel _mainViewModel;
         private readonly IDialogService _dialogService;
         private readonly TimeProvider _timeProvider;
+        private readonly ISettingsService _settingsService;
 
-        public MainWindow(MainViewModel mainViewModel, IDialogService dialogService, TimeProvider timeProvider)
+        public MainWindow(
+            MainViewModel mainViewModel,
+            IDialogService dialogService,
+            TimeProvider timeProvider,
+            ISettingsService settingsService)
         {
             _mainViewModel = mainViewModel;
             _dialogService = dialogService;
             _timeProvider = timeProvider;
+            _settingsService = settingsService;
 
+            // In this order: the design size is read from Width and Height of the XAML,
+            // which RestorePlacement then overwrites.
             InitializeComponent();
             InitializeResponsiveSize();
+            RestorePlacement();
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
@@ -43,6 +53,8 @@ namespace GreenKeeper
             // Stops the periodic status card refresh once this window (and therefore the application)
             // is closed, so the timer doesn't keep firing after the app is meant to shut down.
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
+
+            Closing += (_, _) => SavePlacement();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
@@ -72,6 +84,71 @@ namespace GreenKeeper
             MinHeight = Math.Min(MinHeight, startSize.Height);
 
             SizeChanged += (_, e) => UiScale.SetFactor(this, scale.FactorFor(designSize, e.NewSize));
+        }
+
+        // -- Window Placement Section --
+
+        // The window opens where and how it was closed. Without a stored placement, as on
+        // the first start, it opens at its start size in the middle of the screen.
+        private void RestorePlacement()
+        {
+            var stored = _settingsService.Load().WindowPlacement;
+
+            if (stored == null)
+            {
+                return;
+            }
+
+            // All screens together, because one of them may be gone since the window was closed.
+            var screens = new Rect(
+                SystemParameters.VirtualScreenLeft,
+                SystemParameters.VirtualScreenTop,
+                SystemParameters.VirtualScreenWidth,
+                SystemParameters.VirtualScreenHeight);
+            var bounds = RestoredBounds.For(stored, screens);
+
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = bounds.Left;
+            Top = bounds.Top;
+            Width = bounds.Width;
+            Height = bounds.Height;
+
+            if (stored.IsMaximized)
+            {
+                // Only once the window exists at its place. Maximized earlier, it would open on the
+                // main screen instead of the one it was closed on.
+                SourceInitialized += (_, _) => WindowState = WindowState.Maximized;
+            }
+        }
+
+        // Read-modify-write like the theme toggle, so the other settings stay as they are.
+        private void SavePlacement()
+        {
+            var settings = _settingsService.Load();
+
+            // RestoreBounds is the window in its normal state, also while it is maximized.
+            settings.WindowPlacement = new WindowPlacement
+            {
+                Left = RestoreBounds.Left,
+                Top = RestoreBounds.Top,
+                Width = RestoreBounds.Width,
+                Height = RestoreBounds.Height,
+                IsMaximized = WindowState == WindowState.Maximized
+            };
+
+            _settingsService.Save(settings);
+        }
+
+        // -- Dashboard Section --
+
+        // The cards of another plant start at their top. A refresh of the plant in view,
+        // after Complete for instance, leaves the cards where they are.
+        private void PlantList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                StatusScrollViewer.ScrollToTop();
+            }
         }
 
         // -- Dialogs Section --

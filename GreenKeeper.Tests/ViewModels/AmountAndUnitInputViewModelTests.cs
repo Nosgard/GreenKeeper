@@ -50,7 +50,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void MaxAmountLength_GivenAllUnits_IsTheLengthOfTheLongestMaximum()
+        public void MaxAmountLength_GivenAllUnits_IsOneDigitMoreThanTheLongestMaximum()
         {
             // Given: the longest maximum of all units, 365 days, has three digits
             const int longestMaximumDigits = 3;
@@ -58,8 +58,9 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the length limit of the amount field is read
             var limit = AmountAndUnitInputViewModel.MaxAmountLength;
 
-            // Then: the longest maximum just fits; nothing valid is cut short, nothing longer can be typed
-            Assert.Equal(longestMaximumDigits, limit);
+            // Then: one digit more fits, so an amount above the limit stays visible instead
+            // of being cut down to a valid one
+            Assert.Equal(longestMaximumDigits + 1, limit);
         }
 
         [Fact]

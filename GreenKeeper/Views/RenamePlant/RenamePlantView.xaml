@@ -24,8 +24,7 @@
             <TextBlock Style="{StaticResource DialogHeading}"
                        Text="Enter a new name for the plant" />
 
-            <TextBox x:Name="NameTextBox"
-                     Style="{StaticResource ThemedTextBox}"
+            <TextBox Style="{StaticResource ThemedTextBox}"
                      Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
                      MaxLength="{x:Static models:Plant.MaxNameLength}"
                      TextWrapping="Wrap" />

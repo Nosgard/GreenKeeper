@@ -16,6 +16,7 @@
                 <ResourceDictionary Source="/Resources/Styles/InputStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ContextMenuStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/ToolTipStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BitmapImage x:Key="AppIcon" UriSource="/Resources/AppIcon.ico" />

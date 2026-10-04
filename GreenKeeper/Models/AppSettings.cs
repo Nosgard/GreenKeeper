@@ -15,5 +15,11 @@ namespace GreenKeeper.Models
         /// ("Bright"/"Dark") rather than as a number - see SettingsService.
         /// </summary>
         public Theme Theme { get; set; } = Theme.Bright;
+
+        /// <summary>
+        /// Where the main window was closed, to open it there again. Null until the first
+        /// close, and in a settings file of an earlier version.
+        /// </summary>
+        public WindowPlacement? WindowPlacement { get; set; }
     }
 }
