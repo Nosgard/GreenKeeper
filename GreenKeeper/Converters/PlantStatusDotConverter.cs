@@ -7,18 +7,12 @@ using System.Windows.Data;
 namespace GreenKeeper.Converters
 {
     /// <summary>
-    /// Determines which status dot icon to show next to a plant in the
-    /// sidebar, based on the most urgent state among its Watering and
-    /// Fertilizing schedules (Sunlight is irrelevant, since it has no
-    /// due date). Overdue takes priority over "due today", which in turn
-    /// takes priority over the default green state.
+    /// The status dot shown next to a plant in the sidebar: the plant's status as of
+    /// today (PlantStatusRules decides which state wins). StatusDotStyles.xaml decides
+    /// how each status looks.
     /// </summary>
     public class PlantStatusDotConverter : IValueConverter
     {
-        private const string GreenDot = "/Resources/Icons/Dots/GreenDot.png";
-        private const string YellowDot = "/Resources/Icons/Dots/YellowDot.png";
-        private const string RedDot = "/Resources/Icons/Dots/RedDot.png";
-
         private readonly TimeProvider _timeProvider;
 
         // XAML creates the converter through this constructor, so the app judges by the system clock.
@@ -36,28 +30,10 @@ namespace GreenKeeper.Converters
         {
             if (value is not Plant plant)
             {
-                return GreenDot;
+                return PlantStatus.UpToDate;
             }
 
-            var dueDates = plant.CareSchedules
-                .Where(s => s.Care == CareType.Watering || s.Care == CareType.Fertilizing)
-                .Where(s => s.NextDueAt.HasValue)
-                .Select(s => s.NextDueAt!.Value.Date)
-                .ToList();
-
-            var today = _timeProvider.GetLocalNow().DateTime;
-
-            if (dueDates.Any(due => DueDateRules.IsOverdue(due, today)))
-            {
-                return RedDot;
-            }
-
-            if (dueDates.Any(due => DueDateRules.IsDueToday(due, today)))
-            {
-                return YellowDot;
-            }
-
-            return GreenDot;
+            return PlantStatusRules.For(plant, _timeProvider.GetLocalNow().DateTime);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

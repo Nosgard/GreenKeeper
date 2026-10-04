@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/StatusDotStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ComboBoxStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/InputStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />

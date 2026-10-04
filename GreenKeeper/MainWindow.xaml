@@ -227,16 +227,11 @@
 
                             <!-- Status dot. Its state is part of the entry's name, so a
                                  screen reader skips the dot itself. -->
-                            <Rectangle Grid.Column="0"
-                                       Width="20"
-                                       Height="20"
-                                       VerticalAlignment="Center"
-                                       Margin="0, 0, 4, 0"
-                                       RenderOptions.BitmapScalingMode="HighQuality">
-                                <Rectangle.Fill>
-                                    <ImageBrush ImageSource="{Binding Converter={StaticResource PlantStatusDotConverter}}" Stretch="Uniform" />
-                                </Rectangle.Fill>
-                            </Rectangle>
+                            <ContentPresenter Grid.Column="0"
+                                              Content="{Binding Converter={StaticResource PlantStatusDotConverter}}"
+                                              ContentTemplate="{StaticResource PlantStatusDot}"
+                                              VerticalAlignment="Center"
+                                              Margin="0, 0, 4, 0" />
 
                             <TextBlock Grid.Column="1"
                        Text="{Binding Name}"
