@@ -35,16 +35,17 @@
 
                 <TextBlock x:Name="CounterHint"
                            Style="{StaticResource InputHint}"
-                           Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />
+                           Text="{Binding CharactersRemainingText}" />
             </StackPanel>
         </DataTemplate>
 
         <!-- Watering Step -->
         <DataTemplate DataType="{x:Type activeSteps:WateringStepViewModel}">
             <StackPanel Margin="20">
+                <!-- Required steps carry no marker; only the optional ones say "(optional)" -->
                 <TextBlock x:Name="StepHeading"
                            Style="{StaticResource DialogHeading}"
-                           Text="* Enter the period for watering" />
+                           Text="Enter the period for watering" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"

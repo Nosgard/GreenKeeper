@@ -50,6 +50,8 @@ namespace GreenKeeper.ViewModels.Base
             {
                 if (SetProperty(ref _amountText, value))
                 {
+                    OnPropertyChanged(nameof(IsAmountTooLarge));
+                    OnPropertyChanged(nameof(AmountHint));
                     OnAmountOrUnitChanged();
                 }
             }
@@ -63,12 +65,20 @@ namespace GreenKeeper.ViewModels.Base
                 if (SetProperty(ref _selectedUnit, value))
                 {
                     OnPropertyChanged(nameof(MaxAmount));
+                    OnPropertyChanged(nameof(IsAmountTooLarge));
+                    OnPropertyChanged(nameof(AmountHint));
                     OnAmountOrUnitChanged();
                 }
             }
         }
 
         public int MaxAmount => MaxAmountsByUnit[SelectedUnit];
+
+        // Positive, but more than the selected unit allows.
+        public bool IsAmountTooLarge => Amount > MaxAmount;
+
+        // The line below the field, see AmountLimit.
+        public string AmountHint => AmountLimit.HintFor(MaxAmount, IsAmountTooLarge);
 
         // The entered text as a number, or null while it is not a number at all.
         public int? Amount => int.TryParse(AmountText, out int amount) ? amount : null;

@@ -9,14 +9,17 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
     /// </summary>
     public class SunlightStepViewModel : HoursPerPeriodInputViewModel, IWizardStepViewModel
     {
-        // The step is optional, so the button is always active; only its label changes.
-        public bool CanProceed => true;
+        // The step is optional: empty, it can be skipped. Once something is entered it has
+        // to be valid, because skipping would drop the entry without a word.
+        public bool CanProceed => IsLeftEmpty || HasValidAmount;
 
-        // Depending on the entered amount of hours per period, show "Next" or "Skip".
-        public string NextButtonLabel => HasValidAmount ? "Next" : "Skip";
+        public string NextButtonLabel => IsLeftEmpty ? "Skip" : "Next";
+
+        private bool IsLeftEmpty => AmountText.Length == 0;
 
         protected override void OnHoursOrPeriodChanged()
         {
+            OnPropertyChanged(nameof(CanProceed));
             OnPropertyChanged(nameof(NextButtonLabel));
         }
     }

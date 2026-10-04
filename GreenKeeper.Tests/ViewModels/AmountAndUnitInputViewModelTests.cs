@@ -49,6 +49,41 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(expected, isValid);
         }
 
+        [Theory]
+        [InlineData("365", false, "max. 365")]
+        [InlineData("366", true, "Too large, max. 365")]
+        [InlineData("", false, "max. 365")]
+        public void AmountHint_GivenAmount_NamesTheLimitAndSaysWhenItIsExceeded(string amount, bool expectedTooLarge, string expectedHint)
+        {
+            // Given: the amount field for days, which allows up to 365
+            var input = new AmountAndUnitInputViewModel { SelectedUnit = TimeUnit.Days, AmountText = amount };
+
+            // When: the hint below the field is read
+            var isTooLarge = input.IsAmountTooLarge;
+            var hint = input.AmountHint;
+
+            // Then: it shows the limit, and says so in words once the amount exceeds it
+            Assert.Equal(expectedTooLarge, isTooLarge);
+            Assert.Equal(expectedHint, hint);
+        }
+
+        [Fact]
+        public void SelectedUnit_GivenAmountThatExceedsTheNewLimit_RaisesPropertyChangedForTheHint()
+        {
+            // Given: 100 days, with the changes of the input recorded
+            var input = new AmountAndUnitInputViewModel { SelectedUnit = TimeUnit.Days, AmountText = "100" };
+            var raisedProperties = new List<string>();
+            input.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: the unit changes to weeks, which allow up to 52
+            input.SelectedUnit = TimeUnit.Weeks;
+
+            // Then: PropertyChanged is raised for the hint and its error state, so the view shows "Too large, max. 52"
+            Assert.Contains(nameof(AmountAndUnitInputViewModel.AmountHint), raisedProperties);
+            Assert.Contains(nameof(AmountAndUnitInputViewModel.IsAmountTooLarge), raisedProperties);
+            Assert.Equal("Too large, max. 52", input.AmountHint);
+        }
+
         [Fact]
         public void MaxAmountLength_GivenAllUnits_IsOneDigitMoreThanTheLongestMaximum()
         {

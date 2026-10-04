@@ -1,4 +1,5 @@
-﻿using GreenKeeper.Models.Enums;
+﻿using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
@@ -145,6 +146,38 @@ namespace GreenKeeper.Tests.ViewModels
             // Then: an empty step offers to skip, a filled one to continue
             Assert.Equal(expectedLabel, label);
             Assert.True(step.CanProceed);
+        }
+
+        [Fact]
+        public void FertilizingStep_GivenAmountAboveTheLimit_CannotProceedAndDoesNotOfferToSkip()
+        {
+            // Given: the optional fertilizing step with more days than the limit of 365
+            var step = new FertilizingStepViewModel { AmountText = "400" };
+
+            // When: the state of the Next button is read
+            var canProceed = step.CanProceed;
+            var label = step.NextButtonLabel;
+
+            // Then: the button stays "Next" and is locked, "Skip" would drop the entry unnoticed
+            Assert.False(canProceed);
+            Assert.Equal("Next", label);
+        }
+
+        [Theory]
+        [InlineData(50, "50 characters remaining")]
+        [InlineData(2, "2 characters remaining")]
+        [InlineData(1, "1 character remaining")]
+        [InlineData(0, "0 characters remaining")]
+        public void NameStep_GivenRemainingCharacters_CountsDownInWords(int remaining, string expected)
+        {
+            // Given: the name step with a name that leaves the given number of characters
+            var step = new PlantNameStepViewModel { PlantName = new string('a', Plant.MaxNameLength - remaining) };
+
+            // When: the counter below the field is read
+            var text = step.CharactersRemainingText;
+
+            // Then: it names what is left, in the singular for a single character
+            Assert.Equal(expected, text);
         }
 
         [Fact]

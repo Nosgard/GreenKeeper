@@ -19,12 +19,16 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
                     // characters both depend on the name.
                     OnPropertyChanged(nameof(CanProceed));
                     OnPropertyChanged(nameof(CharactersRemaining));
+                    OnPropertyChanged(nameof(CharactersRemainingText));
                 }
             }
         }
 
-        // Helper that is used to show the remaining characters in the UI.
+        // The number behind CharactersRemainingText.
         public int CharactersRemaining => Plant.MaxNameLength - PlantName.Length;
+
+        // The counter as it is shown below the field.
+        public string CharactersRemainingText => NameLengthCounter.TextFor(CharactersRemaining);
 
         // Mandatory: Only active when the name is not empty and is within
         // the maximum length.

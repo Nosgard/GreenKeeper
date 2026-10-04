@@ -36,7 +36,7 @@
 
             <TextBlock x:Name="CounterHint"
                        Style="{StaticResource InputHint}"
-                       Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />
+                       Text="{Binding CharactersRemainingText}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1"

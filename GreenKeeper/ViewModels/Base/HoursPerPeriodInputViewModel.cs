@@ -50,6 +50,8 @@ namespace GreenKeeper.ViewModels.Base
             {
                 if (SetProperty(ref _amountText, value))
                 {
+                    OnPropertyChanged(nameof(IsAmountTooLarge));
+                    OnPropertyChanged(nameof(AmountHint));
                     OnHoursOrPeriodChanged();
                 }
             }
@@ -65,12 +67,20 @@ namespace GreenKeeper.ViewModels.Base
                     // An entered amount can be invalid with the new period
                     // (e.g. 100 is valid for weeks but not for days).
                     OnPropertyChanged(nameof(MaxAmount));
+                    OnPropertyChanged(nameof(IsAmountTooLarge));
+                    OnPropertyChanged(nameof(AmountHint));
                     OnHoursOrPeriodChanged();
                 }
             }
         }
 
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
+
+        // Positive, but more than the selected period allows.
+        public bool IsAmountTooLarge => Hours > MaxAmount;
+
+        // The line below the field, see AmountLimit.
+        public string AmountHint => AmountLimit.HintFor(MaxAmount, IsAmountTooLarge);
 
         // The entered text as a number, or null while it is not a number at all.
         public int? Hours => int.TryParse(AmountText, out int hours) ? hours : null;

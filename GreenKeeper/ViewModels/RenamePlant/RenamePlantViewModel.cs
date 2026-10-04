@@ -40,16 +40,20 @@ namespace GreenKeeper.ViewModels.RenamePlant
             {
                 if (SetProperty(ref _newName, value))
                 {
-                    // Both depend on _newName and must be re-evaluated whenever
+                    // All three depend on _newName and must be re-evaluated whenever
                     // the text changes.
                     OnPropertyChanged(nameof(CharactersRemaining));
+                    OnPropertyChanged(nameof(CharactersRemainingText));
                     OnPropertyChanged(nameof(HasValidName));
                 }
             }
         }
 
-        // Shown below the input field.
+        // The number behind CharactersRemainingText.
         public int CharactersRemaining => Plant.MaxNameLength - _newName.Length;
+
+        // The counter as it is shown below the field.
+        public string CharactersRemainingText => NameLengthCounter.TextFor(CharactersRemaining);
 
         // Same rule as the Add Plant wizard's name step - it would be
         // inconsistent to accept other names when renaming.

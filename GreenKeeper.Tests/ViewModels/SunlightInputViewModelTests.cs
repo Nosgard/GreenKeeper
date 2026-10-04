@@ -84,6 +84,42 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.False(step.HasValidAmount);
         }
 
+        // -- Hint below the field --
+
+        [Theory]
+        [InlineData("6", false, "max. 24")]
+        [InlineData("24", false, "max. 24")]
+        [InlineData("25", true, "Too large, max. 24")]
+        [InlineData("", false, "max. 24")]
+        public void AmountHint_GivenHours_NamesTheLimitAndSaysWhenItIsExceeded(string hours, bool expectedTooLarge, string expectedHint)
+        {
+            // Given: the hours field for a day, which has 24 hours
+            var step = new SunlightStepViewModel { SelectedPeriod = SunlightPeriod.Day, AmountText = hours };
+
+            // When: the hint below the field is read
+            var isTooLarge = step.IsAmountTooLarge;
+            var hint = step.AmountHint;
+
+            // Then: it shows the limit, and says so in words once the hours exceed it
+            Assert.Equal(expectedTooLarge, isTooLarge);
+            Assert.Equal(expectedHint, hint);
+        }
+
+        [Fact]
+        public void SunlightStep_GivenHoursAboveTheLimit_CannotProceedAndDoesNotOfferToSkip()
+        {
+            // Given: the optional sunlight step with more hours than a day has
+            var step = new SunlightStepViewModel { SelectedPeriod = SunlightPeriod.Day, AmountText = "25" };
+
+            // When: the state of the Next button is read
+            var canProceed = step.CanProceed;
+            var label = step.NextButtonLabel;
+
+            // Then: the button stays "Next" and is locked, "Skip" would drop the entry unnoticed
+            Assert.False(canProceed);
+            Assert.Equal("Next", label);
+        }
+
         // -- Wizard behavior --
 
         [Theory]
