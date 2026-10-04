@@ -3,9 +3,11 @@ using GreenKeeper.Models.Enums;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using static GreenKeeper.Tests.TestPlants;
+using GreenKeeper.ViewModels.CareStatuses.Abstract;
 using GreenKeeper.ViewModels.CareStatuses.Active;
 using GreenKeeper.ViewModels.CareStatuses.Passive;
 using GreenKeeper.ViewModels.Themes;
+using System.Collections.Specialized;
 using System.Windows.Data;
 using System.Windows.Input;
 
@@ -1227,22 +1229,25 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public async Task SimulatedTimerTick_WhenTriggered_RaisesPropertyChangedForCareStatuses()
+        public async Task SimulatedTimerTick_WhenTriggered_ReachesTheCardsOfTheSelectedPlant()
         {
-            // Given: an initialized MainViewModel running on a timer service the test can trigger
+            // Given: a selected plant, on a timer service the test can trigger
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
             var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, timerService: timerService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
 
-            var viewModel = await CreateInitializedViewModelAsync(timerService: timerService);
-
+            var card = viewModel.CareStatuses.Single();
             var raisedProperties = new List<string>();
-            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+            card.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
 
             // When: a timer tick is simulated, without waiting for a real 5-minute interval
             timerService.TriggerTick();
 
-            // Then: the callback passed to _timerService.Start(...) in the constructor is genuinely wired
-            // to RefreshCareStatuses, and the timer actually triggers it
-            Assert.Contains(nameof(MainViewModel.CareStatuses), raisedProperties);
+            // Then: the callback given to _timerService.Start in the constructor refreshes
+            // the card instead of replacing it
+            Assert.Contains(nameof(CareStatusViewModel.StatusText), raisedProperties);
         }
 
         [Fact]
@@ -1594,7 +1599,150 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Empty(announcements);
         }
 
+        // -- Periodic Refresh Tests --
+        // A tick used to rebuild the cards and the sidebar, and a screen reader announced
+        // the focused element again. A tick must leave untouched what did not change.
+
+        [Fact]
+        public async Task CareStatuses_ReadTwice_HandsOutTheSameCards()
+        {
+            // Given: a selected plant with all three cards
+            var plant = AloeVera(WateringEveryDays(7), FertilizingEveryDays(30));
+            plant.SunlightRequirement = DailySunlight(6);
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the cards are read twice
+            var first = viewModel.CareStatuses.ToList();
+            var second = viewModel.CareStatuses.ToList();
+
+            // Then: the same card objects. A new one would make the UI build a new element,
+            // which a screen reader reads out again
+            Assert.Equal(first, second);
+        }
+
+        [Fact]
+        public async Task TimerTick_GivenNothingChanged_KeepsTheCards()
+        {
+            // Given: a selected plant whose watering is due in a week
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(7))));
+            var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, timerService: timerService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var cardsBefore = viewModel.CareStatuses.ToList();
+
+            // When: the periodic refresh runs
+            timerService.TriggerTick();
+
+            // Then: the same cards are still there
+            Assert.Equal(cardsBefore, viewModel.CareStatuses.ToList());
+        }
+
+        [Fact]
+        public async Task TimerTick_GivenTheDueDatePassed_UpdatesTheCardInPlace()
+        {
+            // Given: a watering card that is due today, on a clock the test moves on
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now)));
+            var timeProvider = new FakeTimeProvider(Now);
+            var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(
+                plantRepository, timerService: timerService, timeProvider: timeProvider);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            var card = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+            var raisedProperties = new List<string>();
+            card.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: a day passes and the periodic refresh runs
+            timeProvider.Now = Now.AddDays(1);
+            timerService.TriggerTick();
+
+            // Then: the same card reports its new state, so the element a screen reader is
+            // on stays the one it has announced
+            Assert.Same(card, viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single());
+            Assert.Contains(nameof(WateringStatusViewModel.StatusText), raisedProperties);
+            Assert.Contains(nameof(WateringStatusViewModel.IsOverdue), raisedProperties);
+            Assert.Contains(nameof(WateringStatusViewModel.IsCompletable), raisedProperties);
+            Assert.Equal("Overdue for 1 day", card.StatusText);
+        }
+
+        [Fact]
+        public async Task TimerTick_GivenNothingChanged_LeavesTheSidebarAlone()
+        {
+            // Given: a plant whose watering is due in a week, so no state can change yet
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(7))));
+            var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, timerService: timerService);
+            var sidebarRebuilds = SidebarRebuildsOf(viewModel);
+
+            // When: the periodic refresh runs
+            timerService.TriggerTick();
+
+            // Then: the sidebar is not rebuilt. A rebuild replaces every entry, and a screen
+            // reader on one of them would hear it again
+            Assert.Equal(0, sidebarRebuilds());
+        }
+
+        [Fact]
+        public async Task TimerTick_GivenAPlantBecameOverdue_RebuildsTheSidebar()
+        {
+            // Given: a plant that is due today, on a clock the test moves on
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now)));
+            var timeProvider = new FakeTimeProvider(Now);
+            var timerService = new FakeTimerService();
+            var viewModel = await CreateInitializedViewModelAsync(
+                plantRepository, timerService: timerService, timeProvider: timeProvider);
+            var sidebarRebuilds = SidebarRebuildsOf(viewModel);
+
+            // When: a day passes, so the plant turns overdue, and the refresh runs
+            timeProvider.Now = Now.AddDays(1);
+            timerService.TriggerTick();
+
+            // Then: the sidebar is rebuilt once, so the dot and the spoken name follow
+            Assert.Equal(1, sidebarRebuilds());
+        }
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenAReplacedSchedule_GivesTheCardTheNewSchedule()
+        {
+            // Given: a selected plant whose watering is due in a week
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(7))));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the watering interval is replaced by one of a single day
+            await viewModel.AddOrReplaceCareScheduleAsync(WateringEveryDays(1));
+
+            // Then: the card reads the new schedule, not the replaced one it was built on
+            var card = viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single();
+            Assert.Equal("Due in 1 day", card.StatusText);
+        }
+
         // -- Helpers --
+
+        // How often the sidebar's view is rebuilt from now on. A rebuild replaces every
+        // entry, which makes a screen reader read one out again.
+        private static Func<int> SidebarRebuildsOf(MainViewModel viewModel)
+        {
+            int rebuilds = 0;
+            ((INotifyCollectionChanged)CollectionViewSource.GetDefaultView(viewModel.Plants)).CollectionChanged +=
+                (_, e) =>
+                {
+                    if (e.Action == NotifyCollectionChangedAction.Reset)
+                    {
+                        rebuilds++;
+                    }
+                };
+
+            return () => rebuilds;
+        }
 
         // Everything the ViewModel announces from now on, in order.
         private static List<string> AnnouncementsOf(MainViewModel viewModel)
@@ -1608,13 +1756,14 @@ namespace GreenKeeper.Tests.ViewModels
         private static MainViewModel CreateViewModel(
             FakePlantRepository? plantRepository = null,
             FakeDialogService? dialogService = null,
-            FakeTimerService? timerService = null)
+            FakeTimerService? timerService = null,
+            FakeTimeProvider? timeProvider = null)
         {
             return new MainViewModel(
                 plantRepository ?? new FakePlantRepository(),
                 dialogService ?? new FakeDialogService(),
                 timerService ?? new FakeTimerService(),
-                new FakeTimeProvider(Now),
+                timeProvider ?? new FakeTimeProvider(Now),
                 new ThemeViewModel(new FakeThemeService(), new FakeSettingsService()));
         }
 
@@ -1622,9 +1771,10 @@ namespace GreenKeeper.Tests.ViewModels
         private static async Task<MainViewModel> CreateInitializedViewModelAsync(
             FakePlantRepository? plantRepository = null,
             FakeDialogService? dialogService = null,
-            FakeTimerService? timerService = null)
+            FakeTimerService? timerService = null,
+            FakeTimeProvider? timeProvider = null)
         {
-            var viewModel = CreateViewModel(plantRepository, dialogService, timerService);
+            var viewModel = CreateViewModel(plantRepository, dialogService, timerService, timeProvider);
             await viewModel.InitializeAsync();
             return viewModel;
         }

@@ -68,6 +68,13 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         // is not painted red - the plant's status dot only turns red once a day was missed.
         public override bool IsOverdue => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsOverdue(dueAt, Today);
 
+        // The Complete button becomes usable on the due day, so it follows the day too.
+        public override void NotifyDueStatusChanged()
+        {
+            base.NotifyDueStatusChanged();
+            OnPropertyChanged(nameof(IsCompletable));
+        }
+
         private DateTime Today => _timeProvider.GetLocalNow().DateTime;
     }
 }

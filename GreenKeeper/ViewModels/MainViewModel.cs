@@ -33,6 +33,14 @@ namespace GreenKeeper.ViewModels
         private readonly IPlantRepository _plantRepository;
         private readonly IDialogService _dialogService;
         private readonly ITimerService _timerService;
+
+        // The cards of the selected plant. One kept collection, so a card that is still
+        // correct keeps its object, and with it the element a screen reader is on.
+        private readonly ObservableCollection<CareStatusViewModel> _careStatuses = new();
+
+        // The state each plant's entry shows at the moment, so the periodic refresh can
+        // tell whether rebuilding the sidebar would change anything at all.
+        private readonly Dictionary<int, PlantStatus> _shownPlantStatus = new();
         private readonly TimeProvider _timeProvider;
         private Plant? _selectedPlant;
         private string _searchText = string.Empty;
@@ -55,7 +63,7 @@ namespace GreenKeeper.ViewModels
             // the ListView picks up this filter automatically, without needing to be changed itself.
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
-            _timerService.Start(CareStatusRefreshInterval, RefreshCareStatuses);
+            _timerService.Start(CareStatusRefreshInterval, RefreshDueStatus);
 
             // The commands only signal the intent to open a window; MainWindow subscribes
             // to the events and opens it, so the ViewModel never sees a window class.
@@ -66,7 +74,7 @@ namespace GreenKeeper.ViewModels
             DeletePlantCommand = new AsyncRelayCommand(_ => DeleteSelectedPlantAsync(), _ => IsPlantSelected);
 
 #if DEBUG
-            TimeSimulation = new TimeSimulationViewModel(() => SelectedPlant, RefreshCareStatuses);
+            TimeSimulation = new TimeSimulationViewModel(() => SelectedPlant, RefreshDueStatus);
 #endif
         }
 
@@ -82,6 +90,8 @@ namespace GreenKeeper.ViewModels
             {
                 Plants.Add(plant);
             }
+
+            RememberPlantStatus();
         }
 
         // -- Announcements Section --
@@ -117,6 +127,7 @@ namespace GreenKeeper.ViewModels
             {
                 if (SetProperty(ref _selectedPlant, value))
                 {
+                    RebuildCareStatuses();
                     OnPropertyChanged(nameof(CareStatuses));
                     OnPropertyChanged(nameof(IsPlantSelected));
                 }
@@ -209,33 +220,37 @@ namespace GreenKeeper.ViewModels
         /// The fertilizing schedule and the separate sunlight requirement are optional
         /// and will not show up if they are not set for a plant.
         /// </summary>
-        public IEnumerable<CareStatusViewModel> CareStatuses
+        public IEnumerable<CareStatusViewModel> CareStatuses => _careStatuses;
+
+        // Builds the cards of the selected plant, only when the plant or its data changed:
+        // a card holds the schedule it was built on, and AddOrReplace puts a new schedule
+        // object in its place. The periodic refresh keeps the cards (see RefreshDueStatus).
+        private void RebuildCareStatuses()
         {
-            get
+            _careStatuses.Clear();
+
+            if (SelectedPlant == null)
             {
-                if (SelectedPlant == null)
-                {
-                    yield break;
-                }
+                return;
+            }
 
-                var plant = SelectedPlant;
-                CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
+            var plant = SelectedPlant;
+            CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-                // Watering: mandatory for every plant.
-                yield return WateringCard(ScheduleFor(CareType.Watering));
+            // Watering: mandatory for every plant.
+            _careStatuses.Add(WateringCard(ScheduleFor(CareType.Watering)));
 
-                // Fertilizing: optional, only show the status if set for a plant.
-                var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
-                if (fertilizingSchedule != null)
-                {
-                    yield return FertilizingCard(fertilizingSchedule);
-                }
+            // Fertilizing: optional, only show the status if set for a plant.
+            var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
+            if (fertilizingSchedule != null)
+            {
+                _careStatuses.Add(FertilizingCard(fertilizingSchedule));
+            }
 
-                // Sunlight: optional.
-                if (plant.SunlightRequirement != null)
-                {
-                    yield return SunlightCard(plant.SunlightRequirement);
-                }
+            // Sunlight: optional.
+            if (plant.SunlightRequirement != null)
+            {
+                _careStatuses.Add(SunlightCard(plant.SunlightRequirement));
             }
         }
 
@@ -290,8 +305,53 @@ namespace GreenKeeper.ViewModels
         /// </summary>
         public void RefreshCareStatuses()
         {
+            RebuildCareStatuses();
             OnPropertyChanged(nameof(CareStatuses));
+            RefreshSidebar();
+        }
+
+        /// <summary>
+        /// The periodic refresh. Only time has passed, so only what depends on the current
+        /// day is re-read. The cards keep their objects, and the sidebar is rebuilt only
+        /// once a plant shows a different state, since a screen reader announces every
+        /// rebuilt element again.
+        /// </summary>
+        private void RefreshDueStatus()
+        {
+            foreach (var card in _careStatuses)
+            {
+                card.NotifyDueStatusChanged();
+            }
+
+            if (HasAnyPlantStatusChanged())
+            {
+                RefreshSidebar();
+            }
+        }
+
+        // Rebuilding the view re-runs PlantStatusDotConverter and PlantAccessibleNameConverter
+        // for every entry, so the remembered states are the ones on screen afterwards.
+        private void RefreshSidebar()
+        {
+            RememberPlantStatus();
             CollectionViewSource.GetDefaultView(Plants).Refresh();
+        }
+
+        private void RememberPlantStatus()
+        {
+            _shownPlantStatus.Clear();
+
+            foreach (var plant in Plants)
+            {
+                _shownPlantStatus[plant.Id] = PlantStatusRules.For(plant, Now);
+            }
+        }
+
+        private bool HasAnyPlantStatusChanged()
+        {
+            return Plants.Count != _shownPlantStatus.Count
+                || Plants.Any(plant => !_shownPlantStatus.TryGetValue(plant.Id, out var shown)
+                    || shown != PlantStatusRules.For(plant, Now));
         }
 
         /// <summary>

@@ -40,5 +40,17 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         /// due date and stays false.
         /// </summary>
         public virtual bool IsOverdue => false;
+
+        /// <summary>
+        /// Re-reads everything that depends on the current day without replacing the card.
+        /// A new card would make the UI build a new element, which a screen reader
+        /// announces again (see MainViewModel.RefreshDueStatus).
+        /// </summary>
+        public virtual void NotifyDueStatusChanged()
+        {
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(SpokenStatusText));
+            OnPropertyChanged(nameof(IsOverdue));
+        }
     }
 }
