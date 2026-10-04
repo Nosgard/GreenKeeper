@@ -229,6 +229,19 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public void SummaryStep_GivenSunlight_WritesItOutForScreenReaders()
+        {
+            // Given: a wizard on the summary step with 6 hours of sunlight per day
+            var wizard = WizardAtSummary(sunlightHours: "6");
+
+            // When: the sunlight line is read the way a screen reader announces it
+            var spoken = ((SummaryStepViewModel)wizard.CurrentStep).SpokenSunlight;
+
+            // Then: "6 Hours / Day" is written out, the same way the sunlight card says it
+            Assert.Equal("Sunlight: 6 hours per day", spoken);
+        }
+
+        [Fact]
         public void SummaryStep_GivenValueChangedAfterGoingBack_ShowsTheNewValue()
         {
             // Given: a wizard that went back from the summary to the sunlight step and changed the hours

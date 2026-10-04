@@ -24,18 +24,54 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="CareIcon" TargetType="Image">
+    <!-- The icon only repeats the card's title, so it is drawn as a shape, which a
+         screen reader skips. -->
+    <Style x:Key="CareIcon" TargetType="Rectangle">
         <Style.Triggers>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Watering}">
-                <Setter Property="Source" Value="/Resources/Icons/Waterdrop.png" />
+                <Setter Property="Fill">
+                    <Setter.Value>
+                        <ImageBrush ImageSource="/Resources/Icons/Waterdrop.png" Stretch="Uniform" />
+                    </Setter.Value>
+                </Setter>
             </DataTrigger>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Fertilizing}">
-                <Setter Property="Source" Value="/Resources/Icons/Pill.png" />
+                <Setter Property="Fill">
+                    <Setter.Value>
+                        <ImageBrush ImageSource="/Resources/Icons/Pill.png" Stretch="Uniform" />
+                    </Setter.Value>
+                </Setter>
             </DataTrigger>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Sunlight}">
-                <Setter Property="Source" Value="/Resources/Icons/Sun.png" />
+                <Setter Property="Fill">
+                    <Setter.Value>
+                        <ImageBrush ImageSource="/Resources/Icons/Sun.png" Stretch="Uniform" />
+                    </Setter.Value>
+                </Setter>
             </DataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- Container of a card in the list: a screen reader names the card by its title
+         rather than by the type of its ViewModel -->
+    <Style x:Key="CareStatusCardContainer" TargetType="ContentPresenter">
+        <Setter Property="AutomationProperties.Name" Value="{Binding Title}" />
+    </Style>
+
+    <!-- Buttons of a card. A screen reader names each one with its card ("Complete
+         Watering"), since every card has an "Edit", and hears the status of the card,
+         which otherwise comes before the button only when the whole card is read. -->
+    <Style x:Key="CareStatusCardButton" TargetType="Button" BasedOn="{StaticResource StatusCardActionButton}">
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="AutomationProperties.Name">
+            <Setter.Value>
+                <MultiBinding StringFormat="{}{0} {1}">
+                    <Binding Path="Content" RelativeSource="{RelativeSource Self}" />
+                    <Binding Path="Title" />
+                </MultiBinding>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="AutomationProperties.HelpText" Value="{Binding SpokenStatusText}" />
     </Style>
 
     <DataTemplate x:Key="CareStatusCardTemplate">
@@ -55,7 +91,7 @@
 
                 <!-- Icon box -->
                 <Border Grid.Column="0" Style="{StaticResource CareIconBox}">
-                    <Image Style="{StaticResource CareIcon}" />
+                    <Rectangle Style="{StaticResource CareIcon}" />
                 </Border>
 
                 <!-- Subtitle container; its margin keeps the text off the buttons
@@ -65,6 +101,7 @@
                             VerticalAlignment="Center"
                             Margin="0, 0, 8, 0">
                     <TextBlock Text="{Binding Title}"
+                       AutomationProperties.HeadingLevel="Level4"
                        Foreground="{DynamicResource PrimaryText}"
                        FontSize="16"
                        FontWeight="SemiBold" />
@@ -73,6 +110,7 @@
                          Foreground belongs in the style, not on the element: a
                          local value would outrank the trigger below. -->
                     <TextBlock Text="{Binding StatusText}"
+                       AutomationProperties.Name="{Binding SpokenStatusText}"
                        FontSize="14"
                        TextWrapping="Wrap">
                         <TextBlock.Style>
@@ -102,15 +140,13 @@
     <!-- Button set: Watering -->
     <DataTemplate DataType="{x:Type active:WateringStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Complete"
-                    Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding CompleteCommand}"
                     IsEnabled="{Binding IsCompletable}"/>
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Edit"
-                    Padding="10"
                     Command="{Binding EditCommand}" />
         </StackPanel>
     </DataTemplate>
@@ -118,20 +154,17 @@
     <!-- Button set: Fertilizing -->
     <DataTemplate DataType="{x:Type active:FertilizingStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Complete"
-                    Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding CompleteCommand}"
                     IsEnabled="{Binding IsCompletable}" />
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Edit"
-                    Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Remove"
-                    Padding="10"
                     Command="{Binding RemoveCommand}"/>
         </StackPanel>
     </DataTemplate>
@@ -139,14 +172,12 @@
     <!-- Button set: Sunlight -->
     <DataTemplate DataType="{x:Type passive:SunlightStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Edit"
-                    Padding="10"
                     Margin="0, 0, 6, 0"
                     Command="{Binding EditCommand}" />
-            <Button Style="{StaticResource StatusCardActionButton}"
+            <Button Style="{StaticResource CareStatusCardButton}"
                     Content="Remove"
-                    Padding="10"
                     Command="{Binding RemoveCommand}"/>
         </StackPanel>
     </DataTemplate>

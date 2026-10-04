@@ -12,6 +12,7 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Margin" Value="0, 0, 0, 12" />
         <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="AutomationProperties.HeadingLevel" Value="Level1" />
     </Style>
 
     <!-- Hint below an input field, e.g. the limit or the remaining characters -->
@@ -32,22 +33,33 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- The field of an amount input. Its heading lies outside the input templates
+         below, so the hosting ContentControl carries the field's name and whether it is
+         required as AutomationProperties, and the field takes them over. -->
+    <Style x:Key="AmountTextBox" TargetType="TextBox" BasedOn="{StaticResource ThemedTextBox}">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="AutomationProperties.Name" Value="{Binding (AutomationProperties.Name), RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+        <Setter Property="AutomationProperties.IsRequiredForForm" Value="{Binding (AutomationProperties.IsRequiredForForm), RelativeSource={RelativeSource AncestorType=ContentControl}}" />
+    </Style>
+
     <!-- Save / Cancel / Next / Back and the dashboard buttons -->
     <Style x:Key="DialogButton" TargetType="Button" BasedOn="{StaticResource MediumButton}">
         <Setter Property="Padding" Value="10" />
     </Style>
 
     <!-- Amount and time unit, bound to an AmountAndUnitInputViewModel. The field takes
-         no more characters than fit into it, so its content stays visible. -->
+         a whole number with no more digits than fit into it, so its content stays
+         visible. The hint below the field is its description. -->
     <DataTemplate x:Key="AmountAndUnitInput">
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBox Style="{StaticResource ThemedTextBox}"
+                <TextBox Style="{StaticResource AmountTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
                          views:WholeNumberInput.MaxDigits="{x:Static base:AmountAndUnitInputViewModel.MaxAmountLength}"
-                         Width="80" />
+                         AutomationProperties.HelpText="{Binding Text, ElementName=limitHint}" />
 
                 <ComboBox Style="{StaticResource ThemedComboBox}"
+                          AutomationProperties.Name="Time unit"
                           ItemsSource="{x:Static base:AmountAndUnitInputViewModel.AvailableUnits}"
                           SelectedValuePath="Key"
                           SelectedValue="{Binding SelectedUnit}"
@@ -56,28 +68,37 @@
                           Padding="8" />
             </StackPanel>
 
-            <TextBlock Style="{StaticResource InputHint}"
+            <TextBlock x:Name="limitHint"
+                       Style="{StaticResource InputHint}"
                        Text="{Binding MaxAmount, StringFormat='max. {0}'}" />
         </StackPanel>
     </DataTemplate>
 
     <!-- Hours and period, bound to a HoursPerPeriodInputViewModel. The field is limited
-         the same way. -->
+         and named the same way; its description adds the unit next to it. -->
     <DataTemplate x:Key="HoursPerPeriodInput">
         <StackPanel>
             <StackPanel Orientation="Horizontal">
-                <TextBox Style="{StaticResource ThemedTextBox}"
+                <TextBox Style="{StaticResource AmountTextBox}"
                          Text="{Binding AmountText, UpdateSourceTrigger=PropertyChanged}"
-                         views:WholeNumberInput.MaxDigits="{x:Static base:HoursPerPeriodInputViewModel.MaxAmountLength}"
-                         Width="80" />
+                         views:WholeNumberInput.MaxDigits="{x:Static base:HoursPerPeriodInputViewModel.MaxAmountLength}">
+                    <AutomationProperties.HelpText>
+                        <MultiBinding StringFormat="{}{0}, {1}">
+                            <Binding Path="Text" ElementName="unitLabel" />
+                            <Binding Path="Text" ElementName="limitHint" />
+                        </MultiBinding>
+                    </AutomationProperties.HelpText>
+                </TextBox>
 
-                <TextBlock Text="Hours"
+                <TextBlock x:Name="unitLabel"
+                           Text="Hours"
                            Foreground="{DynamicResource SecondaryText}"
                            FontSize="14"
                            VerticalAlignment="Center"
                            Margin="8, 0, 0, 0" />
 
                 <ComboBox Style="{StaticResource ThemedComboBox}"
+                          AutomationProperties.Name="Period"
                           ItemsSource="{x:Static base:HoursPerPeriodInputViewModel.AvailablePeriods}"
                           SelectedValuePath="Key"
                           SelectedValue="{Binding SelectedPeriod}"
@@ -86,7 +107,8 @@
                           Padding="8" />
             </StackPanel>
 
-            <TextBlock Style="{StaticResource InputHint}"
+            <TextBlock x:Name="limitHint"
+                       Style="{StaticResource InputHint}"
                        Text="{Binding MaxAmount, StringFormat='max. {0}'}" />
         </StackPanel>
     </DataTemplate>

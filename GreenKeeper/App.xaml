@@ -23,6 +23,7 @@
             <BitmapImage x:Key="AppIcon" UriSource="/Resources/AppIcon.ico" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:PlantStatusDotConverter x:Key="PlantStatusDotConverter" />
+            <converters:PlantAccessibleNameConverter x:Key="PlantAccessibleNameConverter" />
             <converters:ThemeToggleIconConverter x:Key="ThemeToggleIconConverter" />
         </ResourceDictionary>
     </Application.Resources>

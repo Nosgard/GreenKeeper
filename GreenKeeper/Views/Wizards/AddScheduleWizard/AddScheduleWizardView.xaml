@@ -17,10 +17,12 @@
         <!-- Step 1: Selection of CareType -->
         <DataTemplate DataType="{x:Type steps:CareTypeSelectionStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="What would you like to add?" />
 
                 <ComboBox Style="{StaticResource ThemedComboBox}"
+                          AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
                           ItemsSource="{x:Static steps:CareTypeSelectionStepViewModel.AvailableCareTypes}"
                           SelectedValuePath="Key"
                           SelectedValue="{Binding SelectedCareType}"
@@ -33,11 +35,14 @@
         <!-- Step 2 (Watering/Fertilizing): Value + Time Unit -->
         <DataTemplate DataType="{x:Type activeSteps:ScheduleActiveStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="{Binding Title, StringFormat='Enter the period for {0}'}" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
@@ -45,11 +50,14 @@
         <!-- Step 2 (Sunlight): Hours + Period -->
         <DataTemplate DataType="{x:Type passiveSteps:ScheduleSunlightStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Enter the amount of sunlight" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource HoursPerPeriodInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>

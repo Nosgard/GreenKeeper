@@ -23,5 +23,21 @@ namespace GreenKeeper.Tests.ViewModels
             // Then: it names the hours and the period they refer to
             Assert.Equal(expected, statusText);
         }
+
+        [Theory]
+        [InlineData(6, SunlightPeriod.Day, "6 hours per day")]
+        [InlineData(1, SunlightPeriod.Week, "1 hour per week")]
+        public void SpokenStatusText_GivenHoursAndPeriod_WritesOutWhatTheShortFormMeans(int hours, SunlightPeriod period, string expected)
+        {
+            // Given: a sunlight card whose short status reads like "6h / day"
+            var requirement = new SunlightRequirement { Hours = hours, Period = period };
+            var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => Task.CompletedTask);
+
+            // When: the text a screen reader announces is read
+            var spokenText = card.SpokenStatusText;
+
+            // Then: "h" and "/" are written out, so it is not read as "6 h slash day"
+            Assert.Equal(expected, spokenText);
+        }
     }
 }

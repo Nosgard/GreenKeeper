@@ -4,6 +4,9 @@
 
     <!-- ComboBox Item -->
     <Style x:Key="ThemedComboBoxItem" TargetType="ComboBoxItem">
+        <!-- Every option list is a list of KeyValuePairs: without this, a screen reader
+             would read an entry as "[Days, Days]" instead of the text it shows -->
+        <Setter Property="AutomationProperties.Name" Value="{Binding Value}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Padding" Value="8, 6" />
@@ -40,6 +43,8 @@
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="8, 6" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource ThemedComboBoxItem}" />
+        <!-- Typing a letter selects the option that starts with it, matched against the shown text -->
+        <Setter Property="TextSearch.TextPath" Value="Value" />
         <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior in WPF -->
         <Setter Property="ItemTemplate">
             <Setter.Value>

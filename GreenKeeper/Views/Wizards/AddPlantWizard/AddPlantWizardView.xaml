@@ -20,15 +20,21 @@
         <!-- Plant Name Step -->
         <DataTemplate DataType="{x:Type steps:PlantNameStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Enter a name for the plant" />
 
+                <!-- Named by the heading, described by the counter below it -->
                 <TextBox Style="{StaticResource ThemedTextBox}"
                          Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}"
                          MaxLength="{x:Static models:Plant.MaxNameLength}"
-                         TextWrapping="Wrap" />
+                         TextWrapping="Wrap"
+                         AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                         AutomationProperties.HelpText="{Binding Text, ElementName=CounterHint}"
+                         AutomationProperties.IsRequiredForForm="True" />
 
-                <TextBlock Style="{StaticResource InputHint}"
+                <TextBlock x:Name="CounterHint"
+                           Style="{StaticResource InputHint}"
                            Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />
             </StackPanel>
         </DataTemplate>
@@ -36,11 +42,14 @@
         <!-- Watering Step -->
         <DataTemplate DataType="{x:Type activeSteps:WateringStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="* Enter the period for watering" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
@@ -48,11 +57,13 @@
         <!-- Fertilizing Step -->
         <DataTemplate DataType="{x:Type activeSteps:FertilizingStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Enter the period for fertilizing (optional)" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
@@ -60,11 +71,13 @@
         <!-- Sunlight Step -->
         <DataTemplate DataType="{x:Type passiveSteps:SunlightStepViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Enter the amount of sunlight (optional)" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource HoursPerPeriodInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
@@ -97,6 +110,7 @@
 
                 <!-- Sunlight Line -->
                 <TextBlock Text="{Binding Sunlight, StringFormat='Sunlight: {0}'}"
+                           AutomationProperties.Name="{Binding SpokenSunlight}"
                            Foreground="{DynamicResource SecondaryText}"
                            FontSize="14"
                            Margin="0, 0, 0, 6"

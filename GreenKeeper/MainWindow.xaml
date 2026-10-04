@@ -46,16 +46,21 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Grid.Column="0"
-                       Source="/Resources/AppIcon.png"
-                       Width="32"
-                       Height="32"
-                       Stretch="Uniform"
-                       VerticalAlignment="Center"
-                       Margin="0, 4, 0, 0"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <!-- The logo only decorates the title next to it, so it is drawn as a shape,
+                     which has no automation element and is skipped by a screen reader. -->
+                <Rectangle Grid.Column="0"
+                           Width="32"
+                           Height="32"
+                           VerticalAlignment="Center"
+                           Margin="0, 4, 0, 0"
+                           RenderOptions.BitmapScalingMode="HighQuality">
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="/Resources/AppIcon.png" Stretch="Uniform" />
+                    </Rectangle.Fill>
+                </Rectangle>
 
                 <TextBlock Grid.Column="1"
+                           AutomationProperties.HeadingLevel="Level1"
                            Text="GreenKeeper"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
@@ -108,6 +113,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="1"
                              x:Name="SearchTextBox"
+                             AutomationProperties.Name="Search plants"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
@@ -143,6 +149,7 @@
 
             <!-- List of plants -->
             <ListView Grid.Row="2"
+                      AutomationProperties.Name="Plants"
                       Background="Transparent"
                       BorderThickness="0"
                       Margin="6, 0, 6, 0"
@@ -151,8 +158,32 @@
                       ItemsSource="{Binding Plants}"
                       SelectedItem="{Binding SelectedPlant, Mode=TwoWay}"
                       SelectionChanged="PlantList_SelectionChanged">
+                <ListView.Resources>
+                    <!-- Context menu of a plant entry. It sits on the entry rather than on its
+                         content, so the keyboard opens it too (menu key, Shift+F10): WPF looks for a
+                         context menu on the focused element and its ancestors. One menu per entry,
+                         so it is not shared. -->
+                    <ContextMenu x:Key="PlantContextMenu"
+                                 x:Shared="False"
+                                 Style="{StaticResource ThemedContextMenu}">
+                        <MenuItem Header="Rename..."
+                                  Style="{StaticResource ThemedMenuItem}"
+                                  Command="{Binding PlacementTarget.Tag.RenamePlantCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding}" />
+                    </ContextMenu>
+                </ListView.Resources>
+
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        <!-- A screen reader announces the entry by its name and the state of its
+                             status dot: "Aloe Vera, overdue". AccessibleName instead of
+                             AutomationProperties.Name, because the state changes while the entry is
+                             in use and WPF would not report that. -->
+                        <Setter Property="views:AccessibleName.Text" Value="{Binding Converter={StaticResource PlantAccessibleNameConverter}}" />
+                        <!-- The context menu opens in a popup outside the window's tree: it
+                             reaches the window's ViewModel through PlacementTarget.Tag -->
+                        <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        <Setter Property="ContextMenu" Value="{StaticResource PlantContextMenu}" />
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="Padding" Value="0" />
@@ -184,31 +215,24 @@
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Context menu for the right click on a plant entry -->
-                            <Grid.ContextMenu>
-                                <ContextMenu Style="{StaticResource ThemedContextMenu}">
-                                    <MenuItem Header="Rename..."
-                                              Style="{StaticResource ThemedMenuItem}"
-                                              Command="{Binding PlacementTarget.Tag.RenamePlantCommand,
-                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding}" />
-                                </ContextMenu>
-                            </Grid.ContextMenu>
-
-                            <Image Grid.Column="0"
-                                   Source="{Binding Converter={StaticResource PlantStatusDotConverter}}"
-                                   Width="20"
-                                   Height="20"
-                                   Stretch="Uniform"
-                                   VerticalAlignment="Center"
-                                   Margin="0, 0, 4, 0"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <!-- Status dot. Its state is part of the entry's name, so a
+                                 screen reader skips the dot itself. -->
+                            <Rectangle Grid.Column="0"
+                                       Width="20"
+                                       Height="20"
+                                       VerticalAlignment="Center"
+                                       Margin="0, 0, 4, 0"
+                                       RenderOptions.BitmapScalingMode="HighQuality">
+                                <Rectangle.Fill>
+                                    <ImageBrush ImageSource="{Binding Converter={StaticResource PlantStatusDotConverter}}" Stretch="Uniform" />
+                                </Rectangle.Fill>
+                            </Rectangle>
 
                             <TextBlock Grid.Column="1"
                        Text="{Binding Name}"
@@ -228,6 +252,7 @@
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
                     Content="+  Add Plant"
+                    AutomationProperties.Name="Add Plant"
                     Command="{Binding AddPlantCommand}"/>
         </Grid>
 
@@ -251,6 +276,7 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0"
+                           AutomationProperties.HeadingLevel="Level2"
                            VerticalAlignment="Top"
                            Text="{Binding SelectedPlant.Name}"
                            Foreground="{DynamicResource PrimaryText}"
@@ -265,11 +291,13 @@
                             HorizontalAlignment="Right">
                     <Button Style="{StaticResource DialogButton}"
                             Content="+  Add Schedule"
+                            AutomationProperties.Name="Add Schedule"
                             Command="{Binding AddScheduleCommand}" />
 
                     <Button Style="{StaticResource DialogButton}"
                             Margin="10, 0, 0, 0"
                             Content="-  Delete Plant"
+                            AutomationProperties.Name="Delete Plant"
                             Command="{Binding DeletePlantCommand}" />
                 </StackPanel>
             </Grid>
@@ -283,7 +311,9 @@
                           Focusable="False">
                 <StackPanel Margin="16, 0, 16, 12"
                             MaxWidth="{StaticResource ContentMaxWidth}">
-                    <TextBlock Text="Status"
+                    <TextBlock x:Name="StatusHeading"
+                               AutomationProperties.HeadingLevel="Level3"
+                               Text="Status"
                                Foreground="{DynamicResource PrimaryText}"
                                FontSize="24"
                                FontWeight="SemiBold"
@@ -292,6 +322,8 @@
                     <!-- Status Cards (Watering, Fertilizing, Sunlight) -->
                     <ItemsControl ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}"
+                                  ItemContainerStyle="{StaticResource CareStatusCardContainer}"
+                                  AutomationProperties.Name="{Binding Text, ElementName=StatusHeading}"
                                   Focusable="False" />
                 </StackPanel>
             </ScrollViewer>
@@ -340,13 +372,15 @@
                         VerticalAlignment="Bottom"
                         Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="DEBUG: Simulate"
+                        <TextBlock x:Name="SimulateLabel"
+                                   Text="DEBUG: Simulate"
                                    Foreground="{DynamicResource DangerForeground}"
                                    FontSize="12"
                                    VerticalAlignment="Center"
                                    Margin="0, 0, 8, 0" />
 
                         <TextBox Style="{StaticResource ThemedTextBox}"
+                                 AutomationProperties.Name="{Binding Text, ElementName=SimulateLabel}"
                                  Text="{Binding TimeSimulation.AmountText, UpdateSourceTrigger=PropertyChanged}"
                                  Width="40"
                                  Padding="4"
@@ -354,6 +388,7 @@
                                  VerticalAlignment="Center" />
 
                         <ComboBox Style="{StaticResource ThemedComboBox}"
+                                  AutomationProperties.Name="Time unit"
                                   ItemsSource="{Binding TimeSimulation.AvailableUnits}"
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding TimeSimulation.Unit}"

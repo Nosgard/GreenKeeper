@@ -15,11 +15,14 @@
         <!-- Watering / Fertilizing -->
         <DataTemplate DataType="{x:Type editSchedule:EditActiveScheduleViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="{Binding Title, StringFormat='Edit period for {0}'}" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
 
                 <TextBlock Text="{Binding PreviewText}"
@@ -32,11 +35,14 @@
         <!-- Sunlight -->
         <DataTemplate DataType="{x:Type editSchedule:EditSunlightViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Edit sunlight requirement" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource HoursPerPeriodInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
