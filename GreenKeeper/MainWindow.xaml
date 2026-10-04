@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
+        xmlns:views="clr-namespace:GreenKeeper.Views"
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
         Title="GreenKeeper"
@@ -62,9 +63,14 @@
                            VerticalAlignment="Center"
                            Margin="4, 0, 0, 0" />
 
-                <!-- Theme toggle button -->
+                <!-- Theme toggle. It shows only an icon, so its label is the name a screen
+                     reader announces and the text of its tooltip. AccessibleName instead of
+                     AutomationProperties.Name, because the label changes with every click and
+                     WPF would not report that. -->
                 <Button Grid.Column="2"
                         Style="{StaticResource IconButton}"
+                        views:AccessibleName.Text="{Binding Theme.ToggleLabel}"
+                        ToolTip="{Binding Theme.ToggleLabel}"
                         VerticalAlignment="Center"
                         Width="32"
                         Height="32"

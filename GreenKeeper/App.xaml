@@ -9,6 +9,7 @@
                 <!-- Order matters: a dictionary can only use the StaticResources of those merged above it -->
                 <ResourceDictionary Source="/Resources/Styles/Themes/BrightTheme.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/Layout.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/FocusStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />

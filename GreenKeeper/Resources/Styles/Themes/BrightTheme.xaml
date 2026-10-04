@@ -10,6 +10,10 @@
     <SolidColorBrush x:Key="SelectedBackground" Color="#B9BCC1" />
     <SolidColorBrush x:Key="SelectedBorder" Color="#777A7F" />
 
+    <!-- Keyboard focus: the ring around the control Tab has reached, in the color of
+         the primary text, the strongest contrast to every background of the theme. -->
+    <SolidColorBrush x:Key="FocusBorder" Color="#1C1E22" />
+
     <!-- Buttons -->
     <SolidColorBrush x:Key="ButtonHoverBackground" Color="#D0D2D6" />
     <SolidColorBrush x:Key="ButtonPressedBackground" Color="#BEC1C6" />

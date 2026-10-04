@@ -32,6 +32,13 @@ namespace GreenKeeper.ViewModels.Themes
         /// </summary>
         public bool IsDarkTheme => _themeService.CurrentTheme == Theme.Dark;
 
+        /// <summary>
+        /// What a click on the toggle does, in words, since the button shows only an icon.
+        /// A screen reader announces the button by it, and the tooltip shows it. Like the
+        /// icon, it names the theme the click switches to.
+        /// </summary>
+        public string ToggleLabel => IsDarkTheme ? "Switch to light theme" : "Switch to dark theme";
+
         private void Toggle()
         {
             var newTheme = IsDarkTheme ? Theme.Bright : Theme.Dark;
@@ -46,6 +53,7 @@ namespace GreenKeeper.ViewModels.Themes
             _settingsService.Save(settings);
 
             OnPropertyChanged(nameof(IsDarkTheme));
+            OnPropertyChanged(nameof(ToggleLabel));
         }
     }
 }
