@@ -84,6 +84,26 @@ namespace GreenKeeper.ViewModels
             }
         }
 
+        // -- Announcements Section --
+
+        /// <summary>
+        /// What an action did, in a short sentence. Sighted users see the result on screen;
+        /// MainWindow hands this text to a screen reader, which stays silent otherwise
+        /// because the focus does not move.
+        /// </summary>
+        public event EventHandler<string>? Announced;
+
+        private void Announce(string text)
+        {
+            Announced?.Invoke(this, text);
+        }
+
+        // What the card of the care type reads at this moment, the way a screen reader says it.
+        private string SpokenStatusOf(CareType careType)
+        {
+            return CareStatuses.First(card => card.Care == careType).SpokenStatusText;
+        }
+
         // -- Plant List Section --
 
         // All available plants for the ListView.
@@ -127,6 +147,8 @@ namespace GreenKeeper.ViewModels
 
                     // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText.
                     CollectionViewSource.GetDefaultView(Plants).Refresh();
+
+                    AnnounceSearchResult();
                 }
             }
         }
@@ -153,6 +175,26 @@ namespace GreenKeeper.ViewModels
             }
 
             return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // The list changes while the focus stays in the search box, so a screen reader
+        // hears how many plants match.
+        private void AnnounceSearchResult()
+        {
+            // An emptied search brings back the full list; nothing to report.
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                return;
+            }
+
+            int matchCount = Plants.Count(FilterPlants);
+
+            Announce(matchCount switch
+            {
+                0 => "No plants found",
+                1 => "1 plant found",
+                _ => $"{matchCount} plants found"
+            });
         }
 
         // -- Care Status Section --
@@ -243,8 +285,8 @@ namespace GreenKeeper.ViewModels
         /// OnPropertyChanged: updates the dashboard's status cards for the currently selected plant.
         ///
         /// CollectionViewSource: forces the sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
-        /// for each plant's status dot - without this, the dot would only ever update by coincidence (e.g. when the ListView happens
-        /// to redraw for an unrelated reason).
+        /// and PlantAccessibleNameConverter for each plant's status dot and spoken name - without this, both would only ever update
+        /// by coincidence (e.g. when the ListView happens to redraw for an unrelated reason).
         /// </summary>
         public void RefreshCareStatuses()
         {
@@ -323,6 +365,8 @@ namespace GreenKeeper.ViewModels
 
             var savedPlant = await _plantRepository.AddPlantAsync(plant);
             Plants.Add(savedPlant);
+
+            Announce($"{savedPlant.Name} added");
         }
 
         /// <summary>
@@ -346,6 +390,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.CareSchedules.Add(saved);
 
             RefreshCareStatuses();
+            Announce($"{saved.Care.DisplayName()} schedule saved. {SpokenStatusOf(saved.Care)}");
         }
 
         /// <summary>
@@ -363,6 +408,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.SunlightRequirement = saved;
 
             RefreshCareStatuses();
+            Announce($"Sunlight requirement saved. {SpokenStatusOf(CareType.Sunlight)}");
         }
 
         /// <summary>
@@ -395,6 +441,8 @@ namespace GreenKeeper.ViewModels
             // The dashboard header binds to SelectedPlant.Name, so it needs an
             // explicit nudge as well if the renamed plant happens to be selected.
             OnPropertyChanged(nameof(SelectedPlant));
+
+            Announce($"Renamed to {newName}");
         }
 
         // -- Card and Button Actions Section --
@@ -436,6 +484,8 @@ namespace GreenKeeper.ViewModels
             // After removing a plant, there is no "selected" plant.
             // Prevent the dashboard from presenting non-existent data.
             SelectedPlant = null;
+
+            Announce($"{plant.Name} deleted");
         }
 
         /// <summary>
@@ -472,6 +522,7 @@ namespace GreenKeeper.ViewModels
             schedule.LastCaredAt = now;
 
             RefreshCareStatuses();
+            Announce($"{careType.DisplayName()} completed. {SpokenStatusOf(careType)}");
         }
 
         // Removes an optional care schedule (Fertilizing) from the selected plant once the user has confirmed.
@@ -509,6 +560,7 @@ namespace GreenKeeper.ViewModels
             // CareStatuses has no backing field and reads from the selected plant, so the
             // refresh is enough to let the removed status card disappear from the ItemsControl.
             RefreshCareStatuses();
+            Announce($"{careType.DisplayName()} schedule removed");
         }
 
         // Removes the sunlight requirement from the selected plant once the user has confirmed.
@@ -542,6 +594,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.SunlightRequirement = null;
 
             RefreshCareStatuses();
+            Announce("Sunlight requirement removed");
         }
 
         // Runs a repository call and turns a failure into an error dialog. Returns whether it succeeded,

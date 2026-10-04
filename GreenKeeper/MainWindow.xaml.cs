@@ -3,6 +3,7 @@ using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels;
+using GreenKeeper.Views;
 using GreenKeeper.Views.CareStatuses.EditOption;
 using GreenKeeper.Views.Notes;
 using GreenKeeper.Views.RenamePlant;
@@ -47,6 +48,9 @@ namespace GreenKeeper
             InitializeComponent();
             InitializeResponsiveSize();
             RestorePlacement();
+
+            FocusKeeper.Attach(this, PlantList, CareStatusList);
+            _mainViewModel.Announced += MainViewModel_Announced;
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
             _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
@@ -141,6 +145,14 @@ namespace GreenKeeper
             };
 
             _settingsService.Save(settings);
+        }
+
+        // -- Screen Reader Section --
+
+        // Said once the focus is back in place (see FocusKeeper).
+        private void MainViewModel_Announced(object? sender, string text)
+        {
+            Announcer.AnnounceAfterFocusSettles(this, text);
         }
 
         // -- Dashboard Section --

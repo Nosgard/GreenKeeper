@@ -24,6 +24,16 @@ namespace GreenKeeper.Views.Notes
             _notesViewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
             Attach(_notesViewModel);
             Closing += NotesView_Closing;
+            _notesViewModel.Saved += NotesViewModel_Saved;
+        }
+
+        // Save disables itself once the notes are saved, and the focus on it would fall
+        // back to the window. The focus goes back to the notes instead, and a screen
+        // reader hears the result.
+        private void NotesViewModel_Saved(object? sender, EventArgs e)
+        {
+            NotesBox.Focus();
+            Announcer.AnnounceAfterFocusSettles(NotesBox, "Notes saved");
         }
 
         protected override void CloseWithResult(bool dialogResult)

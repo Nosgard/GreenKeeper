@@ -23,11 +23,13 @@
     </Style>
 
     <!-- The limit below an amount field. Once the amount exceeds it, it turns into
-         the reason ("Too large, max. 365") in the overdue color. -->
+         the reason ("Too large, max. 365") in the overdue color, and a screen reader
+         hears it right then, while the focus stays in the field. -->
     <Style x:Key="AmountLimitHint" TargetType="TextBlock" BasedOn="{StaticResource InputHint}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsAmountTooLarge}" Value="True">
                 <Setter Property="Foreground" Value="{DynamicResource OverdueText}" />
+                <Setter Property="views:Announcer.Message" Value="{Binding AmountHint}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

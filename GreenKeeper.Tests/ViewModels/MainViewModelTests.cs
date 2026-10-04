@@ -1402,7 +1402,207 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", selectedPlant.Name);
         }
 
+        // -- Announcement Tests --
+        // What a screen reader says after an action: the result is otherwise only visible.
+
+        [Fact]
+        public async Task WateringCard_CompleteCommand_GivenValidSchedule_AnnouncesTheCareAndItsNewStatus()
+        {
+            // Given: a selected plant with an overdue watering, and a listener for announcements
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(-1))));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the watering is completed
+            viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.Execute(null);
+
+            // Then: the announcement names the care and what its card reads now
+            Assert.Equal(new[] { "Watering completed. Due in 1 week" }, announcements);
+        }
+
+        [Fact]
+        public async Task WateringCard_CompleteCommand_GivenRepositoryThrows_AnnouncesNothing()
+        {
+            // Given: a repository that fails to store the completion
+            var plantRepository = new FakePlantRepository { ShouldThrowOnCompleteCareSchedule = true };
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7, nextDueAt: Now.AddDays(-1))));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the watering is completed
+            viewModel.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.Execute(null);
+
+            // Then: no announcement; the error dialog already says what happened
+            Assert.Empty(announcements);
+        }
+
+        [Theory]
+        [InlineData(true, new[] { "Fertilizing schedule removed" })]
+        [InlineData(false, new string[0])]
+        public async Task FertilizingCard_RemoveCommand_GivenUsersAnswer_AnnouncesOnlyAConfirmedRemoval(bool isConfirmed, string[] expected)
+        {
+            // Given: a selected plant with a fertilizing schedule, and the user's answer to the question
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7), FertilizingEveryDays(30)));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, new FakeDialogService { ConfirmResult = isConfirmed });
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the fertilizing schedule is removed
+            viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.Execute(null);
+
+            // Then: the removal is announced once it happened, and not when it was declined
+            Assert.Equal(expected, announcements);
+        }
+
+        [Fact]
+        public async Task SunlightCard_RemoveCommand_GivenUserConfirms_AnnouncesTheRemoval()
+        {
+            // Given: a selected plant with a sunlight requirement, and a user who confirms
+            var plantRepository = new FakePlantRepository();
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
+            plantRepository.SeedPlants(plant);
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, new FakeDialogService { ConfirmResult = true });
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the sunlight requirement is removed
+            viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.Execute(null);
+
+            // Then: the removal is announced
+            Assert.Equal(new[] { "Sunlight requirement removed" }, announcements);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceCareScheduleAsync_GivenSelectedPlant_AnnouncesTheScheduleAndItsStatus()
+        {
+            // Given: a selected plant without a fertilizing schedule
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: a fertilizing schedule of 14 days is saved
+            await viewModel.AddOrReplaceCareScheduleAsync(FertilizingEveryDays(14));
+
+            // Then: the announcement names the schedule and what its new card reads
+            Assert.Equal(new[] { "Fertilizing schedule saved. Due in 2 weeks" }, announcements);
+        }
+
+        [Fact]
+        public async Task AddOrReplaceSunlightRequirementAsync_GivenSelectedPlant_AnnouncesTheRequirementInWords()
+        {
+            // Given: a selected plant without a sunlight requirement
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7)));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: a requirement of 6 hours per day is saved
+            await viewModel.AddOrReplaceSunlightRequirementAsync(new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day });
+
+            // Then: the announcement writes the requirement out instead of reading "6h / day"
+            Assert.Equal(new[] { "Sunlight requirement saved. 6 hours per day" }, announcements);
+        }
+
+        [Fact]
+        public async Task AddPlantAsync_GivenNewPlant_AnnouncesItsName()
+        {
+            // Given: an empty plant list, and a listener for announcements
+            var viewModel = await CreateInitializedViewModelAsync(new FakePlantRepository());
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: a plant is added
+            await viewModel.AddPlantAsync(new Plant { Name = "Basil" });
+
+            // Then: the announcement names the new plant
+            Assert.Equal(new[] { "Basil added" }, announcements);
+        }
+
+        [Fact]
+        public async Task RenamePlantAsync_GivenNewName_AnnouncesTheNewName()
+        {
+            // Given: one plant, and a listener for announcements
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera());
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the plant is renamed
+            await viewModel.RenamePlantAsync(viewModel.Plants[0], "Aloe Arborescens");
+
+            // Then: the announcement names the plant by its new name
+            Assert.Equal(new[] { "Renamed to Aloe Arborescens" }, announcements);
+        }
+
+        [Fact]
+        public async Task DeletePlantCommand_GivenUserConfirms_AnnouncesTheDeletedPlant()
+        {
+            // Given: a selected plant, a user who confirms the question, and a listener for announcements
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera());
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, new FakeDialogService { ConfirmResult = true });
+            viewModel.SelectedPlant = viewModel.Plants[0];
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the plant is deleted
+            viewModel.DeletePlantCommand.Execute(null);
+
+            // Then: the announcement names the deleted plant
+            Assert.Equal(new[] { "Aloe Vera deleted" }, announcements);
+        }
+
+        [Theory]
+        [InlineData("LILY", "2 plants found")]
+        [InlineData("bas", "1 plant found")]
+        [InlineData("xyz", "No plants found")]
+        public async Task SearchText_GivenSearchTerm_AnnouncesHowManyPlantsMatch(string searchText, string expected)
+        {
+            // Given: two lilies and a basil
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(PlantNamed("Peace Lily"), PlantNamed("Basil"), PlantNamed("Calla Lily"));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the term is typed into the search box
+            viewModel.SearchText = searchText;
+
+            // Then: the number of results is announced, since the list changes without the focus moving
+            Assert.Equal(new[] { expected }, announcements);
+        }
+
+        [Fact]
+        public async Task SearchText_GivenSearchIsEmptied_AnnouncesNothing()
+        {
+            // Given: an active search, and a listener that starts afterwards
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(PlantNamed("Peace Lily"), PlantNamed("Basil"));
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository);
+            viewModel.SearchText = "bas";
+            var announcements = AnnouncementsOf(viewModel);
+
+            // When: the search box is emptied
+            viewModel.SearchText = string.Empty;
+
+            // Then: the full list is back and needs no announcement
+            Assert.Empty(announcements);
+        }
+
         // -- Helpers --
+
+        // Everything the ViewModel announces from now on, in order.
+        private static List<string> AnnouncementsOf(MainViewModel viewModel)
+        {
+            var announcements = new List<string>();
+            viewModel.Announced += (_, text) => announcements.Add(text);
+            return announcements;
+        }
 
         // Builds a ViewModel on the given fakes; the ones a test does not mention are fresh defaults.
         private static MainViewModel CreateViewModel(

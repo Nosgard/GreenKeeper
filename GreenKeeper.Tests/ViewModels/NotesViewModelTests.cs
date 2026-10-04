@@ -168,6 +168,30 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(new bool?[] { false }, closeResults);
         }
 
+        [Theory]
+        [InlineData(false, 1)]
+        [InlineData(true, 0)]
+        public void SaveCommand_GivenSaveWorksOrFails_SignalsSavedOnlyWhenItWorked(bool callbackThrows, int expectedSignals)
+        {
+            // Given: changed notes, a save that works or fails, and a listener for the signal
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+            Func<string, Task> saveNotesAsync = _ =>
+                callbackThrows ? throw new InvalidOperationException("Simulated save failure") : Task.CompletedTask;
+
+            var viewModel = new NotesViewModel(plant, new FakeDialogService(), saveNotesAsync);
+            viewModel.EditableNotes = "New notes";
+
+            int signals = 0;
+            viewModel.Saved += (_, _) => signals++;
+
+            // When: SaveCommand is executed
+            viewModel.SaveCommand.Execute(null);
+
+            // Then: Saved is raised once after a successful save, never after a failure.
+            // The window stays open, so the disabled Save button would be the only other sign
+            Assert.Equal(expectedSignals, signals);
+        }
+
         [Fact]
         public void SaveCommand_GivenCallbackThrows_ShowsErrorAndKeepsChangesUnsaved()
         {

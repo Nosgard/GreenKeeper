@@ -30,6 +30,7 @@
         <!-- Notes of the plant. Named on its own: the heading above is the plant's
              name rather than a label of the field -->
         <TextBox Grid.Row="1"
+                 x:Name="NotesBox"
                  Style="{StaticResource ThemedTextBox}"
                  AutomationProperties.Name="{Binding PlantName, StringFormat='Notes for {0}'}"
                  Text="{Binding EditableNotes, UpdateSourceTrigger=PropertyChanged}"

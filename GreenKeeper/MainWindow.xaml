@@ -150,6 +150,7 @@
 
             <!-- List of plants -->
             <ListView Grid.Row="2"
+                      x:Name="PlantList"
                       AutomationProperties.Name="Plants"
                       FocusVisualStyle="{StaticResource FocusRing}"
                       Background="Transparent"
@@ -325,7 +326,8 @@
                                Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!-- Status Cards (Watering, Fertilizing, Sunlight) -->
-                    <ItemsControl ItemsSource="{Binding CareStatuses}"
+                    <ItemsControl x:Name="CareStatusList"
+                                  ItemsSource="{Binding CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}"
                                   ItemContainerStyle="{StaticResource CareStatusCardContainer}"
                                   AutomationProperties.Name="{Binding Text, ElementName=StatusHeading}"
