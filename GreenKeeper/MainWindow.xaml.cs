@@ -50,6 +50,7 @@ namespace GreenKeeper
             RestorePlacement();
 
             FocusKeeper.Attach(this, PlantList, CareStatusList);
+            FocusCue.Attach(this);
             _mainViewModel.Announced += MainViewModel_Announced;
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
@@ -71,6 +72,22 @@ namespace GreenKeeper
             Loaded += MainWindow_Loaded;
 
             DataContext = _mainViewModel;
+        }
+
+        // -- Keyboard Section --
+
+        // Tab focuses an entry without choosing it, and the list chooses only with Space
+        // or the arrow keys. Enter opens the entry as users expect; without it the
+        // dashboard would stay empty and its cards out of reach.
+        private void PlantEntry_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter || sender is not ListViewItem entry)
+            {
+                return;
+            }
+
+            entry.IsSelected = true;
+            e.Handled = true;
         }
 
         // -- Responsive Size Section --

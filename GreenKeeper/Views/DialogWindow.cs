@@ -16,6 +16,8 @@ namespace GreenKeeper.Views
     {
         public DialogWindow()
         {
+            FocusCue.Attach(this);
+
             Loaded += (_, _) =>
             {
                 GrowWithContent();

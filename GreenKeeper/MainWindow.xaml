@@ -183,6 +183,7 @@
                              AutomationProperties.Name, because the state changes while the entry is
                              in use and WPF would not report that. -->
                         <Setter Property="views:AccessibleName.Text" Value="{Binding Converter={StaticResource PlantAccessibleNameConverter}}" />
+                        <EventSetter Event="KeyDown" Handler="PlantEntry_KeyDown" />
                         <!-- The context menu opens in a popup outside the window's tree: it
                              reaches the window's ViewModel through PlacementTarget.Tag -->
                         <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
