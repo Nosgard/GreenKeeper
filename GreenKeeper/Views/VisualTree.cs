@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace GreenKeeper.Views
@@ -27,6 +28,16 @@ namespace GreenKeeper.Views
                     yield return below;
                 }
             }
+        }
+
+        // The entry a list shows the item in. A list only builds the entries in view,
+        // so the item is scrolled into view first.
+        public static UIElement? EntryOf(ListBox list, object item)
+        {
+            list.ScrollIntoView(item);
+            list.UpdateLayout();
+
+            return list.ItemContainerGenerator.ContainerFromItem(item) as UIElement;
         }
     }
 }

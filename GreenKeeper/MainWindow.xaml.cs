@@ -51,6 +51,10 @@ namespace GreenKeeper
 
             FocusKeeper.Attach(this, PlantList, CareStatusList);
             FocusCue.Attach(this);
+            FocusRegions.Attach(
+                this,
+                new FocusRegion(Sidebar, start: SidebarStart),
+                new FocusRegion(Dashboard, emptyHint: () => EmptyDashboardHint.Text));
             _mainViewModel.Announced += MainViewModel_Announced;
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
@@ -88,6 +92,15 @@ namespace GreenKeeper
 
             entry.IsSelected = true;
             e.Handled = true;
+        }
+
+        // F6 into the sidebar lands on the chosen plant or the first one, and on the
+        // search box while the list is empty.
+        private UIElement? SidebarStart()
+        {
+            object? plant = PlantList.SelectedItem ?? PlantList.Items.Cast<object>().FirstOrDefault();
+
+            return plant == null ? SearchTextBox : VisualTree.EntryOf(PlantList, plant);
         }
 
         // -- Responsive Size Section --

@@ -130,11 +130,7 @@ namespace GreenKeeper.Views
                 return _plantList;
             }
 
-            // The list only builds the entries in view.
-            _plantList.ScrollIntoView(plant);
-            _plantList.UpdateLayout();
-
-            return _plantList.ItemContainerGenerator.ContainerFromItem(plant) as UIElement ?? _plantList;
+            return VisualTree.EntryOf(_plantList, plant) ?? _plantList;
         }
 
         // The plant whose entry had the focus; without one, the selected or the first plant.

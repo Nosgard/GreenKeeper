@@ -29,8 +29,13 @@
             <ColumnDefinition Width="634*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Sidebar -->
-        <Grid Background="{DynamicResource SidebarBackground}" Grid.Column="0">
+        <!-- Sidebar. F6 and Shift+F6 switch between it and the dashboard (FocusRegions).
+             The name tells a screen reader which of the two it is in. -->
+        <views:RegionGrid x:Name="Sidebar"
+                          AutomationProperties.Name="Sidebar"
+                          AutomationProperties.AcceleratorKey="F6"
+                          Background="{DynamicResource SidebarBackground}"
+                          Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -254,10 +259,13 @@
                     Content="+  Add Plant"
                     AutomationProperties.Name="Add Plant"
                     Command="{Binding AddPlantCommand}"/>
-        </Grid>
+        </views:RegionGrid>
 
         <!-- Dashboard -->
-        <Grid Grid.Column="1">
+        <views:RegionGrid x:Name="Dashboard"
+                          AutomationProperties.Name="Dashboard"
+                          AutomationProperties.AcceleratorKey="F6"
+                          Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="50" />
@@ -332,7 +340,8 @@
             </ScrollViewer>
 
             <!-- Shown while no plant is selected, so the empty dashboard says what to do -->
-            <TextBlock Grid.Row="2"
+            <TextBlock x:Name="EmptyDashboardHint"
+                       Grid.Row="2"
                        Text="Select a plant or add a new one"
                        Foreground="{DynamicResource MutedText}"
                        FontSize="16"
@@ -407,6 +416,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </Grid>
+        </views:RegionGrid>
     </Grid>
 </Window>
