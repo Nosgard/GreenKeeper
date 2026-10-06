@@ -144,9 +144,11 @@ namespace GreenKeeper.ViewModels.Notes
                 return;
             }
 
+            // "No" would discard the changes, so here "Yes" is the safe answer.
             bool shouldSave = _dialogService.Confirm(
                 "There are unsaved changes. Do you want to save?",
-                "Unsaved Changes");
+                "Unsaved Changes",
+                safeAnswer: Answer.Yes);
 
             if (!shouldSave)
             {

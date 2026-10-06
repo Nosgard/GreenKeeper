@@ -1,6 +1,7 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Scheduling;
+using GreenKeeper.Services;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active;
@@ -173,6 +174,21 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(dialogService.ConfirmWasCalled);
             Assert.Null(wizard.Result);
             Assert.False(closeWasRequested);
+        }
+
+        [Fact]
+        public void Finish_GivenExistingSchedule_OffersNoFirst()
+        {
+            // Given: a plant that already has a watering schedule
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var wizard = WizardOnDetailStep(PlantWithWatering(), CareType.Watering, dialogService);
+            ((ScheduleActiveStepViewModel)wizard.CurrentStep).AmountText = "3";
+
+            // When: Finish is executed and the wizard asks whether to replace the schedule
+            wizard.NextCommand.Execute(null);
+
+            // Then: "No" keeps the existing schedule, so it is offered first
+            Assert.Equal(Answer.No, dialogService.OfferedAnswer);
         }
 
         [Fact]

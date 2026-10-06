@@ -53,7 +53,7 @@ namespace GreenKeeper.Views
                 return;
             }
 
-            if (_lastElement != null && !IsUsable(_lastElement))
+            if (_lastElement != null && !FocusStops.IsUsable(_lastElement))
             {
                 // Only once the rebuilt cards and entries exist.
                 _window.Dispatcher.BeginInvoke(DispatcherPriority.Loaded, Restore);
@@ -84,7 +84,10 @@ namespace GreenKeeper.Views
             }
 
             UIElement target = CardButton() ?? PlantEntry();
-            target.Focus();
+
+            // Through FocusStops, so a plant entry the focus lands on is the chosen one:
+            // after a deletion the dashboard would otherwise stay empty below the ring.
+            FocusStops.Focus(target);
         }
 
         // The same button of the same card; if it is gone or disabled, the first button
@@ -113,7 +116,7 @@ namespace GreenKeeper.Views
                 return null;
             }
 
-            var buttons = VisualTree.Descendants<Button>(container).Where(IsUsable).ToList();
+            var buttons = VisualTree.Descendants<Button>(container).Where(FocusStops.IsUsable).ToList();
 
             var sameButton = card.Care == care ? buttons.FirstOrDefault(button => Equals(button.Content, label)) : null;
 
@@ -142,11 +145,6 @@ namespace GreenKeeper.Views
             }
 
             return _plantList.SelectedItem ?? _plantList.Items.Cast<object>().FirstOrDefault();
-        }
-
-        private static bool IsUsable(UIElement element)
-        {
-            return element.IsVisible && element.IsEnabled && PresentationSource.FromVisual(element) != null;
         }
     }
 }

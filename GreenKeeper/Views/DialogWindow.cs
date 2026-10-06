@@ -17,6 +17,7 @@ namespace GreenKeeper.Views
         public DialogWindow()
         {
             FocusCue.Attach(this);
+            ArrowNavigation.Attach(this);
 
             Loaded += (_, _) =>
             {

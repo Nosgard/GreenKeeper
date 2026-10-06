@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models;
+using GreenKeeper.Services;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.Notes;
 
@@ -135,6 +136,22 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(dialogService.ConfirmWasCalled);
             Assert.Equal("New notes", savedText);
             Assert.Equal(true, closeResult);
+        }
+
+        [Fact]
+        public void CancelCommand_GivenModifiedNotes_OffersYesFirst()
+        {
+            // Given: notes that were changed
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var viewModel = new NotesViewModel(plant, dialogService, _ => Task.CompletedTask);
+            viewModel.EditableNotes = "New notes";
+
+            // When: the window is closed and asks "Do you want to save?"
+            viewModel.CancelCommand.Execute(null);
+
+            // Then: "No" would discard the changes here, so "Yes" is offered first
+            Assert.Equal(Answer.Yes, dialogService.OfferedAnswer);
         }
 
         [Fact]

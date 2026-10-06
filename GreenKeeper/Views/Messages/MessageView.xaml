@@ -12,8 +12,8 @@
                     WindowStartupLocation="CenterOwner"
                     ResizeMode="NoResize"
                     AutomationProperties.HelpText="{Binding Message}">
-    <!-- The window itself keeps the focus (Enter answers through the default button), so
-         the message is its description: a screen reader reads it when the window opens. -->
+    <!-- The message is the description of the window and of its buttons, so a screen
+         reader reads it when the window opens with the focus on one of them. -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -34,7 +34,9 @@
 
             <!-- Yes for a question, OK for a notice. A notice has no second button,
                  so Esc acknowledges it as well. -->
-            <Button Content="{Binding ConfirmLabel}"
+            <Button x:Name="ConfirmButton"
+                    Content="{Binding ConfirmLabel}"
+                    AutomationProperties.HelpText="{Binding Message}"
                     IsDefault="True"
                     Command="{Binding ConfirmCommand}">
                 <Button.Style>
@@ -48,10 +50,12 @@
                 </Button.Style>
             </Button>
 
-            <!-- Only a question can be declined, with a click and not with Esc, since "No"
-                 can be the answer that discards something. -->
-            <Button Style="{StaticResource DialogButton}"
+            <!-- Only a question can be declined, with this button and not with Esc, since
+                 "No" can be the answer that discards something. -->
+            <Button x:Name="DeclineButton"
+                    Style="{StaticResource DialogButton}"
                     Content="No"
+                    AutomationProperties.HelpText="{Binding Message}"
                     Margin="10, 0, 0, 0"
                     Command="{Binding DeclineCommand}"
                     Visibility="{Binding IsQuestion, Converter={StaticResource BooleanToVisibilityConverter}}" />

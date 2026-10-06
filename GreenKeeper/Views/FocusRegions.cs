@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -15,10 +14,10 @@ namespace GreenKeeper.Views
     public sealed class FocusRegions
     {
         private readonly Window _window;
-        private readonly IReadOnlyList<FocusRegion> _regions;
+        private readonly List<FocusRegion> _regions;
         private readonly Dictionary<FocusRegion, UIElement> _lastFocused = new();
 
-        private FocusRegions(Window window, IReadOnlyList<FocusRegion> regions)
+        private FocusRegions(Window window, List<FocusRegion> regions)
         {
             _window = window;
             _regions = regions;
@@ -30,7 +29,7 @@ namespace GreenKeeper.Views
         /// </summary>
         public static void Attach(Window window, params FocusRegion[] regions)
         {
-            var focusRegions = new FocusRegions(window, regions);
+            var focusRegions = new FocusRegions(window, regions.ToList());
             window.GotKeyboardFocus += focusRegions.Window_GotKeyboardFocus;
             window.PreviewKeyDown += focusRegions.Window_PreviewKeyDown;
         }
@@ -78,7 +77,7 @@ namespace GreenKeeper.Views
 
             if (next is int index)
             {
-                targets[index]!.Focus();
+                FocusStops.Focus(targets[index]!);
                 return;
             }
 
@@ -93,35 +92,30 @@ namespace GreenKeeper.Views
 
         private int? RegionWithFocus()
         {
-            int index = _regions.ToList().FindIndex(region => region.Root.IsKeyboardFocusWithin);
+            int index = _regions.FindIndex(region => region.Root.IsKeyboardFocusWithin);
             return index < 0 ? null : index;
         }
 
-        // Where the user left off in the region, else where it starts, else its first tab stop.
+        // Where the user left off in the region, else where it starts, else its first stop.
         private UIElement? TargetIn(FocusRegion region)
         {
-            if (_lastFocused.TryGetValue(region, out var last) && IsUsable(last, region))
+            if (_lastFocused.TryGetValue(region, out var last) && CanTakeFocus(last, region))
             {
                 return last;
             }
 
-            if (region.Start?.Invoke() is { } start && IsUsable(start, region))
+            if (region.Start?.Invoke() is { } start && CanTakeFocus(start, region))
             {
                 return start;
             }
 
-            return VisualTree.Descendants<Control>(region.Root)
-                .FirstOrDefault(control => control.Focusable && control.IsTabStop && IsUsable(control, region));
+            return FocusStops.In(region.Root).FirstOrDefault();
         }
 
-        // Still on screen, usable and part of the region; a rebuilt card is a new element.
-        private static bool IsUsable(UIElement element, FocusRegion region)
+        // Usable, and still part of the region: a card that was rebuilt is a new element.
+        private static bool CanTakeFocus(UIElement element, FocusRegion region)
         {
-            return element.IsVisible
-                && element.IsEnabled
-                && element.Focusable
-                && PresentationSource.FromVisual(element) != null
-                && region.Root.IsAncestorOf(element);
+            return element.Focusable && FocusStops.IsUsable(element) && region.Root.IsAncestorOf(element);
         }
     }
 }

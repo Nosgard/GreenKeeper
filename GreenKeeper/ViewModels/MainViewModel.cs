@@ -522,7 +522,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to delete \"{plant.Name}\"? This cannot be undone.",
-                "Delete Plant");
+                "Delete Plant",
+                safeAnswer: Answer.No);
 
             if (!isConfirmed)
             {
@@ -597,7 +598,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to remove the {scheduleName} for \"{SelectedPlant.Name}\"?",
-                $"Remove {careType.DisplayName()} Schedule");
+                $"Remove {careType.DisplayName()} Schedule",
+                safeAnswer: Answer.No);
 
             var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
 
@@ -634,7 +636,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to remove the sunlight requirement for \"{SelectedPlant.Name}\"?",
-                "Remove Sunlight Requirement");
+                "Remove Sunlight Requirement",
+                safeAnswer: Answer.No);
 
             if (!isConfirmed)
             {

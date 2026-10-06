@@ -1,5 +1,6 @@
 ﻿using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
+using GreenKeeper.Services;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels;
 using static GreenKeeper.Tests.TestPlants;
@@ -1575,6 +1576,62 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: the full list is back and needs no announcement
             Assert.Empty(announcements);
+        }
+
+        // -- Safe Answer Tests --
+        // The window offers the safe answer first, so a hasty Enter removes nothing.
+
+        [Fact]
+        public async Task DeletePlantCommand_GivenTheQuestion_OffersNoFirst()
+        {
+            // Given: a selected plant
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera());
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the plant is about to be deleted
+            viewModel.DeletePlantCommand.Execute(null);
+
+            // Then: "No" keeps the plant, so it is offered first
+            Assert.Equal(Answer.No, dialogService.OfferedAnswer);
+        }
+
+        [Fact]
+        public async Task FertilizingCard_RemoveCommand_GivenTheQuestion_OffersNoFirst()
+        {
+            // Given: a selected plant with a fertilizing schedule
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(AloeVera(WateringEveryDays(7), FertilizingEveryDays(30)));
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the schedule is about to be removed
+            viewModel.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.Execute(null);
+
+            // Then: "No" keeps the schedule, so it is offered first
+            Assert.Equal(Answer.No, dialogService.OfferedAnswer);
+        }
+
+        [Fact]
+        public async Task SunlightCard_RemoveCommand_GivenTheQuestion_OffersNoFirst()
+        {
+            // Given: a selected plant with a sunlight requirement
+            var plant = AloeVera(WateringEveryDays(7));
+            plant.SunlightRequirement = DailySunlight(6);
+            var plantRepository = new FakePlantRepository();
+            plantRepository.SeedPlants(plant);
+            var dialogService = new FakeDialogService { ConfirmResult = false };
+            var viewModel = await CreateInitializedViewModelAsync(plantRepository, dialogService);
+            viewModel.SelectedPlant = viewModel.Plants[0];
+
+            // When: the requirement is about to be removed
+            viewModel.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.Execute(null);
+
+            // Then: "No" keeps the requirement, so it is offered first
+            Assert.Equal(Answer.No, dialogService.OfferedAnswer);
         }
 
         // -- Periodic Refresh Tests --

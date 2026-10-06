@@ -9,19 +9,20 @@ namespace GreenKeeper.Services
     /// </summary>
     public class MessageDialogService : IDialogService
     {
-        public bool Confirm(string message, string title)
+        public bool Confirm(string message, string title, Answer safeAnswer)
         {
-            return Show(message, title, isQuestion: true);
+            return Show(message, title, isQuestion: true, firstAnswer: safeAnswer);
         }
 
+        // A notice has only its OK button, which stands where "Yes" stands.
         public void ShowError(string message, string title)
         {
-            Show(message, title, isQuestion: false);
+            Show(message, title, isQuestion: false, firstAnswer: Answer.Yes);
         }
 
-        private static bool Show(string message, string title, bool isQuestion)
+        private static bool Show(string message, string title, bool isQuestion, Answer firstAnswer)
         {
-            var messageView = new MessageView(message, title, isQuestion);
+            var messageView = new MessageView(message, title, isQuestion, firstAnswer);
 
             // The message belongs to what is in front: the main window, or the dialog that asks.
             var owner = Application.Current.Windows.OfType<Window>().LastOrDefault(window => window.IsVisible);

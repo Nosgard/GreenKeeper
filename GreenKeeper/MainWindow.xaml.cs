@@ -51,10 +51,16 @@ namespace GreenKeeper
 
             FocusKeeper.Attach(this, PlantList, CareStatusList);
             FocusCue.Attach(this);
-            FocusRegions.Attach(
-                this,
+
+            // F6 switches between the regions, the arrow keys step inside each of them.
+            FocusRegion[] regions =
+            [
                 new FocusRegion(Sidebar, start: SidebarStart),
-                new FocusRegion(Dashboard, emptyHint: () => EmptyDashboardHint.Text));
+                new FocusRegion(Dashboard, emptyHint: () => EmptyDashboardHint.Text)
+            ];
+            FocusRegions.Attach(this, regions);
+            ArrowNavigation.Attach(this, regions.Select(region => region.Root).ToArray());
+
             _mainViewModel.Announced += MainViewModel_Announced;
 
             _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;

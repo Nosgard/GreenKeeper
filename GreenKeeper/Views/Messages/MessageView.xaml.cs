@@ -1,4 +1,5 @@
-﻿using GreenKeeper.ViewModels.Messages;
+﻿using GreenKeeper.Services;
+using GreenKeeper.ViewModels.Messages;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
@@ -20,12 +21,16 @@ namespace GreenKeeper.Views.Messages
         // False until one of the buttons has given the answer.
         private bool _isAnswered;
 
-        public MessageView(string message, string title, bool isQuestion)
+        public MessageView(string message, string title, bool isQuestion, Answer firstAnswer)
         {
             InitializeComponent();
             Title = title;
             _isQuestion = isQuestion;
             Attach(new MessageViewModel(message, isQuestion));
+
+            // The focus starts on the answer that loses nothing: a hasty key gives that
+            // answer, and the arrow keys lead to the other one.
+            Loaded += (_, _) => (firstAnswer == Answer.No ? DeclineButton : ConfirmButton).Focus();
             SourceInitialized += MessageView_SourceInitialized;
             Closing += MessageView_Closing;
         }
