@@ -26,8 +26,7 @@
                        GrowRate="0.5"
                        ShrinkRate="0.75" />
 
-    <!-- Sidebar: keeps its share of the width within these limits, never narrower than
-         designed, because its header needs that width. -->
+    <!-- Sidebar: keeps its share of the width within these limits, never narrower than designed -->
     <sys:Double x:Key="SidebarMinWidth">250</sys:Double>
     <sys:Double x:Key="SidebarMaxWidth">320</sys:Double>
 

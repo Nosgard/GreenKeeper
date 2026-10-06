@@ -46,38 +46,28 @@
             <!-- Header -->
             <Grid Grid.Row="0" Margin="16, 20, 16, 12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- The logo only decorates the title next to it, so it is drawn as a shape,
-                     which has no automation element and is skipped by a screen reader. -->
-                <Rectangle Grid.Column="0"
-                           Width="32"
-                           Height="32"
-                           VerticalAlignment="Center"
-                           Margin="0, 4, 0, 0"
-                           RenderOptions.BitmapScalingMode="HighQuality">
-                    <Rectangle.Fill>
-                        <ImageBrush ImageSource="/Resources/AppIcon.png" Stretch="Uniform" />
-                    </Rectangle.Fill>
-                </Rectangle>
-
-                <TextBlock Grid.Column="1"
+                <!-- Heading of the plant list, one step smaller than the plant name in the
+                     dashboard, the main title. The top margin puts both on one baseline. -->
+                <TextBlock Grid.Column="0"
                            AutomationProperties.HeadingLevel="Level1"
-                           Text="GreenKeeper"
+                           Text="My Plants"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
                            FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           Margin="4, 0, 0, 0" />
+                           VerticalAlignment="Top"
+                           Margin="0, 4, 0, 0" />
 
                 <!-- Theme toggle. It shows only an icon, so its label is the name a screen
                      reader announces and the text of its tooltip. AccessibleName instead of
                      AutomationProperties.Name, because the label changes with every click and
-                     WPF would not report that. -->
-                <Button Grid.Column="2"
+                     WPF would not report that. The top margin centers the icon on the capital
+                     letters of the heading, about 22 below the top of the row, and makes the
+                     row 38 high, which keeps the edges of the search box below sharp. -->
+                <Button Grid.Column="1"
                         Style="{StaticResource IconButton}"
                         views:AccessibleName.Text="{Binding Theme.ToggleLabel}"
                         ToolTip="{Binding Theme.ToggleLabel}"
