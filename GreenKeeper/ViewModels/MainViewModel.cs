@@ -44,6 +44,7 @@ namespace GreenKeeper.ViewModels
         private readonly TimeProvider _timeProvider;
         private Plant? _selectedPlant;
         private string _searchText = string.Empty;
+        private bool _hasLoadedPlants;
 
         public MainViewModel(
             IPlantRepository plantRepository,
@@ -92,6 +93,17 @@ namespace GreenKeeper.ViewModels
             }
 
             RememberPlantStatus();
+            HasLoadedPlants = true;
+        }
+
+        /// <summary>
+        /// True once InitializeAsync has filled Plants. Until then an empty list only means
+        /// the plants are still being loaded, not that there are none.
+        /// </summary>
+        public bool HasLoadedPlants
+        {
+            get => _hasLoadedPlants;
+            private set => SetProperty(ref _hasLoadedPlants, value);
         }
 
         // -- Announcements Section --

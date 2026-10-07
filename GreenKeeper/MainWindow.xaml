@@ -242,6 +242,37 @@
                 </ListView.ItemTemplate>
             </ListView>
 
+            <!-- Says why the list is empty. The text is set in the style, because a text
+                 set on the element would win over the trigger that changes it. -->
+            <TextBlock Grid.Row="2"
+                       Foreground="{DynamicResource SecondaryText}"
+                       FontSize="16"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       VerticalAlignment="Top"
+                       Margin="16, 8, 16, 0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <!-- A search found no plant, in the words a screen reader hears -->
+                        <Setter Property="Text" Value="No plants found" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasItems, ElementName=PlantList}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <!-- Without a search, the list is empty because no plant was added yet -->
+                            <DataTrigger Binding="{Binding Text, ElementName=SearchTextBox}" Value="">
+                                <Setter Property="Text" Value="No plants yet" />
+                            </DataTrigger>
+                            <!-- At every start the list is empty for a moment, until the plants are loaded -->
+                            <DataTrigger Binding="{Binding HasLoadedPlants}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!-- Add button -->
             <Button Grid.Row="3"
                     Style="{StaticResource BigButton}"
@@ -330,10 +361,11 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Shown while no plant is selected, so the empty dashboard says what to do -->
+            <!-- Shown while no plant is selected, so the empty dashboard says what to do.
+                 F6 reads it out as well. The text is set in the style, because a text set
+                 on the element would win over the trigger that changes it. -->
             <TextBlock x:Name="EmptyDashboardHint"
                        Grid.Row="2"
-                       Text="Select a plant or add a new one"
                        Foreground="{DynamicResource MutedText}"
                        FontSize="16"
                        TextWrapping="Wrap"
@@ -343,11 +375,21 @@
                        Margin="16, 0, 16, 0">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="Select a plant or add a new one" />
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPlantSelected}" Value="False">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
+                            <!-- Nothing to select yet. Only once the plants are loaded, since the list is
+                                 empty for a moment at every start -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Plants.Count}" Value="0" />
+                                    <Condition Binding="{Binding HasLoadedPlants}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Text" Value="Add your first plant to get started" />
+                            </MultiDataTrigger>
                         </Style.Triggers>
                     </Style>
                 </TextBlock.Style>

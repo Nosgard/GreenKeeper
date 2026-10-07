@@ -38,6 +38,23 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Aloe Vera", viewModel.Plants[0].Name);
         }
 
+        [Fact]
+        public async Task InitializeAsync_GivenRepositoryWithoutPlants_ReportsTheListAsLoaded()
+        {
+            // Given: a repository without plants, so the list stays empty after loading
+            var viewModel = CreateViewModel(new FakePlantRepository());
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: InitializeAsync is called
+            await viewModel.InitializeAsync();
+
+            // Then: the empty list counts as loaded, and the view hears about it
+            Assert.True(viewModel.HasLoadedPlants);
+            Assert.Contains(nameof(MainViewModel.HasLoadedPlants), raisedProperties);
+        }
+
         // -- Add Plant Tests --
 
         [Fact]
