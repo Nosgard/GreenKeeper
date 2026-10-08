@@ -22,7 +22,7 @@
     <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#727270" />
 
     <!-- Status card buttons -->
-    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#5B5E69" />
+    <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#4A4C55" />
     <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#8A8D92" />
 
     <!-- Borders, separators, scrollbar. ControlBorder is the soft frame of buttons,
