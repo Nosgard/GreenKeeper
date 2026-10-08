@@ -98,7 +98,7 @@
             <Border Grid.Row="1"
                     Margin="10, 10, 10, 10"
                     Background="{DynamicResource SearchBarBackground}"
-                    BorderBrush="{DynamicResource ControlBorder}"
+                    BorderBrush="{DynamicResource ControlOutline}"
                     BorderThickness="1"
                     CornerRadius="6">
                 <Grid>

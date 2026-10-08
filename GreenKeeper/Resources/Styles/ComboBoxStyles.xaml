@@ -38,7 +38,7 @@
     <Style x:Key="ThemedComboBox" TargetType="ComboBox">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlOutline}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="FontSize" Value="14" />
@@ -109,7 +109,9 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="Slide">
-                            <Border Background="{DynamicResource SurfaceBackground}"
+                            <!-- The same background as the context menu, so a hovered entry
+                                 stands out from it in both themes -->
+                            <Border Background="{DynamicResource SearchBarBackground}"
                                     BorderBrush="{DynamicResource ControlBorder}"
                                     BorderThickness="1"
                                     CornerRadius="4"
@@ -124,9 +126,9 @@
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <!-- Hover over the closed ComboBox -->
+                        <!-- Hover over the closed ComboBox, the same lift as on a button -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
+                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <!-- Disabled state -->
                         <Trigger Property="IsEnabled" Value="False">

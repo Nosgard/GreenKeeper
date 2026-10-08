@@ -54,7 +54,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ControlBorder}" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource MutedText}" />

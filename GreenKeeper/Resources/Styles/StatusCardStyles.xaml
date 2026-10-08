@@ -13,13 +13,13 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Watering}">
-                <Setter Property="Background" Value="#4accff" />
+                <Setter Property="Background" Value="{DynamicResource WateringIconFill}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Fertilizing}">
-                <Setter Property="Background" Value="#ff695b" />
+                <Setter Property="Background" Value="{DynamicResource FertilizingIconFill}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding Care}" Value="{x:Static enums:CareType.Sunlight}">
-                <Setter Property="Background" Value="#ffcc00" />
+                <Setter Property="Background" Value="{DynamicResource SunlightIconFill}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>

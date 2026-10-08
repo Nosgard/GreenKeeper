@@ -49,6 +49,7 @@ namespace GreenKeeper
             InitializeResponsiveSize();
             RestorePlacement();
 
+            TitleBarTheme.Attach(this);
             FocusKeeper.Attach(this, PlantList, CareStatusList);
             FocusCue.Attach(this);
 

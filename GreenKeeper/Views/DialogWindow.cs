@@ -16,6 +16,7 @@ namespace GreenKeeper.Views
     {
         public DialogWindow()
         {
+            TitleBarTheme.Attach(this);
             FocusCue.Attach(this);
             ArrowNavigation.Attach(this);
 

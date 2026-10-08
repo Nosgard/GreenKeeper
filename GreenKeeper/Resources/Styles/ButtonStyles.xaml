@@ -25,14 +25,16 @@
                     </Border>
 
                     <ControlTemplate.Triggers>
-                        <!-- Hover -->
+                        <!-- Hover and pressed: the text takes the primary color, so it keeps its
+                             contrast on the lifted background of the dark theme -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
                         </Trigger>
 
-                        <!-- Pressed -->
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
                         </Trigger>
 
                         <!-- Disabled: set on the control (not on the border), so that a style

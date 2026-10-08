@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.Views;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -45,6 +46,9 @@ namespace GreenKeeper.Services
             // Set before animating, so IsDarkTheme - and the toggle icon with it -
             // flips right away instead of trailing the fade.
             CurrentTheme = theme;
+
+            // Dark title bar in the window background, not the Windows accent color.
+            TitleBarTheme.Apply(theme == Theme.Dark ? ((SolidColorBrush)target["WindowBackground"]).Color : null);
 
             foreach (var key in live.Keys.Cast<object>().ToList())
             {

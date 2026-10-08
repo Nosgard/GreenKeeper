@@ -1,8 +1,11 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- Implicit style for every tooltip: text as large as the body text, wrapping at
-         a maximum width -->
+    <!-- Implicit style for every tooltip: theme colors instead of the system's light
+         box, text as large as the body text, wrapping at a maximum width -->
     <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="{DynamicResource SearchBarBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="MaxWidth" Value="{StaticResource ToolTipMaxWidth}" />
         <Setter Property="ContentTemplate">
