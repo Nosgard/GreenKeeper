@@ -24,8 +24,7 @@
         <!-- Section for the plant name -->
         <TextBlock Grid.Row="0"
                    Style="{StaticResource DialogHeading}"
-                   Text="{Binding PlantName}"
-                   FontSize="20" />
+                   Text="{Binding PlantName}" />
 
         <!-- Notes of the plant. Named on its own: the heading above is the plant's
              name rather than a label of the field -->

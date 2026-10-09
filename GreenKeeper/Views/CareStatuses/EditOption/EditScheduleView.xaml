@@ -7,7 +7,7 @@
                     xmlns:editSchedule="clr-namespace:GreenKeeper.ViewModels.CareStatuses.EditOption"
                     mc:Ignorable="d"
                     Icon="{StaticResource AppIcon}"
-                    Title="Edit Schedule" Height="300" Width="450"
+                    Title="Edit Schedule" Height="306" Width="450"
                     Background="{DynamicResource WindowBackground}"
                     WindowStartupLocation="CenterOwner"
                     ResizeMode="NoResize">
@@ -27,7 +27,7 @@
 
                 <TextBlock Text="{Binding PreviewText}"
                            Foreground="{DynamicResource SecondaryText}"
-                           FontSize="14"
+                           FontSize="16"
                            Margin="0, 10, 0, 0" />
             </StackPanel>
         </DataTemplate>

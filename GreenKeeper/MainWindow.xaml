@@ -275,7 +275,7 @@
 
             <!-- Add button -->
             <Button Grid.Row="3"
-                    Style="{StaticResource BigButton}"
+                    Style="{StaticResource DialogButton}"
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
                     Content="+  Add Plant"
@@ -438,6 +438,7 @@
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding TimeSimulation.Unit}"
                                   Width="90"
+                                  FontSize="14"
                                   Margin="6, 0, 0, 0" />
 
                         <Button Style="{StaticResource StatusCardActionButton}"

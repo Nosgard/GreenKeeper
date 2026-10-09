@@ -92,20 +92,20 @@
                 <!-- Plant Name Line -->
                 <TextBlock Text="{Binding PlantName}"
                            Foreground="{DynamicResource PrimaryText}"
-                           FontSize="14"
+                           FontSize="16"
                            Margin="0, 0, 0, 6"
                            TextWrapping="Wrap" />
 
                 <!-- Watering Line -->
                 <TextBlock Text="{Binding Watering, StringFormat='Watering: {0}'}"
                            Foreground="{DynamicResource SecondaryText}"
-                           FontSize="14"
+                           FontSize="16"
                            Margin="0, 0, 0, 6" />
 
                 <!-- Fertilizing Line -->
                 <TextBlock Text="{Binding Fertilizing, StringFormat='Fertilizing: {0}'}"
                            Foreground="{DynamicResource SecondaryText}"
-                           FontSize="14"
+                           FontSize="16"
                            Margin="0, 0, 0, 6"
                            Visibility="{Binding HasFertilizing, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
@@ -113,7 +113,7 @@
                 <TextBlock Text="{Binding Sunlight, StringFormat='Sunlight: {0}'}"
                            AutomationProperties.Name="{Binding SpokenSunlight}"
                            Foreground="{DynamicResource SecondaryText}"
-                           FontSize="14"
+                           FontSize="16"
                            Margin="0, 0, 0, 6"
                            Visibility="{Binding HasSunlight, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </StackPanel>
