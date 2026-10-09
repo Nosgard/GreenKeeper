@@ -31,9 +31,9 @@
     <sys:Double x:Key="SidebarMaxWidth">320</sys:Double>
 
     <!-- Dashboard: the content grows up to this width and stays centered beyond it.
-         1024 is a common large container width, and the longest plant name still fits
-         next to the buttons. -->
-    <sys:Double x:Key="ContentMaxWidth">1024</sys:Double>
+         760 keeps a card's text and its buttons close together; a plant name that does
+         not fit next to the header buttons is trimmed and shown in a tooltip. -->
+    <sys:Double x:Key="ContentMaxWidth">760</sys:Double>
 
     <!-- Tooltip: a longer text wraps instead of running across the screen -->
     <sys:Double x:Key="ToolTipMaxWidth">360</sys:Double>

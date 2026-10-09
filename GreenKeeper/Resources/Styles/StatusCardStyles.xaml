@@ -103,7 +103,7 @@
                     <TextBlock Text="{Binding Title}"
                        AutomationProperties.HeadingLevel="Level4"
                        Foreground="{DynamicResource PrimaryText}"
-                       FontSize="16"
+                       FontSize="18"
                        FontWeight="SemiBold" />
 
                     <!-- Wraps where the buttons leave too little room for one line.
@@ -111,7 +111,7 @@
                          local value would outrank the trigger below. -->
                     <TextBlock Text="{Binding StatusText}"
                        AutomationProperties.Name="{Binding SpokenStatusText}"
-                       FontSize="14"
+                       FontSize="16"
                        TextWrapping="Wrap">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
