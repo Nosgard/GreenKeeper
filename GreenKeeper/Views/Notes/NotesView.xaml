@@ -24,12 +24,14 @@
         <!-- Section for the plant name -->
         <TextBlock Grid.Row="0"
                    Style="{StaticResource DialogHeading}"
-                   Text="{Binding PlantName}"
-                   FontSize="20" />
+                   Text="{Binding PlantName}" />
 
-        <!-- Notes of the plant -->
+        <!-- Notes of the plant. Named on its own: the heading above is the plant's
+             name rather than a label of the field -->
         <TextBox Grid.Row="1"
+                 x:Name="NotesBox"
                  Style="{StaticResource ThemedTextBox}"
+                 AutomationProperties.Name="{Binding PlantName, StringFormat='Notes for {0}'}"
                  Text="{Binding EditableNotes, UpdateSourceTrigger=PropertyChanged}"
                  Padding="10"
                  AcceptsReturn="True"
@@ -50,6 +52,7 @@
             <Button Style="{StaticResource DialogButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"
+                    IsCancel="True"
                     Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>

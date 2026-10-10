@@ -74,10 +74,10 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal("Due in 1 year", result);
         }
 
-        // -- Today and overdue stay untouched --
+        // -- Today reads "Due today", overdue stays untouched --
 
         [Fact]
-        public void StatusText_GivenDueDateIsToday_ReturnsTodayWithoutPrefix()
+        public void StatusText_GivenDueDateIsToday_ReturnsDueToday()
         {
             // Given: a watering card due today
             var card = WateringCard(Now);
@@ -85,18 +85,18 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the status text is read
             var result = card.StatusText;
 
-            // Then: "Today" already says what it means and gets no prefix
-            Assert.Equal("Today", result);
+            // Then: it reads like the other states, "Due today" next to "Due in 3 days"
+            Assert.Equal("Due today", result);
         }
 
         /// <summary>
         /// The prefix is decided on the calendar date, not on the timestamp - the
-        /// same rule "Today" and the Complete button already follow. A due date
+        /// same rule "Due today" and the Complete button already follow. A due date
         /// later on the current day is still today and must not turn into
         /// "Due in ...", and the first minute of the next day must.
         /// </summary>
         [Fact]
-        public void StatusText_GivenDueDateLaterOnTheCurrentDay_StillReturnsTodayWithoutPrefix()
+        public void StatusText_GivenDueDateLaterOnTheCurrentDay_StillReturnsDueToday()
         {
             // Given: a watering card due just before midnight of the current day
             var card = WateringCard(Now.Date.AddHours(23).AddMinutes(59));
@@ -105,7 +105,7 @@ namespace GreenKeeper.Tests.ViewModels
             var result = card.StatusText;
 
             // Then: the leftover time of day does not make it an upcoming date
-            Assert.Equal("Today", result);
+            Assert.Equal("Due today", result);
         }
 
         [Fact]
@@ -171,7 +171,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Theory]
         [InlineData(5, "Due in 5 days")]
         [InlineData(-5, "Overdue for 5 days")]
-        [InlineData(0, "Today")]
+        [InlineData(0, "Due today")]
         public void StatusText_GivenFertilizingCard_FollowsTheSameRuleAsWatering(
             int dayOffset, string expected)
         {

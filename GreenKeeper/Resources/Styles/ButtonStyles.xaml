@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Big Button -->
     <Style x:Key="BigButton" TargetType="Button">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <!-- Default properties -->
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
@@ -24,14 +25,16 @@
                     </Border>
 
                     <ControlTemplate.Triggers>
-                        <!-- Hover -->
+                        <!-- Hover and pressed: the text takes the primary color, so it keeps its
+                             contrast on the lifted background of the dark theme -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
                         </Trigger>
 
-                        <!-- Pressed -->
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
+                            <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
                         </Trigger>
 
                         <!-- Disabled: set on the control (not on the border), so that a style
@@ -64,6 +67,7 @@
 
     <!-- Icon Button (e.g. the theme toggle in the sidebar header) -->
     <Style x:Key="IconButton" TargetType="Button">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Cursor" Value="Hand" />

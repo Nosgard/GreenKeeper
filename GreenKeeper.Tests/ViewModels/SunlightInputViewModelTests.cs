@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.ViewModels.Base;
 using GreenKeeper.ViewModels.CareStatuses.EditOption;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Passive;
@@ -36,6 +37,20 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(expectedMaxHours, editLimit);
         }
 
+        [Fact]
+        public void MaxAmountLength_GivenAllPeriods_IsOneDigitMoreThanTheLongestMaximum()
+        {
+            // Given: the longest maximum of all periods, 8760 hours per year, has four digits
+            const int longestMaximumDigits = 4;
+
+            // When: the length limit of the hours field is read
+            var limit = HoursPerPeriodInputViewModel.MaxAmountLength;
+
+            // Then: one digit more fits, so an amount above the limit stays visible instead
+            // of being cut down to a valid one
+            Assert.Equal(longestMaximumDigits + 1, limit);
+        }
+
         [Theory]
         [InlineData("", false)]
         [InlineData("abc", false)]
@@ -67,6 +82,42 @@ namespace GreenKeeper.Tests.ViewModels
 
             // Then: the same amount is no longer valid
             Assert.False(step.HasValidAmount);
+        }
+
+        // -- Hint below the field --
+
+        [Theory]
+        [InlineData("6", false, "max. 24")]
+        [InlineData("24", false, "max. 24")]
+        [InlineData("25", true, "Too large, max. 24")]
+        [InlineData("", false, "max. 24")]
+        public void AmountHint_GivenHours_NamesTheLimitAndSaysWhenItIsExceeded(string hours, bool expectedTooLarge, string expectedHint)
+        {
+            // Given: the hours field for a day, which has 24 hours
+            var step = new SunlightStepViewModel { SelectedPeriod = SunlightPeriod.Day, AmountText = hours };
+
+            // When: the hint below the field is read
+            var isTooLarge = step.IsAmountTooLarge;
+            var hint = step.AmountHint;
+
+            // Then: it shows the limit, and says so in words once the hours exceed it
+            Assert.Equal(expectedTooLarge, isTooLarge);
+            Assert.Equal(expectedHint, hint);
+        }
+
+        [Fact]
+        public void SunlightStep_GivenHoursAboveTheLimit_CannotProceedAndDoesNotOfferToSkip()
+        {
+            // Given: the optional sunlight step with more hours than a day has
+            var step = new SunlightStepViewModel { SelectedPeriod = SunlightPeriod.Day, AmountText = "25" };
+
+            // When: the state of the Next button is read
+            var canProceed = step.CanProceed;
+            var label = step.NextButtonLabel;
+
+            // Then: the button stays "Next" and is locked, "Skip" would drop the entry unnoticed
+            Assert.False(canProceed);
+            Assert.Equal("Next", label);
         }
 
         // -- Wizard behavior --

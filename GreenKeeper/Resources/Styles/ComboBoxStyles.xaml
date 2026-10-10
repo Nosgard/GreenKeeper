@@ -4,6 +4,10 @@
 
     <!-- ComboBox Item -->
     <Style x:Key="ThemedComboBoxItem" TargetType="ComboBoxItem">
+        <!-- Every option list is a list of KeyValuePairs: without this, a screen reader
+             would read an entry as "[Days, Days]" instead of the text it shows -->
+        <Setter Property="AutomationProperties.Name" Value="{Binding Value}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Padding" Value="8, 6" />
@@ -32,14 +36,17 @@
 
     <!-- ComboBox Main Part -->
     <Style x:Key="ThemedComboBox" TargetType="ComboBox">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource ControlBorder}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ControlOutline}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="8, 6" />
         <Setter Property="ItemContainerStyle" Value="{StaticResource ThemedComboBoxItem}" />
+        <!-- Typing a letter selects the option that starts with it, matched against the shown text -->
+        <Setter Property="TextSearch.TextPath" Value="Value" />
         <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior in WPF -->
         <Setter Property="ItemTemplate">
             <Setter.Value>
@@ -67,7 +74,8 @@
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
                                             Padding="{TemplateBinding Padding}"
-                                            CornerRadius="4">
+                                            CornerRadius="4"
+                                            SnapsToDevicePixels="True">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
@@ -102,7 +110,9 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="Slide">
-                            <Border Background="{DynamicResource SurfaceBackground}"
+                            <!-- The same background as the context menu, so a hovered entry
+                                 stands out from it in both themes -->
+                            <Border Background="{DynamicResource SearchBarBackground}"
                                     BorderBrush="{DynamicResource ControlBorder}"
                                     BorderThickness="1"
                                     CornerRadius="4"
@@ -117,9 +127,9 @@
                     </Grid>
 
                     <ControlTemplate.Triggers>
-                        <!-- Hover over the closed ComboBox -->
+                        <!-- Hover over the closed ComboBox, the same lift as on a button -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
+                            <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <!-- Disabled state -->
                         <Trigger Property="IsEnabled" Value="False">

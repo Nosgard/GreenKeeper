@@ -30,11 +30,27 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         // All status cards implement the status text in their own way.
         public abstract string StatusText { get; }
 
+        // The status text the way a screen reader should say it. Most status texts
+        // read well as they are; a card with abbreviations writes them out.
+        public virtual string SpokenStatusText => StatusText;
+
         /// <summary>
         /// Whether the status text should read as overdue. Sits on the base class
         /// so the shared card template can bind it on every card - Sunlight has no
         /// due date and stays false.
         /// </summary>
         public virtual bool IsOverdue => false;
+
+        /// <summary>
+        /// Re-reads everything that depends on the current day without replacing the card.
+        /// A new card would make the UI build a new element, which a screen reader
+        /// announces again (see MainViewModel.RefreshDueStatus).
+        /// </summary>
+        public virtual void NotifyDueStatusChanged()
+        {
+            OnPropertyChanged(nameof(StatusText));
+            OnPropertyChanged(nameof(SpokenStatusText));
+            OnPropertyChanged(nameof(IsOverdue));
+        }
     }
 }

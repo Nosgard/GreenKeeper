@@ -7,25 +7,34 @@
     <SolidColorBrush x:Key="SearchBarBackground" Color="#F2F3F6" />
 
     <!-- Selection -->
+    <SolidColorBrush x:Key="EntryHoverBackground" Color="#C9CCD1" />
     <SolidColorBrush x:Key="SelectedBackground" Color="#B9BCC1" />
-    <SolidColorBrush x:Key="SelectedBorder" Color="#777A7F" />
+    <SolidColorBrush x:Key="SelectedBorder" Color="#74777C" />
+
+    <!-- Keyboard focus: the ring around the control Tab has reached, in the color of
+         the primary text, the strongest contrast to every background of the theme. -->
+    <SolidColorBrush x:Key="FocusBorder" Color="#1C1E22" />
 
     <!-- Buttons -->
     <SolidColorBrush x:Key="ButtonHoverBackground" Color="#D0D2D6" />
     <SolidColorBrush x:Key="ButtonPressedBackground" Color="#BEC1C6" />
     <SolidColorBrush x:Key="ButtonDisabledBackground" Color="#DCDDE0" />
     <SolidColorBrush x:Key="ButtonDisabledBorder" Color="#C4C6CB" />
-    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#898B90" />
+    <SolidColorBrush x:Key="ButtonDisabledForeground" Color="#787A80" />
 
     <!-- Status card buttons -->
     <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#CACCD0" />
-    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#9EA0A5" />
+    <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#8A8C92" />
 
-    <!-- Borders, separators, scrollbar -->
+    <!-- Borders, separators, scrollbar. ControlBorder is the soft frame of buttons,
+         cards and popups. ControlOutline marks a control that stands on its own (text
+         boxes, drop-downs, the scroll bar thumb) and keeps 3:1 against every
+         background it sits on. -->
     <SolidColorBrush x:Key="ControlBorder" Color="#B3B6BC" />
+    <SolidColorBrush x:Key="ControlOutline" Color="#74777C" />
     <SolidColorBrush x:Key="DividerBrush" Color="#C5C8CD" />
     <SolidColorBrush x:Key="SeparatorBrush" Color="#AEB1B7" />
-    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#83868C" />
+    <SolidColorBrush x:Key="ScrollBarThumbPressed" Color="#5E6166" />
 
     <!-- Text -->
     <SolidColorBrush x:Key="PrimaryText" Color="#1C1E22" />
@@ -33,11 +42,16 @@
     <SolidColorBrush x:Key="MutedText" Color="#606369" />
     <SolidColorBrush x:Key="SearchText" Color="#3A3D42" />
 
+    <!-- Icon boxes of the status cards, one hue per care type -->
+    <SolidColorBrush x:Key="WateringIconFill" Color="#4ACCFF" />
+    <SolidColorBrush x:Key="FertilizingIconFill" Color="#FF695B" />
+    <SolidColorBrush x:Key="SunlightIconFill" Color="#FFCC00" />
+
     <!-- Overdue status text -->
     <SolidColorBrush x:Key="OverdueText" Color="#84342F" />
 
     <!-- Debug panel (DEBUG builds only) -->
     <SolidColorBrush x:Key="DangerBackground" Color="#F1D7D7" />
-    <SolidColorBrush x:Key="DangerBorder" Color="#B96D6E" />
+    <SolidColorBrush x:Key="DangerBorder" Color="#AC5859" />
     <SolidColorBrush x:Key="DangerForeground" Color="#A32B2B" />
 </ResourceDictionary>

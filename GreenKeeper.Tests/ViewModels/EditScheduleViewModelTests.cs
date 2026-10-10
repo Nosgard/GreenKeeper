@@ -83,7 +83,7 @@ namespace GreenKeeper.Tests.ViewModels
             var preview = step.PreviewText;
 
             // Then: it names the due date counted from now
-            Assert.Equal("New due date: 1 week", preview);
+            Assert.Equal("New due date in: 1 week", preview);
         }
 
         [Fact]

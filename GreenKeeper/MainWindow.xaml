@@ -4,23 +4,38 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GreenKeeper"
+        xmlns:views="clr-namespace:GreenKeeper.Views"
         mc:Ignorable="d"
         Icon="{StaticResource AppIcon}"
         Title="GreenKeeper"
-        MinHeight="550"
-        MinWidth="750"
+        MinHeight="{StaticResource WindowMinHeight}"
+        MinWidth="{StaticResource WindowMinWidth}"
         Height="650"
-        Width="900">
+        Width="900"
+        WindowStartupLocation="CenterScreen">
+
+    <!-- Width and Height above are the design size: the UI is drawn at scale 1 there and
+         scales from it at every other size (InitializeResponsiveSize in MainWindow.xaml.cs) -->
 
     <!-- Main Grid -->
     <Grid Background="{DynamicResource WindowBackground}">
+        <!-- Sidebar and dashboard share the width in the proportion of the design size
+             (250 : 634 of the 884 px inside the window frame), the sidebar within its
+             limits. -->
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition />
+            <ColumnDefinition Width="250*"
+                              MinWidth="{StaticResource SidebarMinWidth}"
+                              MaxWidth="{StaticResource SidebarMaxWidth}" />
+            <ColumnDefinition Width="634*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Sidebar -->
-        <Grid Background="{DynamicResource SidebarBackground}" Grid.Column="0">
+        <!-- Sidebar. F6 and Shift+F6 switch between it and the dashboard (FocusRegions).
+             The name tells a screen reader which of the two it is in. -->
+        <views:RegionGrid x:Name="Sidebar"
+                          AutomationProperties.Name="Sidebar"
+                          AutomationProperties.AcceleratorKey="F6"
+                          Background="{DynamicResource SidebarBackground}"
+                          Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -31,31 +46,31 @@
             <!-- Header -->
             <Grid Grid.Row="0" Margin="16, 20, 16, 12">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Grid.Column="0"
-                       Source="/Resources/AppIcon.png"
-                       Width="32"
-                       Height="32"
-                       Stretch="Uniform"
-                       VerticalAlignment="Center"
-                       Margin="0, 4, 0, 0"
-                       RenderOptions.BitmapScalingMode="HighQuality" />
-
-                <TextBlock Grid.Column="1"
-                           Text="GreenKeeper"
+                <!-- Heading of the plant list, one step smaller than the plant name in the
+                     dashboard, the main title. The top margin puts both on one baseline. -->
+                <TextBlock Grid.Column="0"
+                           AutomationProperties.HeadingLevel="Level1"
+                           Text="My Plants"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="24"
                            FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           Margin="4, 0, 0, 0" />
+                           VerticalAlignment="Top"
+                           Margin="0, 4, 0, 0" />
 
-                <!-- Theme toggle button -->
-                <Button Grid.Column="2"
+                <!-- Theme toggle. It shows only an icon, so its label is the name a screen
+                     reader announces and the text of its tooltip. AccessibleName instead of
+                     AutomationProperties.Name, because the label changes with every click and
+                     WPF would not report that. The top margin centers the icon on the capital
+                     letters of the heading, about 22 below the top of the row, and makes the
+                     row 38 high, which keeps the edges of the search box below sharp. -->
+                <Button Grid.Column="1"
                         Style="{StaticResource IconButton}"
+                        views:AccessibleName.Text="{Binding Theme.ToggleLabel}"
+                        ToolTip="{Binding Theme.ToggleLabel}"
                         VerticalAlignment="Center"
                         Width="32"
                         Height="32"
@@ -83,7 +98,7 @@
             <Border Grid.Row="1"
                     Margin="10, 10, 10, 10"
                     Background="{DynamicResource SearchBarBackground}"
-                    BorderBrush="{DynamicResource ControlBorder}"
+                    BorderBrush="{DynamicResource ControlOutline}"
                     BorderThickness="1"
                     CornerRadius="6">
                 <Grid>
@@ -93,18 +108,20 @@
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="1"
                              x:Name="SearchTextBox"
+                             AutomationProperties.Name="Search plants"
+                             FocusVisualStyle="{StaticResource FocusRing}"
                              Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
                              Foreground="{DynamicResource SearchText}"
                              CaretBrush="{DynamicResource SearchText}"
-                             FontSize="13"
+                             FontSize="14"
                              VerticalContentAlignment="Center"
                              Padding="10, 8, 10, 8" />
                     <TextBlock Grid.Column="1"
                                Text="Search..."
                                Foreground="{DynamicResource MutedText}"
-                               FontSize="13"
+                               FontSize="14"
                                Margin="10, 0, 0, 0"
                                VerticalAlignment="Center"
                                IsHitTestVisible="False">
@@ -128,15 +145,45 @@
 
             <!-- List of plants -->
             <ListView Grid.Row="2"
+                      x:Name="PlantList"
+                      AutomationProperties.Name="Plants"
+                      FocusVisualStyle="{StaticResource FocusRing}"
                       Background="Transparent"
                       BorderThickness="0"
                       Margin="6, 0, 6, 0"
                       HorizontalContentAlignment="Stretch"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                       ItemsSource="{Binding Plants}"
-                      SelectedItem="{Binding SelectedPlant, Mode=TwoWay}">
+                      SelectedItem="{Binding SelectedPlant, Mode=TwoWay}"
+                      SelectionChanged="PlantList_SelectionChanged">
+                <ListView.Resources>
+                    <!-- Context menu of a plant entry. It sits on the entry rather than on its
+                         content, so the keyboard opens it too (menu key, Shift+F10): WPF looks for a
+                         context menu on the focused element and its ancestors. One menu per entry,
+                         so it is not shared. -->
+                    <ContextMenu x:Key="PlantContextMenu"
+                                 x:Shared="False"
+                                 Style="{StaticResource ThemedContextMenu}">
+                        <MenuItem Header="Rename..."
+                                  Style="{StaticResource ThemedMenuItem}"
+                                  Command="{Binding PlacementTarget.Tag.RenamePlantCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding}" />
+                    </ContextMenu>
+                </ListView.Resources>
+
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
+                        <!-- A screen reader announces the entry by its name and the state of its
+                             status dot: "Aloe Vera, overdue". AccessibleName instead of
+                             AutomationProperties.Name, because the state changes while the entry is
+                             in use and WPF would not report that. -->
+                        <Setter Property="views:AccessibleName.Text" Value="{Binding Converter={StaticResource PlantAccessibleNameConverter}}" />
+                        <EventSetter Event="KeyDown" Handler="PlantEntry_KeyDown" />
+                        <!-- The context menu opens in a popup outside the window's tree: it
+                             reaches the window's ViewModel through PlacementTarget.Tag -->
+                        <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
+                        <Setter Property="ContextMenu" Value="{StaticResource PlantContextMenu}" />
+                        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
                         <Setter Property="Background" Value="Transparent" />
                         <Setter Property="BorderThickness" Value="0" />
                         <Setter Property="Padding" Value="0" />
@@ -152,7 +199,7 @@
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource SurfaceBackground}" />
+                                            <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource EntryHoverBackground}" />
                                         </Trigger>
                                         <Trigger Property="IsSelected" Value="True">
                                             <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource SelectedBackground}" />
@@ -168,31 +215,19 @@
                 <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Context menu for the right click on a plant entry -->
-                            <Grid.ContextMenu>
-                                <ContextMenu Style="{StaticResource ThemedContextMenu}">
-                                    <MenuItem Header="Rename..."
-                                              Style="{StaticResource ThemedMenuItem}"
-                                              Command="{Binding PlacementTarget.Tag.RenamePlantCommand,
-                                        RelativeSource={RelativeSource AncestorType=ContextMenu}}"
-                                              CommandParameter="{Binding}" />
-                                </ContextMenu>
-                            </Grid.ContextMenu>
-
-                            <Image Grid.Column="0"
-                                   Source="{Binding Converter={StaticResource PlantStatusDotConverter}}"
-                                   Width="20"
-                                   Height="20"
-                                   Stretch="Uniform"
-                                   VerticalAlignment="Center"
-                                   Margin="0, 0, 4, 0"
-                                   RenderOptions.BitmapScalingMode="HighQuality" />
+                            <!-- Status dot. Its state is part of the entry's name, so a
+                                 screen reader skips the dot itself. -->
+                            <ContentPresenter Grid.Column="0"
+                                              Content="{Binding Converter={StaticResource PlantStatusDotConverter}}"
+                                              ContentTemplate="{StaticResource PlantStatusDot}"
+                                              VerticalAlignment="Center"
+                                              Margin="0, 0, 4, 0" />
 
                             <TextBlock Grid.Column="1"
                        Text="{Binding Name}"
@@ -200,37 +235,78 @@
                        FontSize="24"
                        FontWeight="Medium"
                        VerticalAlignment="Center"
+                       Margin="0, -1.5, 0, 1.5"
                        TextWrapping="Wrap" />
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
 
+            <!-- Says why the list is empty. The text is set in the style, because a text
+                 set on the element would win over the trigger that changes it. -->
+            <TextBlock Grid.Row="2"
+                       Foreground="{DynamicResource SecondaryText}"
+                       FontSize="16"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       VerticalAlignment="Top"
+                       Margin="16, 8, 16, 0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <!-- A search found no plant, in the words a screen reader hears -->
+                        <Setter Property="Text" Value="No plants found" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasItems, ElementName=PlantList}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <!-- Without a search, the list is empty because no plant was added yet -->
+                            <DataTrigger Binding="{Binding Text, ElementName=SearchTextBox}" Value="">
+                                <Setter Property="Text" Value="No plants yet" />
+                            </DataTrigger>
+                            <!-- At every start the list is empty for a moment, until the plants are loaded -->
+                            <DataTrigger Binding="{Binding HasLoadedPlants}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
             <!-- Add button -->
             <Button Grid.Row="3"
-                    Style="{StaticResource BigButton}"
+                    Style="{StaticResource DialogButton}"
                     Margin="10, 8, 10, 12"
                     Padding="0, 10"
                     Content="+  Add Plant"
+                    AutomationProperties.Name="Add Plant"
                     Command="{Binding AddPlantCommand}"/>
-        </Grid>
+        </views:RegionGrid>
 
         <!-- Dashboard -->
-        <Grid Grid.Column="1">
+        <views:RegionGrid x:Name="Dashboard"
+                          AutomationProperties.Name="Dashboard"
+                          AutomationProperties.AcceleratorKey="F6"
+                          Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="50" />
                 <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Navigation -->
-            <Grid Grid.Row="0" VerticalAlignment="Center" Margin="16, 20, 16, 12">
+            <Grid Grid.Row="0"
+                  VerticalAlignment="Center"
+                  Margin="16, 20, 16, 12"
+                  MaxWidth="{StaticResource ContentMaxWidth}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Column="0"
+                           AutomationProperties.HeadingLevel="Level2"
                            VerticalAlignment="Top"
                            Text="{Binding SelectedPlant.Name}"
                            Foreground="{DynamicResource PrimaryText}"
@@ -245,35 +321,88 @@
                             HorizontalAlignment="Right">
                     <Button Style="{StaticResource DialogButton}"
                             Content="+  Add Schedule"
+                            AutomationProperties.Name="Add Schedule"
                             Command="{Binding AddScheduleCommand}" />
 
                     <Button Style="{StaticResource DialogButton}"
                             Margin="10, 0, 0, 0"
                             Content="-  Delete Plant"
+                            AutomationProperties.Name="Delete Plant"
                             Command="{Binding DeletePlantCommand}" />
                 </StackPanel>
             </Grid>
 
             <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerBrush}" />
 
-            <!-- Status -->
-            <Grid Grid.Row="2">
-                <StackPanel Margin="16, 0, 16, 12">
-                    <TextBlock Text="Status"
+            <!-- Status: scrolls as soon as the cards do not fit above the footer -->
+            <ScrollViewer x:Name="StatusScrollViewer"
+                          Grid.Row="2"
+                          VerticalScrollBarVisibility="Auto"
+                          Focusable="False">
+                <StackPanel x:Name="StatusPanel"
+                            Margin="16, 0, 16, 12"
+                            MaxWidth="{StaticResource ContentMaxWidth}"
+                            RequestBringIntoView="StatusPanel_RequestBringIntoView">
+                    <TextBlock x:Name="StatusHeading"
+                               AutomationProperties.HeadingLevel="Level3"
+                               Text="Status"
                                Foreground="{DynamicResource PrimaryText}"
                                FontSize="24"
                                FontWeight="SemiBold"
                                Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!-- Status Cards (Watering, Fertilizing, Sunlight) -->
-                    <ItemsControl ItemsSource="{Binding CareStatuses}"
-                                  ItemTemplate="{StaticResource CareStatusCardTemplate}" />
+                    <ItemsControl x:Name="CareStatusList"
+                                  ItemsSource="{Binding CareStatuses}"
+                                  ItemTemplate="{StaticResource CareStatusCardTemplate}"
+                                  ItemContainerStyle="{StaticResource CareStatusCardContainer}"
+                                  AutomationProperties.Name="{Binding Text, ElementName=StatusHeading}"
+                                  Focusable="False" />
                 </StackPanel>
+            </ScrollViewer>
 
+            <!-- Shown while no plant is selected, so the empty dashboard says what to do.
+                 F6 reads it out as well. The text is set in the style, because a text set
+                 on the element would win over the trigger that changes it. -->
+            <TextBlock x:Name="EmptyDashboardHint"
+                       Grid.Row="2"
+                       Foreground="{DynamicResource MutedText}"
+                       FontSize="16"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Margin="16, 0, 16, 0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="Select a plant or add a new one" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPlantSelected}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <!-- Nothing to select yet. Only once the plants are loaded, since the list is
+                                 empty for a moment at every start -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Plants.Count}" Value="0" />
+                                    <Condition Binding="{Binding HasLoadedPlants}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Text" Value="Add your first plant to get started" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Footer: stays in view below the cards -->
+            <Grid Grid.Row="3"
+                  Margin="16, 0, 16, 0"
+                  MaxWidth="{StaticResource ContentMaxWidth}">
                 <!-- Notes button -->
                 <Button Style="{StaticResource DialogButton}"
                         Content="View Notes"
-                        Margin="0, 0, 16, 16"
+                        Margin="0, 0, 0, 16"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
                         Command="{Binding OpenNotesCommand}"/>
@@ -284,17 +413,19 @@
                         BorderThickness="1"
                         CornerRadius="8"
                         Padding="10"
-                        Margin="16, 0, 16, 80"
+                        Margin="0, 0, 0, 80"
                         VerticalAlignment="Bottom"
                         Visibility="{Binding IsDebugBuild, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="DEBUG: Simulate"
+                        <TextBlock x:Name="SimulateLabel"
+                                   Text="DEBUG: Simulate"
                                    Foreground="{DynamicResource DangerForeground}"
                                    FontSize="12"
                                    VerticalAlignment="Center"
                                    Margin="0, 0, 8, 0" />
 
                         <TextBox Style="{StaticResource ThemedTextBox}"
+                                 AutomationProperties.Name="{Binding Text, ElementName=SimulateLabel}"
                                  Text="{Binding TimeSimulation.AmountText, UpdateSourceTrigger=PropertyChanged}"
                                  Width="40"
                                  Padding="4"
@@ -302,10 +433,12 @@
                                  VerticalAlignment="Center" />
 
                         <ComboBox Style="{StaticResource ThemedComboBox}"
+                                  AutomationProperties.Name="Time unit"
                                   ItemsSource="{Binding TimeSimulation.AvailableUnits}"
                                   SelectedValuePath="Key"
                                   SelectedValue="{Binding TimeSimulation.Unit}"
                                   Width="90"
+                                  FontSize="14"
                                   Margin="6, 0, 0, 0" />
 
                         <Button Style="{StaticResource StatusCardActionButton}"
@@ -317,6 +450,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </Grid>
+        </views:RegionGrid>
     </Grid>
 </Window>

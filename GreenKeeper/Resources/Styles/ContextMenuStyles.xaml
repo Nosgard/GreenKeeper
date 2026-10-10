@@ -24,9 +24,10 @@
     
     <!-- Context menu entry -->
     <Style x:Key="ThemedMenuItem" TargetType="MenuItem">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
         <Setter Property="Foreground" Value="{DynamicResource PrimaryText}" />
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="10, 2.35, 20, 2.35" />
         <Setter Property="Template">
             <Setter.Value>
@@ -53,7 +54,7 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ControlBorder}" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Foreground" Value="{DynamicResource MutedText}" />

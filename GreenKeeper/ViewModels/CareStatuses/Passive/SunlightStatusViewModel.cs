@@ -26,21 +26,8 @@ namespace GreenKeeper.ViewModels.CareStatuses.Passive
             RemoveCommand = new AsyncRelayCommand(_ => onRemove());
         }
 
-        public override string StatusText
-        {
-            get
-            {
-                string periodText = _sunlightRequirement.Period switch
-                {
-                    SunlightPeriod.Day => "day",
-                    SunlightPeriod.Week => "week",
-                    SunlightPeriod.Month => "month",
-                    SunlightPeriod.Year => "year",
-                    _ => string.Empty
-                };
+        public override string StatusText => $"{_sunlightRequirement.Hours}h / {_sunlightRequirement.Period.NameInText()}";
 
-                return $"{_sunlightRequirement.Hours}h / {periodText}";
-            }
-        }
+        public override string SpokenStatusText => _sunlightRequirement.Period.SpokenHours(_sunlightRequirement.Hours);
     }
 }

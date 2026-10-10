@@ -7,7 +7,7 @@
                     xmlns:editSchedule="clr-namespace:GreenKeeper.ViewModels.CareStatuses.EditOption"
                     mc:Ignorable="d"
                     Icon="{StaticResource AppIcon}"
-                    Title="Edit Schedule" Height="300" Width="450"
+                    Title="Edit Schedule" Height="306" Width="450"
                     Background="{DynamicResource WindowBackground}"
                     WindowStartupLocation="CenterOwner"
                     ResizeMode="NoResize">
@@ -15,16 +15,19 @@
         <!-- Watering / Fertilizing -->
         <DataTemplate DataType="{x:Type editSchedule:EditActiveScheduleViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="{Binding Title, StringFormat='Edit period for {0}'}" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource AmountAndUnitInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
 
                 <TextBlock Text="{Binding PreviewText}"
                            Foreground="{DynamicResource SecondaryText}"
-                           FontSize="13"
+                           FontSize="16"
                            Margin="0, 10, 0, 0" />
             </StackPanel>
         </DataTemplate>
@@ -32,11 +35,14 @@
         <!-- Sunlight -->
         <DataTemplate DataType="{x:Type editSchedule:EditSunlightViewModel}">
             <StackPanel Margin="20">
-                <TextBlock Style="{StaticResource DialogHeading}"
+                <TextBlock x:Name="StepHeading"
+                           Style="{StaticResource DialogHeading}"
                            Text="Edit sunlight requirement" />
 
                 <ContentControl Content="{Binding}"
                                 ContentTemplate="{StaticResource HoursPerPeriodInput}"
+                                AutomationProperties.Name="{Binding Text, ElementName=StepHeading}"
+                                AutomationProperties.IsRequiredForForm="True"
                                 Focusable="False" />
             </StackPanel>
         </DataTemplate>
@@ -48,7 +54,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" />
+        <ContentControl Grid.Row="0" Content="{Binding CurrentStep}" Focusable="False" />
 
         <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
@@ -57,11 +63,13 @@
 
             <Button Style="{StaticResource DialogButton}"
                     Content="Save"
+                    IsDefault="True"
                     Command="{Binding SaveCommand}" />
 
             <Button Style="{StaticResource DialogButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"
+                    IsCancel="True"
                     Command="{Binding CancelCommand}" />
         </StackPanel>
     </Grid>

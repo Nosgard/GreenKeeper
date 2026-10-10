@@ -72,6 +72,33 @@ namespace GreenKeeper.Tests.Services
         }
 
         [Fact]
+        public void Load_GivenWindowPlacementSavedBefore_RestoresIt()
+        {
+            // Given: the placement of the main window, saved when it was closed
+            var placement = new WindowPlacement { Left = 120, Top = 80, Width = 1100, Height = 700, IsMaximized = true };
+            _settingsService.Save(new AppSettings { WindowPlacement = placement });
+
+            // When: the settings are loaded on the next start
+            var settings = _settingsService.Load();
+
+            // Then: position, size and state of the window are back
+            Assert.Equal(placement, settings.WindowPlacement);
+        }
+
+        [Fact]
+        public void Load_GivenFileOfAnEarlierVersion_KnowsNoWindowPlacement()
+        {
+            // Given: a settings file written before the window placement was stored
+            File.WriteAllText(_settingsPath, """{ "Theme": "Dark" }""");
+
+            // When: the settings are loaded
+            var settings = _settingsService.Load();
+
+            // Then: there is no placement, so the window opens at its start size
+            Assert.Null(settings.WindowPlacement);
+        }
+
+        [Fact]
         public void Load_GivenDamagedFile_ReturnsTheDefaults()
         {
             // Given: a settings file that breaks off in the middle

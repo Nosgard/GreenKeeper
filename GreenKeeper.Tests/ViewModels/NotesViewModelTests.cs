@@ -1,4 +1,5 @@
 ﻿using GreenKeeper.Models;
+using GreenKeeper.Services;
 using GreenKeeper.Tests.Fakes;
 using GreenKeeper.ViewModels.Notes;
 
@@ -138,6 +139,22 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public void CancelCommand_GivenModifiedNotes_OffersYesFirst()
+        {
+            // Given: notes that were changed
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+            var dialogService = new FakeDialogService { ConfirmResult = true };
+            var viewModel = new NotesViewModel(plant, dialogService, _ => Task.CompletedTask);
+            viewModel.EditableNotes = "New notes";
+
+            // When: the window is closed and asks "Do you want to save?"
+            viewModel.CancelCommand.Execute(null);
+
+            // Then: "No" would discard the changes here, so "Yes" is offered first
+            Assert.Equal(Answer.Yes, dialogService.OfferedAnswer);
+        }
+
+        [Fact]
         public void CancelCommand_GivenModifiedNotesAndUserDeclinesSave_DiscardsAndClosesWithFalse()
         {
             // Given: a plant with notes, EditableNotes changed to a new value,
@@ -166,6 +183,30 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(dialogService.ConfirmWasCalled);
             Assert.False(saveWasCalled);
             Assert.Equal(new bool?[] { false }, closeResults);
+        }
+
+        [Theory]
+        [InlineData(false, 1)]   // the save works -> one signal
+        [InlineData(true, 0)]    // the save fails -> no signal
+        public void SaveCommand_GivenSaveWorksOrFails_SignalsSavedOnlyWhenItWorked(bool callbackThrows, int expectedSignals)
+        {
+            // Given: changed notes, a save that works or fails, and a listener for the signal
+            var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
+            Func<string, Task> saveNotesAsync = _ =>
+                callbackThrows ? throw new InvalidOperationException("Simulated save failure") : Task.CompletedTask;
+
+            var viewModel = new NotesViewModel(plant, new FakeDialogService(), saveNotesAsync);
+            viewModel.EditableNotes = "New notes";
+
+            int signals = 0;
+            viewModel.Saved += (_, _) => signals++;
+
+            // When: SaveCommand is executed
+            viewModel.SaveCommand.Execute(null);
+
+            // Then: Saved is raised once after a successful save, never after a failure.
+            // The window stays open, so the disabled Save button would be the only other sign
+            Assert.Equal(expectedSignals, signals);
         }
 
         [Fact]

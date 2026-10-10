@@ -1,4 +1,5 @@
-﻿using GreenKeeper.ViewModels.Base;
+﻿using GreenKeeper.Models.Enums;
+using GreenKeeper.ViewModels.Base;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive;
 using GreenKeeper.ViewModels.Wizards.Base;
@@ -52,6 +53,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
 
+        // The sunlight line the way a screen reader should say it ("6 hours per day").
+        public string SpokenSunlight =>
+            $"Sunlight: {_sunlightStepViewModel.SelectedPeriod.SpokenHours(_sunlightStepViewModel.Hours ?? 0)}";
+
         // The summary step is the last step, so proceeding is always possible.
         public bool CanProceed => true;
 
@@ -75,6 +80,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         {
             OnPropertyChanged(nameof(HasSunlight));
             OnPropertyChanged(nameof(Sunlight));
+            OnPropertyChanged(nameof(SpokenSunlight));
         }
     }
 }

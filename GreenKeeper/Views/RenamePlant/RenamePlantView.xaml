@@ -21,16 +21,22 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0">
-            <TextBlock Style="{StaticResource DialogHeading}"
+            <TextBlock x:Name="NameHeading"
+                       Style="{StaticResource DialogHeading}"
                        Text="Enter a new name for the plant" />
 
-            <TextBox x:Name="NameTextBox"
-                     Style="{StaticResource ThemedTextBox}"
+            <!-- Named by the heading, described by the counter below it -->
+            <TextBox Style="{StaticResource ThemedTextBox}"
                      Text="{Binding NewName, UpdateSourceTrigger=PropertyChanged}"
-                     MaxLength="{x:Static models:Plant.MaxNameLength}" />
+                     MaxLength="{x:Static models:Plant.MaxNameLength}"
+                     TextWrapping="Wrap"
+                     AutomationProperties.Name="{Binding Text, ElementName=NameHeading}"
+                     AutomationProperties.HelpText="{Binding Text, ElementName=CounterHint}"
+                     AutomationProperties.IsRequiredForForm="True" />
 
-            <TextBlock Style="{StaticResource InputHint}"
-                       Text="{Binding CharactersRemaining, StringFormat='{}{0} characters remaining'}" />
+            <TextBlock x:Name="CounterHint"
+                       Style="{StaticResource InputHint}"
+                       Text="{Binding CharactersRemainingText}" />
         </StackPanel>
 
         <StackPanel Grid.Row="1"

@@ -33,9 +33,18 @@ namespace GreenKeeper.ViewModels
         private readonly IPlantRepository _plantRepository;
         private readonly IDialogService _dialogService;
         private readonly ITimerService _timerService;
+
+        // The cards of the selected plant. One kept collection, so a card that is still
+        // correct keeps its object, and with it the element a screen reader is on.
+        private readonly ObservableCollection<CareStatusViewModel> _careStatuses = new();
+
+        // The state each plant's entry shows at the moment, so the periodic refresh can
+        // tell whether rebuilding the sidebar would change anything at all.
+        private readonly Dictionary<int, PlantStatus> _shownPlantStatus = new();
         private readonly TimeProvider _timeProvider;
         private Plant? _selectedPlant;
         private string _searchText = string.Empty;
+        private bool _hasLoadedPlants;
 
         public MainViewModel(
             IPlantRepository plantRepository,
@@ -55,7 +64,7 @@ namespace GreenKeeper.ViewModels
             // the ListView picks up this filter automatically, without needing to be changed itself.
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
-            _timerService.Start(CareStatusRefreshInterval, RefreshCareStatuses);
+            _timerService.Start(CareStatusRefreshInterval, RefreshDueStatus);
 
             // The commands only signal the intent to open a window; MainWindow subscribes
             // to the events and opens it, so the ViewModel never sees a window class.
@@ -66,7 +75,7 @@ namespace GreenKeeper.ViewModels
             DeletePlantCommand = new AsyncRelayCommand(_ => DeleteSelectedPlantAsync(), _ => IsPlantSelected);
 
 #if DEBUG
-            TimeSimulation = new TimeSimulationViewModel(() => SelectedPlant, RefreshCareStatuses);
+            TimeSimulation = new TimeSimulationViewModel(() => SelectedPlant, RefreshDueStatus);
 #endif
         }
 
@@ -82,6 +91,39 @@ namespace GreenKeeper.ViewModels
             {
                 Plants.Add(plant);
             }
+
+            RememberPlantStatus();
+            HasLoadedPlants = true;
+        }
+
+        /// <summary>
+        /// True once InitializeAsync has filled Plants. Until then an empty list only means
+        /// the plants are still being loaded, not that there are none.
+        /// </summary>
+        public bool HasLoadedPlants
+        {
+            get => _hasLoadedPlants;
+            private set => SetProperty(ref _hasLoadedPlants, value);
+        }
+
+        // -- Announcements Section --
+
+        /// <summary>
+        /// What an action did, in a short sentence. Sighted users see the result on screen;
+        /// MainWindow hands this text to a screen reader, which stays silent otherwise
+        /// because the focus does not move.
+        /// </summary>
+        public event EventHandler<string>? Announced;
+
+        private void Announce(string text)
+        {
+            Announced?.Invoke(this, text);
+        }
+
+        // What the card of the care type reads at this moment, the way a screen reader says it.
+        private string SpokenStatusOf(CareType careType)
+        {
+            return CareStatuses.First(card => card.Care == careType).SpokenStatusText;
         }
 
         // -- Plant List Section --
@@ -97,6 +139,7 @@ namespace GreenKeeper.ViewModels
             {
                 if (SetProperty(ref _selectedPlant, value))
                 {
+                    RebuildCareStatuses();
                     OnPropertyChanged(nameof(CareStatuses));
                     OnPropertyChanged(nameof(IsPlantSelected));
                 }
@@ -127,6 +170,8 @@ namespace GreenKeeper.ViewModels
 
                     // Re-evaluates FilterPlants for every item in Plants using the NOW-updated SearchText.
                     CollectionViewSource.GetDefaultView(Plants).Refresh();
+
+                    AnnounceSearchResult();
                 }
             }
         }
@@ -155,6 +200,26 @@ namespace GreenKeeper.ViewModels
             return plant.Name.Contains(SearchText, StringComparison.OrdinalIgnoreCase);
         }
 
+        // The list changes while the focus stays in the search box, so a screen reader
+        // hears how many plants match.
+        private void AnnounceSearchResult()
+        {
+            // An emptied search brings back the full list; nothing to report.
+            if (string.IsNullOrWhiteSpace(SearchText))
+            {
+                return;
+            }
+
+            int matchCount = Plants.Count(FilterPlants);
+
+            Announce(matchCount switch
+            {
+                0 => "No plants found",
+                1 => "1 plant found",
+                _ => $"{matchCount} plants found"
+            });
+        }
+
         // -- Care Status Section --
 
         /// <summary>
@@ -167,33 +232,37 @@ namespace GreenKeeper.ViewModels
         /// The fertilizing schedule and the separate sunlight requirement are optional
         /// and will not show up if they are not set for a plant.
         /// </summary>
-        public IEnumerable<CareStatusViewModel> CareStatuses
+        public IEnumerable<CareStatusViewModel> CareStatuses => _careStatuses;
+
+        // Builds the cards of the selected plant, only when the plant or its data changed:
+        // a card holds the schedule it was built on, and AddOrReplace puts a new schedule
+        // object in its place. The periodic refresh keeps the cards (see RefreshDueStatus).
+        private void RebuildCareStatuses()
         {
-            get
+            _careStatuses.Clear();
+
+            if (SelectedPlant == null)
             {
-                if (SelectedPlant == null)
-                {
-                    yield break;
-                }
+                return;
+            }
 
-                var plant = SelectedPlant;
-                CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
+            var plant = SelectedPlant;
+            CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-                // Watering: mandatory for every plant.
-                yield return WateringCard(ScheduleFor(CareType.Watering));
+            // Watering: mandatory for every plant.
+            _careStatuses.Add(WateringCard(ScheduleFor(CareType.Watering)));
 
-                // Fertilizing: optional, only show the status if set for a plant.
-                var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
-                if (fertilizingSchedule != null)
-                {
-                    yield return FertilizingCard(fertilizingSchedule);
-                }
+            // Fertilizing: optional, only show the status if set for a plant.
+            var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
+            if (fertilizingSchedule != null)
+            {
+                _careStatuses.Add(FertilizingCard(fertilizingSchedule));
+            }
 
-                // Sunlight: optional.
-                if (plant.SunlightRequirement != null)
-                {
-                    yield return SunlightCard(plant.SunlightRequirement);
-                }
+            // Sunlight: optional.
+            if (plant.SunlightRequirement != null)
+            {
+                _careStatuses.Add(SunlightCard(plant.SunlightRequirement));
             }
         }
 
@@ -243,13 +312,58 @@ namespace GreenKeeper.ViewModels
         /// OnPropertyChanged: updates the dashboard's status cards for the currently selected plant.
         ///
         /// CollectionViewSource: forces the sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
-        /// for each plant's status dot - without this, the dot would only ever update by coincidence (e.g. when the ListView happens
-        /// to redraw for an unrelated reason).
+        /// and PlantAccessibleNameConverter for each plant's status dot and spoken name - without this, both would only ever update
+        /// by coincidence (e.g. when the ListView happens to redraw for an unrelated reason).
         /// </summary>
         public void RefreshCareStatuses()
         {
+            RebuildCareStatuses();
             OnPropertyChanged(nameof(CareStatuses));
+            RefreshSidebar();
+        }
+
+        /// <summary>
+        /// The periodic refresh. Only time has passed, so only what depends on the current
+        /// day is re-read. The cards keep their objects, and the sidebar is rebuilt only
+        /// once a plant shows a different state, since a screen reader announces every
+        /// rebuilt element again.
+        /// </summary>
+        private void RefreshDueStatus()
+        {
+            foreach (var card in _careStatuses)
+            {
+                card.NotifyDueStatusChanged();
+            }
+
+            if (HasAnyPlantStatusChanged())
+            {
+                RefreshSidebar();
+            }
+        }
+
+        // Rebuilding the view re-runs PlantStatusDotConverter and PlantAccessibleNameConverter
+        // for every entry, so the remembered states are the ones on screen afterwards.
+        private void RefreshSidebar()
+        {
+            RememberPlantStatus();
             CollectionViewSource.GetDefaultView(Plants).Refresh();
+        }
+
+        private void RememberPlantStatus()
+        {
+            _shownPlantStatus.Clear();
+
+            foreach (var plant in Plants)
+            {
+                _shownPlantStatus[plant.Id] = PlantStatusRules.For(plant, Now);
+            }
+        }
+
+        private bool HasAnyPlantStatusChanged()
+        {
+            return Plants.Count != _shownPlantStatus.Count
+                || Plants.Any(plant => !_shownPlantStatus.TryGetValue(plant.Id, out var shown)
+                    || shown != PlantStatusRules.For(plant, Now));
         }
 
         /// <summary>
@@ -323,6 +437,8 @@ namespace GreenKeeper.ViewModels
 
             var savedPlant = await _plantRepository.AddPlantAsync(plant);
             Plants.Add(savedPlant);
+
+            Announce($"{savedPlant.Name} added");
         }
 
         /// <summary>
@@ -346,6 +462,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.CareSchedules.Add(saved);
 
             RefreshCareStatuses();
+            Announce($"{saved.Care.DisplayName()} schedule saved. {SpokenStatusOf(saved.Care)}");
         }
 
         /// <summary>
@@ -363,6 +480,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.SunlightRequirement = saved;
 
             RefreshCareStatuses();
+            Announce($"Sunlight requirement saved. {SpokenStatusOf(CareType.Sunlight)}");
         }
 
         /// <summary>
@@ -395,6 +513,8 @@ namespace GreenKeeper.ViewModels
             // The dashboard header binds to SelectedPlant.Name, so it needs an
             // explicit nudge as well if the renamed plant happens to be selected.
             OnPropertyChanged(nameof(SelectedPlant));
+
+            Announce($"Renamed to {newName}");
         }
 
         // -- Card and Button Actions Section --
@@ -414,7 +534,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to delete \"{plant.Name}\"? This cannot be undone.",
-                "Delete Plant");
+                "Delete Plant",
+                safeAnswer: Answer.No);
 
             if (!isConfirmed)
             {
@@ -436,6 +557,8 @@ namespace GreenKeeper.ViewModels
             // After removing a plant, there is no "selected" plant.
             // Prevent the dashboard from presenting non-existent data.
             SelectedPlant = null;
+
+            Announce($"{plant.Name} deleted");
         }
 
         /// <summary>
@@ -472,6 +595,7 @@ namespace GreenKeeper.ViewModels
             schedule.LastCaredAt = now;
 
             RefreshCareStatuses();
+            Announce($"{careType.DisplayName()} completed. {SpokenStatusOf(careType)}");
         }
 
         // Removes an optional care schedule (Fertilizing) from the selected plant once the user has confirmed.
@@ -486,7 +610,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to remove the {scheduleName} for \"{SelectedPlant.Name}\"?",
-                $"Remove {careType.DisplayName()} Schedule");
+                $"Remove {careType.DisplayName()} Schedule",
+                safeAnswer: Answer.No);
 
             var schedule = SelectedPlant.CareSchedules.FirstOrDefault(s => s.Care == careType);
 
@@ -506,9 +631,9 @@ namespace GreenKeeper.ViewModels
 
             SelectedPlant.CareSchedules.Remove(schedule);
 
-            // CareStatuses has no backing field and reads from the selected plant, so the
-            // refresh is enough to let the removed status card disappear from the ItemsControl.
+            // The refresh rebuilds the cards of the selected plant, so the removed card disappears.
             RefreshCareStatuses();
+            Announce($"{careType.DisplayName()} schedule removed");
         }
 
         // Removes the sunlight requirement from the selected plant once the user has confirmed.
@@ -523,7 +648,8 @@ namespace GreenKeeper.ViewModels
 
             bool isConfirmed = _dialogService.Confirm(
                 $"Are you sure you want to remove the sunlight requirement for \"{SelectedPlant.Name}\"?",
-                "Remove Sunlight Requirement");
+                "Remove Sunlight Requirement",
+                safeAnswer: Answer.No);
 
             if (!isConfirmed)
             {
@@ -542,6 +668,7 @@ namespace GreenKeeper.ViewModels
             SelectedPlant.SunlightRequirement = null;
 
             RefreshCareStatuses();
+            Announce("Sunlight requirement removed");
         }
 
         // Runs a repository call and turns a failure into an error dialog. Returns whether it succeeded,

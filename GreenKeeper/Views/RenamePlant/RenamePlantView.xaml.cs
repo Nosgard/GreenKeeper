@@ -15,14 +15,6 @@ namespace GreenKeeper.Views.RenamePlant
             InitializeComponent();
             _renamePlantViewModel = new RenamePlantViewModel(plant);
             Attach(_renamePlantViewModel);
-
-            // Puts the cursor straight into the input field,
-            // so the user can continue typing at the end of the current name.
-            Loaded += (_, _) =>
-            {
-                NameTextBox.Focus();
-                NameTextBox.CaretIndex = NameTextBox.Text.Length;
-            };
         }
 
         // Exposes the name to the caller (MainWindow), analogous to

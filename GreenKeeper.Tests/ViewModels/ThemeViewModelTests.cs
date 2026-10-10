@@ -38,6 +38,25 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(isDarkTheme);
         }
 
+        // The visible wording says "light" where the code says Bright.
+        [Theory]
+        [InlineData(Theme.Bright, "Switch to dark theme")]
+        [InlineData(Theme.Dark, "Switch to light theme")]
+        public void ToggleLabel_GivenActiveTheme_NamesTheThemeAClickSwitchesTo(Theme activeTheme, string expected)
+        {
+            // Given: a ViewModel whose theme service reports the active theme
+            var themeService = new FakeThemeService();
+            themeService.ApplyTheme(activeTheme);
+            var viewModel = new ThemeViewModel(themeService, new FakeSettingsService());
+
+            // When: the label of the toggle is read
+            var label = viewModel.ToggleLabel;
+
+            // Then: it says what a click does, like the icon. A screen reader announces the
+            // icon-only button by it and the tooltip shows it
+            Assert.Equal(expected, label);
+        }
+
         [Fact]
         public void ToggleCommand_GivenBrightIsActive_AppliesDark()
         {
@@ -100,6 +119,23 @@ namespace GreenKeeper.Tests.ViewModels
             // Then: IsDarkTheme was announced. Without this the colors would change
             // but the toggle button would keep showing the icon of the old theme
             Assert.Contains(nameof(ThemeViewModel.IsDarkTheme), raisedProperties);
+        }
+
+        [Fact]
+        public void ToggleCommand_WhenExecuted_RaisesPropertyChangedForToggleLabel()
+        {
+            // Given: a ViewModel whose PropertyChanged events are recorded
+            var viewModel = new ThemeViewModel(new FakeThemeService(), new FakeSettingsService());
+
+            var raisedProperties = new List<string>();
+            viewModel.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+
+            // When: the toggle command is executed
+            viewModel.ToggleCommand.Execute(null);
+
+            // Then: ToggleLabel was announced. Otherwise the screen reader and the tooltip
+            // would keep offering the theme that has just become active
+            Assert.Contains(nameof(ThemeViewModel.ToggleLabel), raisedProperties);
         }
 
         [Fact]

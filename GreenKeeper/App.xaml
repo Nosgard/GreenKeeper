@@ -6,19 +6,25 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Order matters: a dictionary can only use the StaticResources of those merged above it -->
                 <ResourceDictionary Source="/Resources/Styles/Themes/BrightTheme.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/Layout.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/FocusStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardButtonStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/StatusCardStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/StatusDotStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ComboBoxStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/InputStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ScrollBarStyles.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/ContextMenuStyles.xaml" />
+                <ResourceDictionary Source="/Resources/Styles/ToolTipStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <BitmapImage x:Key="AppIcon" UriSource="/Resources/AppIcon.ico" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <converters:PlantStatusDotConverter x:Key="PlantStatusDotConverter" />
+            <converters:PlantAccessibleNameConverter x:Key="PlantAccessibleNameConverter" />
             <converters:ThemeToggleIconConverter x:Key="ThemeToggleIconConverter" />
         </ResourceDictionary>
     </Application.Resources>

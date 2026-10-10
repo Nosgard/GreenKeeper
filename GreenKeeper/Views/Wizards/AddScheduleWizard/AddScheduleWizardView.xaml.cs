@@ -8,7 +8,7 @@ namespace GreenKeeper.Views.Wizards.AddScheduleWizard
     /// <summary>
     /// Interaction logic for AddScheduleWizardView.xaml.
     /// </summary>
-    public partial class AddScheduleWizardView : DialogWindow
+    public partial class AddScheduleWizardView : WizardWindow
     {
         private readonly AddScheduleWizardViewModel _addScheduleWizardViewModel;
 

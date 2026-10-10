@@ -50,7 +50,7 @@ namespace GreenKeeper.ViewModels.Notes
             _editableNotes = _originalNotes;
 
             SaveCommand = new AsyncRelayCommand(
-                execute: _ => TrySaveAsync(),
+                execute: _ => SaveAsync(),
                 canExecute: _ => IsDirty);
 
             CancelCommand = new AsyncRelayCommand(
@@ -94,6 +94,12 @@ namespace GreenKeeper.ViewModels.Notes
         public event EventHandler<bool>? RequestClose;
 
         /// <summary>
+        /// Raised when the Save button has saved the notes. The window stays open then,
+        /// so NotesView uses it to keep the focus in the notes and to tell a screen reader.
+        /// </summary>
+        public event EventHandler? Saved;
+
+        /// <summary>
         /// Runs the actual save via the callback, updates _originalNotes on success (resets IsDirty)
         /// and returns whether it worked. Used by both commands so both share the same
         /// error behavior - on failure the entered text stays untouched instead of being lost.
@@ -117,6 +123,14 @@ namespace GreenKeeper.ViewModels.Notes
             return true;
         }
 
+        private async Task SaveAsync()
+        {
+            if (await TrySaveAsync())
+            {
+                Saved?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
         /// <summary>
         /// Called when the Cancel button is clicked (or the window is closed otherwise).
         /// Without changes the window simply closes. With unsaved changes the user is
@@ -130,9 +144,11 @@ namespace GreenKeeper.ViewModels.Notes
                 return;
             }
 
+            // "No" would discard the changes, so here "Yes" is the safe answer.
             bool shouldSave = _dialogService.Confirm(
                 "There are unsaved changes. Do you want to save?",
-                "Unsaved Changes");
+                "Unsaved Changes",
+                safeAnswer: Answer.Yes);
 
             if (!shouldSave)
             {

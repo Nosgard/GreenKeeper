@@ -57,7 +57,8 @@ namespace GreenKeeper.Scheduling
         }
 
         /// <summary>
-        /// The text of a status card: "Today", "3 days", "Overdue for 2 weeks".
+        /// The due date as text: "Today", "3 days", "Overdue for 2 weeks". The status
+        /// cards word it further ("Due today", "Due in 3 days").
         ///
         /// The "today" it measures against is passed in rather than read from the
         /// clock: every result depends on the calendar position of the current day -

@@ -76,7 +76,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         {
             var input = _detailStep!.CreateInput();
 
-            if (input.ExistsOn(_plant) && !_dialogService.Confirm(input.OverwriteQuestion, input.OverwriteTitle))
+            if (input.ExistsOn(_plant) && !_dialogService.Confirm(input.OverwriteQuestion, input.OverwriteTitle, safeAnswer: Answer.No))
             {
                 return false;
             }

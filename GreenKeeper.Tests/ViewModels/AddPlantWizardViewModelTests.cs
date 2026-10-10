@@ -1,4 +1,5 @@
-﻿using GreenKeeper.Models.Enums;
+﻿using GreenKeeper.Models;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps;
 using GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Active;
@@ -148,6 +149,38 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public void FertilizingStep_GivenAmountAboveTheLimit_CannotProceedAndDoesNotOfferToSkip()
+        {
+            // Given: the optional fertilizing step with more days than the limit of 365
+            var step = new FertilizingStepViewModel { AmountText = "400" };
+
+            // When: the state of the Next button is read
+            var canProceed = step.CanProceed;
+            var label = step.NextButtonLabel;
+
+            // Then: the button stays "Next" and is locked, "Skip" would drop the entry unnoticed
+            Assert.False(canProceed);
+            Assert.Equal("Next", label);
+        }
+
+        [Theory]
+        [InlineData(50, "50 characters remaining")]   // nothing typed yet
+        [InlineData(2, "2 characters remaining")]
+        [InlineData(1, "1 character remaining")]
+        [InlineData(0, "0 characters remaining")]     // the name reached the length limit
+        public void PlantNameStep_GivenRemainingCharacters_CountsDownInWords(int remaining, string expected)
+        {
+            // Given: the name step with a name that leaves the given number of characters
+            var step = new PlantNameStepViewModel { PlantName = new string('a', Plant.MaxNameLength - remaining) };
+
+            // When: the counter below the field is read
+            var text = step.CharactersRemainingText;
+
+            // Then: it names what is left, in the singular for a single character
+            Assert.Equal(expected, text);
+        }
+
+        [Fact]
         public void CurrentStep_WhenChanged_RaisesPropertyChanged()
         {
             // Given: a wizard with a listener and a valid name
@@ -226,6 +259,19 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.True(summary.HasSunlight);
             Assert.Equal("6 Hours / Day", summary.Sunlight);
             Assert.Equal("Finish", summary.NextButtonLabel);
+        }
+
+        [Fact]
+        public void SummaryStep_GivenSunlight_WritesItOutForScreenReaders()
+        {
+            // Given: a wizard on the summary step with 6 hours of sunlight per day
+            var wizard = WizardAtSummary(sunlightHours: "6");
+
+            // When: the sunlight line is read the way a screen reader announces it
+            var spoken = ((SummaryStepViewModel)wizard.CurrentStep).SpokenSunlight;
+
+            // Then: the line names the field and spells "6 Hours / Day" out like the sunlight card
+            Assert.Equal("Sunlight: 6 hours per day", spoken);
         }
 
         [Fact]

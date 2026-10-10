@@ -48,7 +48,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
                 var now = _timeProvider.GetLocalNow().DateTime;
                 var nextDueAt = DueDateCalculator.ToDueDate(now, Amount!.Value, SelectedUnit);
 
-                return $"New due date: {DueDateCalculator.ToDueDateText(nextDueAt, now)}";
+                return $"New due date in: {DueDateCalculator.ToDueDateText(nextDueAt, now)}";
             }
         }
 

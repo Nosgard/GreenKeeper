@@ -6,7 +6,7 @@ namespace GreenKeeper.Views.Wizards.AddPlantWizard
     /// <summary>
     /// Interaction logic for AddPlantWizardView.xaml.
     /// </summary>
-    public partial class AddPlantWizardView : DialogWindow
+    public partial class AddPlantWizardView : WizardWindow
     {
         private readonly AddPlantWizardViewModel _addPlantWizardViewModel;
 

@@ -6,11 +6,16 @@ namespace GreenKeeper.Tests.Fakes
     {
         public bool ConfirmResult { get; set; } = true;
         public bool ConfirmWasCalled { get; private set; }
+
+        // The answer the last question offered first; null while nothing was asked.
+        public Answer? OfferedAnswer { get; private set; }
+
         public bool ShowErrorWasCalled { get; private set; }
 
-        public bool Confirm(string message, string title)
+        public bool Confirm(string message, string title, Answer safeAnswer)
         {
             ConfirmWasCalled = true;
+            OfferedAnswer = safeAnswer;
             return ConfirmResult;
         }
 
