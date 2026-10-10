@@ -5,9 +5,11 @@
     <!-- Layout tokens: how the UI adapts to the window and the screen. All sizes are
          in units of the design (scale 1). -->
 
-    <!-- Smallest window the layout is built for; 640 is a common small breakpoint -->
-    <sys:Double x:Key="WindowMinWidth">640</sys:Double>
-    <sys:Double x:Key="WindowMinHeight">480</sys:Double>
+    <!-- Smallest window: the room the layout needs at the lowest scale, about 800 x 540
+         design units inside the frame, so three cards and their buttons fit without
+         scrolling -->
+    <sys:Double x:Key="WindowMinWidth">700</sys:Double>
+    <sys:Double x:Key="WindowMinHeight">500</sys:Double>
 
     <!-- The screen the design size of the main window (Width and Height in
          MainWindow.xaml) is meant for. On a larger screen the window opens larger in
@@ -17,11 +19,11 @@
     <!-- How the UI follows the size of the window. Larger than designed: half of the
          difference enlarges the UI, the other half gives it room. Smaller than designed:
          three quarters shrink the UI, so the status texts still fit next to their
-         buttons at the smallest window. The limits are the scales of the smallest
-         window (640 x 480) and of a window twice the design size; beyond them the UI
-         keeps its size. -->
+         buttons at the smallest window. The lower limit keeps the smallest text of
+         14 at 12 px (12 / 14), the upper one is the scale of a window twice the
+         design size; beyond them the UI keeps its size. -->
     <layout:FluidScale x:Key="WindowScale"
-                       Minimum="0.78"
+                       Minimum="0.857"
                        Maximum="1.5"
                        GrowRate="0.5"
                        ShrinkRate="0.75" />

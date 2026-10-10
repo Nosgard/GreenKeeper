@@ -12,7 +12,7 @@ namespace GreenKeeper.Tests.Layout
         // The size MainWindow.xaml is designed at.
         private static readonly Size DesignSize = new(900, 650);
 
-        // The rates of Layout.xaml with limits wider than the app's 0.78 and 1.5, so the
+        // The rates of Layout.xaml with limits wider than the app's 0.857 and 1.5, so the
         // rate alone decides the factor in the tests below.
         private static FluidScale ScaleWithoutLimits() =>
             new() { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
@@ -76,11 +76,11 @@ namespace GreenKeeper.Tests.Layout
 
         [Theory]
         [InlineData(9000, 6500, 1.5)]   // far larger than the design size
-        [InlineData(90, 65, 0.78)]      // far smaller than the design size
+        [InlineData(90, 65, 0.857)]     // far smaller than the design size
         public void FactorFor_GivenExtremeWindowSize_StaysWithinTheLimits(double width, double height, double expected)
         {
-            // Given: a scale limited to 0.78 at the bottom and 1.5 at the top
-            var scale = new FluidScale { Minimum = 0.78, Maximum = 1.5, GrowRate = 0.5, ShrinkRate = 0.75 };
+            // Given: a scale limited to 0.857 at the bottom and 1.5 at the top
+            var scale = new FluidScale { Minimum = 0.857, Maximum = 1.5, GrowRate = 0.5, ShrinkRate = 0.75 };
 
             // When: the factor for the extreme window size is calculated
             var factor = scale.FactorFor(DesignSize, new Size(width, height));
