@@ -203,3 +203,7 @@ Questions and bug reports go to the [issues](https://github.com/Nosgard/GreenKee
 
 - The icons on the status cards (water drop, pill and sun) come from [Streamline](https://www.streamlinehq.com/).
 - I used Claude Code to help me fix bugs, improve the code structure and implement new features.
+
+## License
+
+GreenKeeper is available under the [MIT License](LICENSE): you can use, copy, change and share it, as long as the license text goes with it. The status card icons from Streamline are not covered by it; they fall under Streamline's own license terms.
