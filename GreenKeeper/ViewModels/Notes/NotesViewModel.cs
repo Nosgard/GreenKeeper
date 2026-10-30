@@ -15,7 +15,7 @@ namespace GreenKeeper.ViewModels.Notes
         private readonly IDialogService _dialogService;
 
         /// <summary>
-        /// Handles the actual persistence via MainViewModel.UpdatePlantNotesAsync -
+        /// Handles the actual persistence via DashboardViewModel.UpdatePlantNotesAsync -
         /// NotesViewModel itself still knows neither the repository nor the database.
         /// Func is used instead of Action because saving needs to await the result
         /// to keep the dialog open on failure.

@@ -110,7 +110,7 @@
                              x:Name="SearchTextBox"
                              AutomationProperties.Name="Search plants"
                              FocusVisualStyle="{StaticResource FocusRing}"
-                             Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding PlantList.SearchText, UpdateSourceTrigger=PropertyChanged}"
                              Background="Transparent"
                              BorderThickness="0"
                              Foreground="{DynamicResource SearchText}"
@@ -153,8 +153,8 @@
                       Margin="6, 0, 6, 0"
                       HorizontalContentAlignment="Stretch"
                       ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      ItemsSource="{Binding Plants}"
-                      SelectedItem="{Binding SelectedPlant, Mode=TwoWay}"
+                      ItemsSource="{Binding PlantList.Plants}"
+                      SelectedItem="{Binding PlantList.SelectedPlant, Mode=TwoWay}"
                       SelectionChanged="PlantList_SelectionChanged">
                 <ListView.Resources>
                     <!-- Context menu of a plant entry. It sits on the entry rather than on its
@@ -166,7 +166,7 @@
                                  Style="{StaticResource ThemedContextMenu}">
                         <MenuItem Header="Rename..."
                                   Style="{StaticResource ThemedMenuItem}"
-                                  Command="{Binding PlacementTarget.Tag.RenamePlantCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  Command="{Binding PlacementTarget.Tag.PlantList.RenamePlantCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                                   CommandParameter="{Binding}" />
                     </ContextMenu>
                 </ListView.Resources>
@@ -265,7 +265,7 @@
                                 <Setter Property="Text" Value="No plants yet" />
                             </DataTrigger>
                             <!-- At every start the list is empty for a moment, until the plants are loaded -->
-                            <DataTrigger Binding="{Binding HasLoadedPlants}" Value="False">
+                            <DataTrigger Binding="{Binding PlantList.HasLoadedPlants}" Value="False">
                                 <Setter Property="Visibility" Value="Collapsed" />
                             </DataTrigger>
                         </Style.Triggers>
@@ -280,7 +280,7 @@
                     Padding="0, 10"
                     Content="+  Add Plant"
                     AutomationProperties.Name="Add Plant"
-                    Command="{Binding AddPlantCommand}"/>
+                    Command="{Binding PlantList.AddPlantCommand}"/>
         </views:RegionGrid>
 
         <!-- Dashboard -->
@@ -308,13 +308,13 @@
                 <TextBlock Grid.Column="0"
                            AutomationProperties.HeadingLevel="Level2"
                            VerticalAlignment="Top"
-                           Text="{Binding SelectedPlant.Name}"
+                           Text="{Binding PlantList.SelectedPlant.Name}"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="28"
                            FontWeight="Bold"
                            TextWrapping="NoWrap"
                            TextTrimming="CharacterEllipsis"
-                           ToolTip="{Binding SelectedPlant.Name}" />
+                           ToolTip="{Binding PlantList.SelectedPlant.Name}" />
 
                 <StackPanel Grid.Column="1"
                             Orientation="Horizontal"
@@ -322,13 +322,13 @@
                     <Button Style="{StaticResource DialogButton}"
                             Content="+  Add Schedule"
                             AutomationProperties.Name="Add Schedule"
-                            Command="{Binding AddScheduleCommand}" />
+                            Command="{Binding Dashboard.AddScheduleCommand}" />
 
                     <Button Style="{StaticResource DialogButton}"
                             Margin="10, 0, 0, 0"
                             Content="-  Delete Plant"
                             AutomationProperties.Name="Delete Plant"
-                            Command="{Binding DeletePlantCommand}" />
+                            Command="{Binding Dashboard.DeletePlantCommand}" />
                 </StackPanel>
             </Grid>
 
@@ -349,11 +349,11 @@
                                Foreground="{DynamicResource PrimaryText}"
                                FontSize="24"
                                FontWeight="SemiBold"
-                               Visibility="{Binding IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                               Visibility="{Binding Dashboard.IsPlantSelected, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!-- Status Cards (Watering, Fertilizing, Sunlight) -->
                     <ItemsControl x:Name="CareStatusList"
-                                  ItemsSource="{Binding CareStatuses}"
+                                  ItemsSource="{Binding Dashboard.CareStatuses}"
                                   ItemTemplate="{StaticResource CareStatusCardTemplate}"
                                   ItemContainerStyle="{StaticResource CareStatusCardContainer}"
                                   AutomationProperties.Name="{Binding Text, ElementName=StatusHeading}"
@@ -378,15 +378,15 @@
                         <Setter Property="Text" Value="Select a plant or add a new one" />
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsPlantSelected}" Value="False">
+                            <DataTrigger Binding="{Binding Dashboard.IsPlantSelected}" Value="False">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                             <!-- Nothing to select yet. Only once the plants are loaded, since the list is
                                  empty for a moment at every start -->
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
-                                    <Condition Binding="{Binding Plants.Count}" Value="0" />
-                                    <Condition Binding="{Binding HasLoadedPlants}" Value="True" />
+                                    <Condition Binding="{Binding PlantList.Plants.Count}" Value="0" />
+                                    <Condition Binding="{Binding PlantList.HasLoadedPlants}" Value="True" />
                                 </MultiDataTrigger.Conditions>
                                 <Setter Property="Text" Value="Add your first plant to get started" />
                             </MultiDataTrigger>
@@ -405,7 +405,7 @@
                         Margin="0, 0, 0, 16"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Bottom"
-                        Command="{Binding OpenNotesCommand}"/>
+                        Command="{Binding Dashboard.OpenNotesCommand}"/>
 
                 <!-- Debug section -->
                 <Border Background="{DynamicResource DangerBackground}"

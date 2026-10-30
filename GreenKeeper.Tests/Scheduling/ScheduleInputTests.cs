@@ -76,7 +76,7 @@ namespace GreenKeeper.Tests.Scheduling
             Assert.Null(editor.SavedCareSchedule);
         }
 
-        // Stands in for MainViewModel, which the app passes as the editor.
+        // Stands in for DashboardViewModel, which the app passes as the editor.
         private sealed class RecordingPlantCareEditor : IPlantCareEditor
         {
             public CareSchedule? SavedCareSchedule { get; private set; }

@@ -64,11 +64,11 @@ namespace GreenKeeper
 
             _mainViewModel.Announced += MainViewModel_Announced;
 
-            _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
-            _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
-            _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
-            _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
-            _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
+            _mainViewModel.PlantList.AddPlantRequested += MainViewModel_AddPlantRequested;
+            _mainViewModel.Dashboard.AddScheduleRequested += MainViewModel_AddScheduleRequested;
+            _mainViewModel.Dashboard.EditScheduleRequested += MainViewModel_EditScheduleRequested;
+            _mainViewModel.Dashboard.OpenNotesRequested += MainViewModel_OpenNotesRequested;
+            _mainViewModel.PlantList.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
             // Stops the periodic status card refresh once this window (and therefore the application)
             // is closed, so the timer doesn't keep firing after the app is meant to shut down.
@@ -229,7 +229,7 @@ namespace GreenKeeper
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await RunAsync(() => _mainViewModel.InitializeAsync(), "Failed to load the plant", "Loading Error");
+            await RunAsync(() => _mainViewModel.PlantList.InitializeAsync(), "Failed to load the plant", "Loading Error");
         }
 
         // Opens the Add Plant wizard. If the user completed it, the built plant is handed off to be persisted.
@@ -242,7 +242,7 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => _mainViewModel.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
+            await RunAsync(() => _mainViewModel.PlantList.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
         }
 
         // Opens the Add Schedule wizard. If completed, its result (a care schedule or a sunlight requirement) is persisted.
@@ -255,7 +255,7 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel), "Schedule could not be saved", "Saving Error");
+            await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel.Dashboard), "Schedule could not be saved", "Saving Error");
         }
 
         // Opens the edit dialog. If saved, its result is persisted the exact same way as a wizard result -
@@ -269,13 +269,13 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => editView.Result.SaveAsync(_mainViewModel), "The change could not be saved", "Saving Error");
+            await RunAsync(() => editView.Result.SaveAsync(_mainViewModel.Dashboard), "The change could not be saved", "Saving Error");
         }
 
         // Opens the notes window. It saves through the callback itself, so there is nothing to persist afterwards.
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
-            var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text));
+            var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.Dashboard.UpdatePlantNotesAsync(plant, text));
 
             notesView.ShowDialog(this);
         }
@@ -291,7 +291,7 @@ namespace GreenKeeper
             }
 
             await RunAsync(
-                () => _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName),
+                () => _mainViewModel.PlantList.RenamePlantAsync(plant, renameView.ConfirmedName),
                 "The plant could not be renamed",
                 "Renaming Error");
         }
