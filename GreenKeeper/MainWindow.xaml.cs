@@ -17,9 +17,8 @@ using System.Windows.Media;
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml. Opens the dialogs the ViewModel asks
-    /// for through its events and hands their results back to it - the only place
-    /// where ViewModel and windows meet.
+    /// Opens the windows that PlantListViewModel and DashboardViewModel ask for through their
+    /// events and hands the results back to them, so those ViewModels never see a window class.
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -70,16 +69,13 @@ namespace GreenKeeper
             _mainViewModel.Dashboard.OpenNotesRequested += MainViewModel_OpenNotesRequested;
             _mainViewModel.PlantList.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
-            // Stops the periodic status card refresh once this window (and therefore the application)
-            // is closed, so the timer doesn't keep firing after the app is meant to shut down.
+            // Otherwise the refresh timer keeps firing while the app shuts down.
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             Closing += (_, _) => SavePlacement();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
-            // The constructor cannot be async, so loading the plants will be fired
-            // via the Loaded event once the window is ready.
             Loaded += MainWindow_Loaded;
 
             DataContext = _mainViewModel;
@@ -204,8 +200,9 @@ namespace GreenKeeper
             }
         }
 
-        // A card button the keyboard scrolls into view comes in only up to its own edge,
-        // and the scroll area would cut its focus ring off. So the ring comes along.
+        // A card button the keyboard scrolls into view comes in only up to its own edge, and
+        // the scroll area would cut its focus ring off. This handler asks again for the button
+        // plus the ring's reach (FocusRingReach) on every side.
         private void StatusPanel_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
             // Requests that already name a rectangle, including the one raised below, and
@@ -224,15 +221,15 @@ namespace GreenKeeper
         }
 
         // -- Dialogs Section --
-        // Event handlers have to be "async void", so nobody can await them: every database
-        // call goes through RunAsync, which reports a failure as an error dialog.
+        // Nobody awaits these async void handlers, so loading the plants and saving a dialog's
+        // result go through RunAsync, which reports a failure as an error dialog. The notes
+        // window handles its own failures.
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await RunAsync(() => _mainViewModel.PlantList.InitializeAsync(), "Failed to load the plant", "Loading Error");
         }
 
-        // Opens the Add Plant wizard. If the user completed it, the built plant is handed off to be persisted.
         private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
         {
             var wizardView = new AddPlantWizardView();
@@ -245,7 +242,6 @@ namespace GreenKeeper
             await RunAsync(() => _mainViewModel.PlantList.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
         }
 
-        // Opens the Add Schedule wizard. If completed, its result (a care schedule or a sunlight requirement) is persisted.
         private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
             var wizardView = new AddScheduleWizardView(plant, _dialogService);
@@ -258,8 +254,8 @@ namespace GreenKeeper
             await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel.Dashboard), "Schedule could not be saved", "Saving Error");
         }
 
-        // Opens the edit dialog. If saved, its result is persisted the exact same way as a wizard result -
-        // editing a schedule and replacing it via the wizard are, from the database's point of view, the identical operation.
+        // Opens the edit dialog. Its result is saved like a wizard result: for the database,
+        // editing a schedule and replacing it through the wizard are the same operation.
         private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
             var editView = new EditScheduleView(e.plant, e.care, _timeProvider);
@@ -272,7 +268,7 @@ namespace GreenKeeper
             await RunAsync(() => editView.Result.SaveAsync(_mainViewModel.Dashboard), "The change could not be saved", "Saving Error");
         }
 
-        // Opens the notes window. It saves through the callback itself, so there is nothing to persist afterwards.
+        // The notes window saves through the callback itself, so nothing is left to persist here.
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
             var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.Dashboard.UpdatePlantNotesAsync(plant, text));
@@ -280,7 +276,8 @@ namespace GreenKeeper
             notesView.ShowDialog(this);
         }
 
-        // Opens the rename dialog for the plant that was right-clicked in the sidebar.
+        // Opens the rename dialog for the plant whose context menu was used, which need not be the
+        // selected one.
         private async void MainViewModel_RenamePlantRequested(object? sender, Plant plant)
         {
             var renameView = new RenamePlantView(plant);

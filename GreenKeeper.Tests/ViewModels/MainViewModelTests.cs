@@ -20,7 +20,7 @@ namespace GreenKeeper.Tests.ViewModels
 
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
-            // Sanity check on the initial state, before the actual "When" happens.
+            // Sanity check of the start state, before the When.
             Assert.False(viewModel.Dashboard.IsPlantSelected);
 
             var raisedProperties = new List<string>();
@@ -30,10 +30,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a plant is selected
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Then: IsPlantSelected reflects the new state, and PropertyChanged was
-            // raised for all three properties that depend on the selection.
-            // CareStatuses matters just as much as the other two: without its
-            // notification the status cards would keep showing the previous plant
+            // Then: IsPlantSelected is true, and PropertyChanged was raised for SelectedPlant,
+            // IsPlantSelected and CareStatuses
             Assert.True(viewModel.Dashboard.IsPlantSelected);
             Assert.Contains(nameof(PlantListViewModel.SelectedPlant), raisedProperties);
             Assert.Contains(nameof(DashboardViewModel.IsPlantSelected), raisedProperties);
@@ -56,8 +54,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a plant is selected
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Then: the view hears about the plant first, then about its cards, and only
-            // then that a plant is selected, so the status heading appears with the cards in place
+            // Then: PropertyChanged was raised for SelectedPlant first, then for CareStatuses, and
+            // only then for IsPlantSelected, so the status heading appears with the cards in place
             Assert.Equal(
                 new[]
                 {
@@ -100,8 +98,8 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         // -- Periodic Refresh Tests --
-        // A tick used to rebuild the cards and the sidebar, and a screen reader announced
-        // the focused element again. A tick must leave untouched what did not change.
+        // A tick must leave untouched what did not change: a screen reader reads a rebuilt card
+        // or sidebar entry out again.
 
         [Fact]
         public async Task TimerTick_WhenTriggered_ReachesTheCardsOfTheSelectedPlant()
@@ -185,8 +183,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the periodic refresh runs
             timerService.TriggerTick();
 
-            // Then: the sidebar is not rebuilt. A rebuild replaces every entry, and a screen
-            // reader on one of them would hear it again
+            // Then: the sidebar is not rebuilt
             Assert.Equal(0, sidebarRebuilds());
         }
 

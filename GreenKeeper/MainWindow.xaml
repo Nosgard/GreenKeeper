@@ -17,11 +17,9 @@
     <!-- Width and Height above are the design size: the UI is drawn at scale 1 there and
          scales from it at every other size (InitializeResponsiveSize in MainWindow.xaml.cs) -->
 
-    <!-- Main Grid -->
     <Grid Background="{DynamicResource WindowBackground}">
-        <!-- Sidebar and dashboard share the width in the proportion of the design size
-             (250 : 634 of the 884 px inside the window frame), the sidebar within its
-             limits. -->
+        <!-- Sidebar and dashboard share the width as at the design size, where 250 + 634
+             are the 884 px inside the window frame. -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250*"
                               MinWidth="{StaticResource SidebarMinWidth}"
@@ -29,8 +27,7 @@
             <ColumnDefinition Width="634*" />
         </Grid.ColumnDefinitions>
 
-        <!-- Sidebar. F6 and Shift+F6 switch between it and the dashboard (FocusRegions).
-             The name tells a screen reader which of the two it is in. -->
+        <!-- Sidebar. F6 and Shift+F6 switch between it and the dashboard (FocusRegions). -->
         <views:RegionGrid x:Name="Sidebar"
                           AutomationProperties.Name="Sidebar"
                           AutomationProperties.AcceleratorKey="F6"
@@ -61,10 +58,8 @@
                            VerticalAlignment="Top"
                            Margin="0, 4, 0, 0" />
 
-                <!-- Theme toggle. It shows only an icon, so its label is the name a screen
-                     reader announces and the text of its tooltip. AccessibleName instead of
-                     AutomationProperties.Name, because the label changes with every click and
-                     WPF would not report that. The top margin centers the icon on the capital
+                <!-- Theme toggle. Its label changes with every click, so it goes through
+                     AccessibleName. The top margin centers the icon on the capital
                      letters of the heading, about 22 below the top of the row, and makes the
                      row 38 high, which keeps the edges of the search box below sharp. -->
                 <Button Grid.Column="1"
@@ -77,8 +72,8 @@
                         Padding="4"
                         Margin="0, 6, 0, 0"
                         Command="{Binding Theme.ToggleCommand}">
-                    <!-- The PNG supplies only the shape (its alpha channel), the color comes
-                         from PrimaryText - so the icon fades along on a theme change.
+                    <!-- The PNG supplies only the shape (its alpha channel); the color comes from
+                         PrimaryText, so the icon fades along with a theme change.
                          24 = the button's 32 minus its padding. -->
                     <Rectangle Width="24"
                                Height="24"
@@ -143,7 +138,6 @@
                 </Grid>
             </Border>
 
-            <!-- List of plants -->
             <ListView Grid.Row="2"
                       x:Name="PlantList"
                       AutomationProperties.Name="Plants"
@@ -159,8 +153,7 @@
                 <ListView.Resources>
                     <!-- Context menu of a plant entry. It sits on the entry rather than on its
                          content, so the keyboard opens it too (menu key, Shift+F10): WPF looks for a
-                         context menu on the focused element and its ancestors. One menu per entry,
-                         so it is not shared. -->
+                         context menu on the focused element and its ancestors. -->
                     <ContextMenu x:Key="PlantContextMenu"
                                  x:Shared="False"
                                  Style="{StaticResource ThemedContextMenu}">
@@ -174,9 +167,8 @@
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <!-- A screen reader announces the entry by its name and the state of its
-                             status dot: "Aloe Vera, overdue". AccessibleName instead of
-                             AutomationProperties.Name, because the state changes while the entry is
-                             in use and WPF would not report that. -->
+                             status dot: "Aloe Vera, overdue". The state changes while the entry is
+                             in use, so the name goes through AccessibleName. -->
                         <Setter Property="views:AccessibleName.Text" Value="{Binding Converter={StaticResource PlantAccessibleNameConverter}}" />
                         <EventSetter Event="KeyDown" Handler="PlantEntry_KeyDown" />
                         <!-- The context menu opens in a popup outside the window's tree: it
@@ -212,7 +204,6 @@
                     </Style>
                 </ListView.ItemContainerStyle>
 
-                <!-- Template for plant entries -->
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -221,14 +212,16 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Status dot. Its state is part of the entry's name, so a
-                                 screen reader skips the dot itself. -->
+                            <!-- Status dot. Its shapes have no automation element, so a screen
+                                 reader skips it; the entry's name carries its state. -->
                             <ContentPresenter Grid.Column="0"
                                               Content="{Binding Converter={StaticResource PlantStatusDotConverter}}"
                                               ContentTemplate="{StaticResource PlantStatusDot}"
                                               VerticalAlignment="Center"
                                               Margin="0, 0, 4, 0" />
 
+                            <!-- VerticalAlignment="Center" leaves the name a little low in its
+                                 entry. The margin lifts it by 1.5 and keeps the entry's height. -->
                             <TextBlock Grid.Column="1"
                        Text="{Binding Name}"
                        Foreground="{DynamicResource PrimaryText}"
@@ -253,7 +246,7 @@
                        Margin="16, 8, 16, 0">
                 <TextBlock.Style>
                     <Style TargetType="TextBlock">
-                        <!-- A search found no plant, in the words a screen reader hears -->
+                        <!-- A search found no plant; the same words PlantListViewModel announces -->
                         <Setter Property="Text" Value="No plants found" />
                         <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
@@ -273,7 +266,6 @@
                 </TextBlock.Style>
             </TextBlock>
 
-            <!-- Add button -->
             <Button Grid.Row="3"
                     Style="{StaticResource DialogButton}"
                     Margin="10, 8, 10, 12"
@@ -283,7 +275,6 @@
                     Command="{Binding PlantList.AddPlantCommand}"/>
         </views:RegionGrid>
 
-        <!-- Dashboard -->
         <views:RegionGrid x:Name="Dashboard"
                           AutomationProperties.Name="Dashboard"
                           AutomationProperties.AcceleratorKey="F6"
@@ -362,8 +353,8 @@
             </ScrollViewer>
 
             <!-- Shown while no plant is selected, so the empty dashboard says what to do.
-                 F6 reads it out as well. The text is set in the style, because a text set
-                 on the element would win over the trigger that changes it. -->
+                 F6 reads it out as well. The text sits in the style, because a text set on the
+                 element would win over the trigger that changes it. -->
             <TextBlock x:Name="EmptyDashboardHint"
                        Grid.Row="2"
                        Foreground="{DynamicResource MutedText}"
@@ -381,8 +372,7 @@
                             <DataTrigger Binding="{Binding Dashboard.IsPlantSelected}" Value="False">
                                 <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
-                            <!-- Nothing to select yet. Only once the plants are loaded, since the list is
-                                 empty for a moment at every start -->
+                            <!-- Nothing to select yet, once the plants have loaded -->
                             <MultiDataTrigger>
                                 <MultiDataTrigger.Conditions>
                                     <Condition Binding="{Binding PlantList.Plants.Count}" Value="0" />
@@ -399,7 +389,6 @@
             <Grid Grid.Row="3"
                   Margin="16, 0, 16, 0"
                   MaxWidth="{StaticResource ContentMaxWidth}">
-                <!-- Notes button -->
                 <Button Style="{StaticResource DialogButton}"
                         Content="View Notes"
                         Margin="0, 0, 0, 16"

@@ -42,10 +42,8 @@ namespace GreenKeeper.ViewModels
 #endif
         }
 
-        // The sidebar: the plant list with its search and the selection.
         public PlantListViewModel PlantList { get; }
 
-        // The dashboard: the cards of the selected plant and the actions on them.
         public DashboardViewModel Dashboard { get; }
 
         // -- Announcements Section --
@@ -82,10 +80,8 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Stop the periodic status card refresh (see _timerService.Start in the constructor).
-        /// Called by MainWindow.xaml.cs when the main window is closed, so the timer doesn't
-        /// keep running (and referencing this ViewModel) after the application would otherwise
-        /// have shut down.
+        /// Stops the periodic refresh started in the constructor. MainWindow calls it when it
+        /// closes.
         /// </summary>
         public void StopCareStatusRefreshTimer()
         {

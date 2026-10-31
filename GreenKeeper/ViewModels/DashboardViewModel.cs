@@ -16,8 +16,6 @@ namespace GreenKeeper.ViewModels
     /// <summary>
     /// Backs the dashboard of the main window: the status cards of the plant selected in
     /// the sidebar and every change to that plant's care, its notes and its deletion.
-    /// Windows are only requested through events and MainWindow opens them, so this class
-    /// knows no window class and stays testable.
     /// </summary>
     public class DashboardViewModel : ObservableObject, IPlantCareEditor
     {
@@ -27,8 +25,9 @@ namespace GreenKeeper.ViewModels
         private readonly PlantListViewModel _plantList;
         private readonly Action<string> _announce;
 
-        // The cards of the selected plant. One kept collection, so a card that is still
-        // correct keeps its object, and with it the element a screen reader is on.
+        // The cards of the selected plant. A rebuild replaces all of them; until then
+        // CareStatuses hands out the same objects, so the periodic refresh updates them in
+        // place and a screen reader stays on its element (see MainViewModel.RefreshDueStatus).
         private readonly ObservableCollection<CareStatusViewModel> _careStatuses = new();
 
         // plantList: owns the selection and the sidebar, which a change to a plant's care refreshes.
@@ -46,22 +45,17 @@ namespace GreenKeeper.ViewModels
             _plantList = plantList;
             _announce = announce;
 
-            // The commands only signal the intent to open a window; MainWindow subscribes
-            // to the events and opens it, so the ViewModel never sees a window class.
             AddScheduleCommand = new RelayCommand(_ => AddScheduleRequested?.Invoke(this, SelectedPlant!), _ => IsPlantSelected);
             OpenNotesCommand = new RelayCommand(_ => OpenNotesRequested?.Invoke(this, SelectedPlant!), _ => IsPlantSelected);
             DeletePlantCommand = new AsyncRelayCommand(_ => DeleteSelectedPlantAsync(), _ => IsPlantSelected);
         }
 
-        // The sidebar owns the selection, the dashboard only reads it.
         private Plant? SelectedPlant => _plantList.SelectedPlant;
 
-        // Check if a plant is selected.
-        // Useful for visibility bindings like the status title in the dashboard.
         public bool IsPlantSelected => SelectedPlant != null;
 
         /// <summary>
-        /// Shows the cards of the plant just selected in the sidebar. MainViewModel hands
+        /// Shows the cards of the plant now selected in the sidebar. MainViewModel hands
         /// this to PlantListViewModel, whose SelectedPlant setter calls it after reporting
         /// the new selection.
         /// </summary>
@@ -81,14 +75,8 @@ namespace GreenKeeper.ViewModels
         // -- Care Status Section --
 
         /// <summary>
-        /// One card per defined CareType. Depending on which care types are set,
-        /// only the cards of the assigned care types will appear in the status.
-        ///
-        /// Important!
-        /// The watering schedule is mandatory for all plants, which means that
-        /// its status card is always visible.
-        /// The fertilizing schedule and the separate sunlight requirement are optional
-        /// and will not show up if they are not set for a plant.
+        /// The cards of the selected plant: Watering always, since it is mandatory, Fertilizing
+        /// and Sunlight only when the plant has them.
         /// </summary>
         public IEnumerable<CareStatusViewModel> CareStatuses => _careStatuses;
 
@@ -107,17 +95,14 @@ namespace GreenKeeper.ViewModels
             var plant = SelectedPlant;
             CareSchedule? ScheduleFor(CareType type) => plant.CareSchedules.FirstOrDefault(s => s.Care == type);
 
-            // Watering: mandatory for every plant.
             _careStatuses.Add(WateringCard(ScheduleFor(CareType.Watering)));
 
-            // Fertilizing: optional, only show the status if set for a plant.
             var fertilizingSchedule = ScheduleFor(CareType.Fertilizing);
             if (fertilizingSchedule != null)
             {
                 _careStatuses.Add(FertilizingCard(fertilizingSchedule));
             }
 
-            // Sunlight: optional.
             if (plant.SunlightRequirement != null)
             {
                 _careStatuses.Add(SunlightCard(plant.SunlightRequirement));
@@ -158,20 +143,9 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Refreshes both the dashboard and the sidebar after any change to a plant's care schedules or sunlight requirement,
-        /// e.g. after completing, adding, replacing or removing a schedule.
-        ///
-        /// Called from multiple places rather than relying on ObservableCollection notifications, because the change happens
-        /// directly on an already-loaded plant object (Plant/CareSchedule don't implement INotifyPropertyChanged).
-        /// Plants itself is never swapped or re-added to, so the UI would otherwise never learn that something changed.
-        ///
-        /// What both things do:
-        ///
-        /// OnPropertyChanged: updates the dashboard's status cards for the currently selected plant.
-        ///
-        /// CollectionViewSource: forces the sidebar's ListView to re-evaluate every item, which in turn re-runs PlantStatusDotConverter
-        /// and PlantAccessibleNameConverter for each plant's status dot and spoken name - without this, both would only ever update
-        /// by coincidence (e.g. when the ListView happens to redraw for an unrelated reason).
+        /// Rebuilds the cards and refreshes the sidebar after a change to a plant's care. Plant
+        /// and CareSchedule raise no PropertyChanged, so without RefreshSidebar the status dot
+        /// and the spoken name of a plant would not follow the change.
         /// </summary>
         public void RefreshCareStatuses()
         {
@@ -185,19 +159,18 @@ namespace GreenKeeper.ViewModels
         public ICommand AddScheduleCommand { get; }
         public ICommand OpenNotesCommand { get; }
 
-        // MainWindow.xaml.cs subscribes to these and opens the respective window (View).
+        // MainWindow handles these and opens the window each one asks for.
         public event EventHandler<Plant>? AddScheduleRequested;
         public event EventHandler<Plant>? OpenNotesRequested;
         public event EventHandler<(Plant plant, CareType care)>? EditScheduleRequested;
 
         // -- Plant Changes Section --
-        // Called by MainWindow with the result of a dialog, so the callers await them
-        // in their own try/catch; the ViewModel only persists and updates the local objects.
+        // Called with a dialog's result. MainWindow reports a failure through RunAsync; for
+        // UpdatePlantNotesAsync the notes window does that.
 
         /// <summary>
-        /// Calculates NextDueAt/LastCaredAt for a new or replacing care schedule,
-        /// persists it via the repository, then updates the local CareSchedules
-        /// list so the status card appears immediately without a DB reload.
+        /// Saves the schedule with its interval starting now and puts the saved one into the
+        /// plant's CareSchedules, so the card shows it without reloading the plants.
         /// </summary>
         public async Task AddOrReplaceCareScheduleAsync(CareSchedule careSchedule)
         {
@@ -210,7 +183,6 @@ namespace GreenKeeper.ViewModels
 
             var saved = await _plantRepository.AddOrReplaceCareScheduleAsync(SelectedPlant.Id, careSchedule);
 
-            // Swap out any old local entry of the same care type for the saved one.
             SelectedPlant.CareSchedules.RemoveAll(s => s.Care == saved.Care);
             SelectedPlant.CareSchedules.Add(saved);
 
@@ -219,8 +191,8 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Persists a new/replacing sunlight requirement for the selected plant -
-        /// same principle as AddOrReplaceCareScheduleAsync, just no date calculation needed.
+        /// Saves a new or replacing sunlight requirement for the selected plant, like
+        /// AddOrReplaceCareScheduleAsync but without a due date to calculate.
         /// </summary>
         public async Task AddOrReplaceSunlightRequirementAsync(SunlightRequirement sunlightRequirement)
         {
@@ -236,10 +208,6 @@ namespace GreenKeeper.ViewModels
             _announce($"Sunlight requirement saved. {SpokenStatusOf(CareType.Sunlight)}");
         }
 
-        /// <summary>
-        /// Persists new notes text for the given plant, then updates the local,
-        /// in-memory plant object so it reflects the saved state.
-        /// </summary>
         public async Task UpdatePlantNotesAsync(Plant plant, string notes)
         {
             await _plantRepository.UpdatePlantNotesAsync(plant.Id, notes);
@@ -251,7 +219,6 @@ namespace GreenKeeper.ViewModels
 
         public ICommand DeletePlantCommand { get; }
 
-        // Deletes the currently selected plant, after the user confirms.
         private async Task DeleteSelectedPlantAsync()
         {
             if (SelectedPlant == null)
@@ -283,31 +250,25 @@ namespace GreenKeeper.ViewModels
 
             _plantList.Plants.Remove(plant);
 
-            // After removing a plant, there is no "selected" plant.
-            // Prevent the dashboard from presenting non-existent data.
             _plantList.SelectedPlant = null;
 
             _announce($"{plant.Name} deleted");
         }
 
         /// <summary>
-        /// Marks an active care schedule (Watering/Fertilizing) as "done now":
-        /// calculates a new due date starting from the exact moment of the click,
-        /// persists that new due date to the database, and then updates the local,
-        /// in-memory copy so the status card reflects the change immediately.
+        /// Completes an active care (Watering, Fertilizing): the next due date counts from the
+        /// moment of the click.
         /// </summary>
         private async Task CompleteCareScheduleAsync(CareType careType)
         {
             var schedule = SelectedPlant?.CareSchedules.FirstOrDefault(s => s.Care == careType);
 
-            // No saved amount or unit -> No calculation of a new interval.
             if (schedule == null || !schedule.HasInterval())
             {
                 return;
             }
 
-            // Calculated here, so the exact same values that get persisted to the database are
-            // also the ones applied to the local object afterwards.
+            // Calculated once, so the database and the local object afterwards get the same values.
             var now = Now;
             var nextDueAt = schedule.NextDueDateFrom(now);
 
@@ -327,7 +288,6 @@ namespace GreenKeeper.ViewModels
             _announce($"{careType.DisplayName()} completed. {SpokenStatusOf(careType)}");
         }
 
-        // Removes an optional care schedule (Fertilizing) from the selected plant once the user has confirmed.
         private async Task RemoveCareScheduleAsync(CareType careType)
         {
             if (SelectedPlant == null)
@@ -360,12 +320,10 @@ namespace GreenKeeper.ViewModels
 
             SelectedPlant.CareSchedules.Remove(schedule);
 
-            // The refresh rebuilds the cards of the selected plant, so the removed card disappears.
             RefreshCareStatuses();
             _announce($"{careType.DisplayName()} schedule removed");
         }
 
-        // Removes the sunlight requirement from the selected plant once the user has confirmed.
         private async Task RemoveSunlightRequirementAsync()
         {
             if (SelectedPlant?.SunlightRequirement == null)

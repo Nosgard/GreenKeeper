@@ -16,8 +16,7 @@ namespace GreenKeeper.Tests.ViewModels
         // The clock every ViewModel under test runs on, so due dates are exact instead of "now".
         public static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
 
-        // How often the sidebar's view is rebuilt from now on. A rebuild replaces every
-        // entry, which makes a screen reader read one out again. WPF reports
+        // How often the sidebar's view is rebuilt from now on. WPF reports
         // ICollectionView.Refresh() as a Reset, so that is the action counted.
         public static Func<int> SidebarRebuildsOf(MainViewModel viewModel)
         {
@@ -69,8 +68,7 @@ namespace GreenKeeper.Tests.ViewModels
             return viewModel;
         }
 
-        // What the sidebar lists: its ListView is bound to Plants and therefore shows
-        // the default view of that collection, which is where the search filter applies.
+        // What the sidebar lists: the default view of Plants, which carries the search filter.
         public static List<string> VisiblePlantNames(MainViewModel viewModel)
         {
             return CollectionViewSource.GetDefaultView(viewModel.PlantList.Plants)

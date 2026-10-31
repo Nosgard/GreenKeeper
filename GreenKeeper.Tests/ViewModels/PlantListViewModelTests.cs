@@ -27,7 +27,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: InitializeAsync is called
             await viewModel.PlantList.InitializeAsync();
 
-            // Then: Plants should contain exactly the seeded plant
+            // Then: Plants holds the seeded plant and nothing else
             Assert.Single(viewModel.PlantList.Plants);
             Assert.Equal("Aloe Vera", viewModel.PlantList.Plants[0].Name);
         }
@@ -44,7 +44,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: InitializeAsync is called
             await viewModel.PlantList.InitializeAsync();
 
-            // Then: the empty list counts as loaded, and the view hears about it
+            // Then: the empty list counts as loaded, and PropertyChanged was raised for HasLoadedPlants
             Assert.True(viewModel.PlantList.HasLoadedPlants);
             Assert.Contains(nameof(PlantListViewModel.HasLoadedPlants), raisedProperties);
         }
@@ -63,7 +63,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a second plant is added
             await viewModel.PlantList.AddPlantAsync(new Plant { Name = "Basil" });
 
-            // Then: both plants should be present, not just the new one
+            // Then: the list holds the old plant and the new one
             Assert.Equal(2, viewModel.PlantList.Plants.Count);
             Assert.Contains(viewModel.PlantList.Plants, p => p.Name == "Aloe Vera");
             Assert.Contains(viewModel.PlantList.Plants, p => p.Name == "Basil");
@@ -81,7 +81,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a plant is added
             var exception = await Record.ExceptionAsync(() => viewModel.PlantList.AddPlantAsync(new Plant { Name = "Basil" }));
 
-            // Then: the exception is propagated and the plant does NOT appear in the UI-bound collection
+            // Then: the exception is propagated and the plant does not appear in the UI-bound collection
             Assert.IsType<InvalidOperationException>(exception);
             Assert.Empty(viewModel.PlantList.Plants);
         }
@@ -112,14 +112,14 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public async Task SearchText_GivenPlantIsSelected_ResetsSelectedPlantToNull()
         {
-            // Given: an initialized MainViewModel with a plant currently selected
+            // Given: an initialized MainViewModel with a plant selected
             var plantRepository = new FakePlantRepository();
             plantRepository.SeedPlants(AloeVera());
 
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Sanity check before the actual "When".
+            // Sanity check before the When.
             Assert.NotNull(viewModel.PlantList.SelectedPlant);
 
             // When: the search text changes
@@ -141,12 +141,10 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SearchText = "al";
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // When: SearchText is set to the exact same value again
+            // When: SearchText is set to the same value again
             viewModel.PlantList.SearchText = "al";
 
-            // Then: nothing actually changed, so the selection should be preserved
-            // (the setter's early-return guard for unchanged values should prevent
-            // the deselection logic from running again)
+            // Then: the value did not change, so the selection stays
             Assert.NotNull(viewModel.PlantList.SelectedPlant);
         }
 
@@ -185,7 +183,7 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(new[] { "Peace Lily", "Basil", "Calla Lily" }, VisiblePlantNames(viewModel));
         }
 
-        // -- CanExecute & Event Tests --
+        // -- Add Plant Command Tests --
 
         [Fact]
         public async Task AddPlantCommand_Execute_RaisesAddPlantRequested()
@@ -257,8 +255,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: RenamePlantCommand is executed from the context menu of the other plant
             viewModel.PlantList.RenamePlantCommand.Execute(rightClickedPlant);
 
-            // Then: RenamePlantRequested was raised exactly once, with the plant
-            // that was right-clicked - not with the selected one
+            // Then: RenamePlantRequested was raised exactly once, with the plant whose context menu
+            // was used, not with the selected one
             Assert.Equal(1, eventRaisedCount);
             Assert.Same(rightClickedPlant, raisedPlant);
         }
@@ -300,8 +298,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the selected plant is renamed
             await viewModel.PlantList.RenamePlantAsync(viewModel.PlantList.Plants[0], "Basil");
 
-            // Then: SelectedPlant was announced, so the dashboard header - bound to
-            // SelectedPlant.Name - re-reads the name instead of keeping the old one
+            // Then: PropertyChanged was raised for SelectedPlant, so the dashboard header (bound to
+            // SelectedPlant.Name) re-reads the name instead of keeping the old one
             Assert.Contains(nameof(PlantListViewModel.SelectedPlant), raisedProperties);
         }
 
@@ -318,8 +316,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the aloe vera gets a name the search does not match
             await viewModel.PlantList.RenamePlantAsync(viewModel.PlantList.Plants[0], "Snake Plant");
 
-            // Then: the sidebar was refreshed and no longer lists the plant - without
-            // the refresh the entry would stay and keep showing the old name
+            // Then: the sidebar was refreshed and no longer lists the plant; without the refresh
+            // the entry would stay and keep showing the old name
             Assert.Empty(VisiblePlantNames(viewModel));
         }
 
