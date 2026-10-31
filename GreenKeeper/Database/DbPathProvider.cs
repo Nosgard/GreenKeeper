@@ -5,16 +5,10 @@ namespace GreenKeeper.Database
     public static class DbPathProvider
     {
         /// <summary>
-        /// Determines the single, consistent path for the SQLite database file.
-        /// Used both by the runtime DbContextFactory and by the design-time factory
-        /// that the EF Core migration tooling needs - both must always agree on the
-        /// same file; otherwise migrations could end up targeting a different
-        /// database than the one the app actually uses.
-        /// 
-        /// Stored under %LocalAppData%\GreenKeeper, not the program directory:
-        /// this location is always writable by the current user regardless
-        /// of install location or permissions and survives app updates/reinstalls
-        /// since it's independent of where the executable itself lives.
+        /// The path of the SQLite file. The app and the EF Core migration tooling both take it
+        /// from here, so migrations reach the file the app uses. It lies under
+        /// %LocalAppData%\GreenKeeper rather than next to the program: the user can write there
+        /// wherever the app is installed, and the file survives updates and reinstalls.
         /// </summary>
         public static string GetDatabasePath()
         {
@@ -22,20 +16,14 @@ namespace GreenKeeper.Database
         }
 
         /// <summary>
-        /// The settings file lives next to the database, for the same reasons.
-        /// It deliberately stays out of SQLite: these are preferences of the
-        /// installation rather than data, and they have to be readable before the
-        /// database has even been opened.
+        /// The settings file lives next to the database, for the same reasons. It stays out of
+        /// SQLite because it holds preferences of the installation, not the user's plant data.
         /// </summary>
         public static string GetSettingsPath()
         {
             return Path.Combine(EnsureAppDataFolder(), "settings.json");
         }
 
-        /// <summary>
-        /// Creates the folder if it is not there yet and returns it. Both paths go
-        /// through here, so the location is defined in exactly one place.
-        /// </summary>
         private static string EnsureAppDataFolder()
         {
             string folder = Path.Combine(

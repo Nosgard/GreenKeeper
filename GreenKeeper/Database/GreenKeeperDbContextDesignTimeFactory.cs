@@ -3,13 +3,8 @@
 namespace GreenKeeper.Database
 {
     /// <summary>
-    /// Separate factory, used ONLY by the EF Core migration tooling
-    /// (Add-Migration / dotnet ef), never by the app itself at runtime.
-    /// 
-    /// Necessary because GreenKeeperDbContext has no parameterless
-    /// constructor (it requires DbContextOptions to be passed in)
-    /// and this project has no central DI startup configuration
-    /// the tooling could otherwise discover automatically.
+    /// For the EF Core tools (Add-Migration, dotnet ef): GreenKeeperDbContext has no
+    /// parameterless constructor, and the app has no DI setup the tools could discover.
     /// </summary>
     public class GreenKeeperDbContextDesignTimeFactory : IDesignTimeDbContextFactory<GreenKeeperDbContext>
     {

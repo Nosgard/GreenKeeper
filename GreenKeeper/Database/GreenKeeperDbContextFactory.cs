@@ -3,13 +3,9 @@
 namespace GreenKeeper.Database
 {
     /// <summary>
-    /// Runtime factory that creates a fresh, short-lived GreenKeeperDbContext
-    /// instance on demand. Used by the repository layer: every single
-    /// database operation gets its own context via this factory,
-    /// instead of one context living for the entire app session - this way,
-    /// a failure in one operation (e.g. a locked file, a constraint violation)
-    /// can never leave a shared context in a broken state that would affect
-    /// subsequent, unrelated operations.
+    /// Creates a new GreenKeeperDbContext for every database operation of the repository.
+    /// A failed operation (a locked file, a violated constraint) then cannot leave a shared
+    /// context broken for the next one.
     /// </summary>
     public class GreenKeeperDbContextFactory : IDbContextFactory<GreenKeeperDbContext>
     {

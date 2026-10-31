@@ -9,8 +9,7 @@ using System.Windows;
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for App.xaml. The composition root: everything the main
-    /// window needs is created and wired up here, in one place.
+    /// The composition root: creates everything the main window needs and wires it up.
     /// </summary>
     public partial class App : Application
     {
@@ -23,16 +22,13 @@ namespace GreenKeeper
 
             if (!await TryPrepareDatabaseAsync(contextFactory, dialogService))
             {
-                // If preparing the database fails, the app cannot work in any meaningful way.
-                // Every feature depends on the database, so the app must shut down.
+                // Every feature needs the database, so the app cannot run without it.
                 Shutdown();
                 return;
             }
 
-            // Restore the theme the user picked last time. This has to happen before
-            // the window is created - applying it afterwards would show the window in
-            // the default theme first and only then switch. Load never throws, so with a
-            // missing or damaged settings file the app simply starts in the default theme.
+            // Restore the last theme before the window exists; applied later, the window would
+            // show the default theme first.
             var settingsService = new SettingsService();
             var themeService = new ThemeService();
             themeService.ApplyTheme(settingsService.Load().Theme);
@@ -44,20 +40,15 @@ namespace GreenKeeper
                 TimeProvider.System,
                 new ThemeViewModel(themeService, settingsService));
 
-            // Create the main window manually. StartupUri would show the window immediately
-            // before the code above had any chance to run.
+            // The app creates the window here, not through StartupUri, which would show it before
+            // the code above has run.
             var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System, settingsService);
             mainWindow.Show();
         }
 
         /// <summary>
-        /// Applies every migration that hasn't run on this machine yet; on a first
-        /// launch, this creates the entire schema from scratch.
-        ///
-        /// Why this exists: An end user who downloads the released application never executes "Update-Database"
-        /// manually - therefore their machine would have no tables at all, and the app would crash on the
-        /// first data access with a "no such table" error. Applying migrations here, at startup, makes the app
-        /// self-sufficient on any machine.
+        /// Applies the pending migrations. Users of the release never run Update-Database, so
+        /// without this the first query would fail with "no such table".
         /// </summary>
         private static async Task<bool> TryPrepareDatabaseAsync(GreenKeeperDbContextFactory contextFactory, IDialogService dialogService)
         {
