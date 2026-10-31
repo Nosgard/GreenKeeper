@@ -5,11 +5,10 @@
          ways, so nobody has to tell red, yellow and green apart: color, the sign inside
          (check, clock hands, exclamation mark) and the tooltip. The outline in the text
          color keeps the dot visible on every background of both themes, where the fills
-         alone do not reach a contrast of 3:1. Drawn in a box of 20 x 20. It has no
-         automation element; the entry's name carries the state for screen readers. -->
+         alone do not reach a contrast of 3:1. -->
 
-    <!-- The same fills in both themes; the outline separates them from either
-         background. The sign is dark on the light fills and white on the red one. -->
+    <!-- The same fills in both themes. The sign is dark on the light fills and white on
+         the red one. -->
     <SolidColorBrush x:Key="StatusUpToDateFill" Color="#3DBE4A" />
     <SolidColorBrush x:Key="StatusDueTodayFill" Color="#F6C21A" />
     <SolidColorBrush x:Key="StatusOverdueFill" Color="#D92D20" />

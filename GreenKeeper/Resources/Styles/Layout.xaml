@@ -16,12 +16,10 @@
          the same proportion. -->
     <Size x:Key="ReferenceScreenSize">1920,1080</Size>
 
-    <!-- How the UI follows the size of the window. Larger than designed: half of the
-         difference enlarges the UI, the other half gives it room. Smaller than designed:
-         three quarters shrink the UI, so the status texts still fit next to their
-         buttons at the smallest window. The lower limit keeps the smallest text of
-         14 at 12 px (12 / 14), the upper one is the scale of a window twice the
-         design size; beyond them the UI keeps its size. -->
+    <!-- How the UI follows the size of the window (rates: see FluidScale). Shrinking at
+         0.75 keeps the status texts next to their buttons at the smallest window. The
+         lower limit keeps the smallest text of 14 at 12 px (12 / 14), the upper one is
+         the scale of a window twice the design size; beyond them the UI keeps its size. -->
     <layout:FluidScale x:Key="WindowScale"
                        Minimum="0.857"
                        Maximum="1.5"

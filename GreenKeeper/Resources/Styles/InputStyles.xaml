@@ -54,7 +54,9 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             SnapsToDevicePixels="True">
-                        <!-- Padding and scroll bar settings are applied by the TextBox itself -->
+                        <!-- The TextBox applies Padding itself and hands its scroll bar settings to
+                             this host, where they replace the Hidden values below (the notes field
+                             scrolls that way) -->
                         <ScrollViewer x:Name="PART_ContentHost"
                                       Focusable="False"
                                       HorizontalScrollBarVisibility="Hidden"
