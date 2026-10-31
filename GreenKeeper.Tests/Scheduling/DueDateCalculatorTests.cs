@@ -6,8 +6,7 @@ namespace GreenKeeper.Tests.Scheduling
 {
     public class DueDateCalculatorTests
     {
-        // Every text is measured against the same pinned "today", so the results do
-        // not depend on the calendar position of the day the tests happen to run on.
+        // A pinned "today", so the results do not depend on the day the tests run.
         private static readonly DateTime Today = new(2025, 5, 1);
 
         [Fact]
@@ -19,17 +18,14 @@ namespace GreenKeeper.Tests.Scheduling
             // When: the due date text is calculated
             var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the result should read "Today"
+            // Then: it reads "Today"
             Assert.Equal("Today", result);
         }
 
         /// <summary>
-        /// The one-day case is a regression test for a historical bug: a due date exactly
-        /// one calendar day in the past used to be displayed as "Overdue for 0 days"
-        /// instead of "Overdue for 1 day". The cause was comparing the full,
-        /// time-of-day-inclusive due date directly against an already Date-truncated
-        /// "today" value - since less than 24 full hours had elapsed, the day difference
-        /// was truncated to 0 instead of being calculated on a pure calendar-day basis.
+        /// Overdue spans read in the largest unit that has elapsed in full, in the singular for
+        /// one and in the plural for more. A due date one calendar day back reads "Overdue for 1 day",
+        /// not "Overdue for 0 days".
         /// </summary>
         [Theory]
         [InlineData(1, TimeUnit.Days, "Overdue for 1 day")]
@@ -49,7 +45,7 @@ namespace GreenKeeper.Tests.Scheduling
             // When: the due date text is calculated
             var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the span reads as overdue, in the largest unit that has completely elapsed
+            // Then: the span reads as overdue, in the largest unit that has elapsed in full
             Assert.Equal(expected, result);
         }
 
@@ -71,22 +67,17 @@ namespace GreenKeeper.Tests.Scheduling
             // When: the due date text is calculated
             var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the span is reported in the largest unit that has completely elapsed
+            // Then: the span is reported in the largest unit that has elapsed in full
             Assert.Equal(expected, result);
         }
 
         /// <summary>
-        /// Regression test for a structural bug: the number of full calendar months
-        /// was derived by comparing the two day-of-month numbers. That comparison is
-        /// wrong whenever a month step gets clamped to a shorter month - Jan 31 plus
-        /// one month is Feb 28, so Feb 28 IS one full month after Jan 31, but
-        /// 28 &lt; 31 made the code count zero months. The span then fell through to
-        /// the week branch and the card read "4 weeks" instead of "1 month".
+        /// A month step can be clamped: Jan 31 + 1 month is Feb 28, so Feb 28 is one full month
+        /// after Jan 31, although 28 &lt; 31. Comparing the day-of-month numbers would count
+        /// zero months here, and the card would read "4 weeks" instead of "1 month".
         ///
-        /// The dates are pinned rather than derived from DateTime.Now: the bug only
-        /// surfaces when one end of the span sits on a day the other month does not
-        /// have, which on a "today"-relative test would be reachable on a handful of
-        /// days per year and silently pass on every other day.
+        /// The dates are pinned rather than derived from DateTime.Now: a test relative to today
+        /// would reach such a month end on a few days per year only and pass on every other day.
         /// </summary>
         [Theory]
         [InlineData("2025-01-31", "2025-02-28")] // 28 days, Jan 31 + 1 month clamps to Feb 28
@@ -109,8 +100,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// The overdue direction of the same clamping bug - here the due date is the
-        /// month end and "today" is the clamped target.
+        /// The overdue direction of the same clamping: the due date falls on a day the next month
+        /// does not have, and "today" is the clamped target.
         /// </summary>
         [Theory]
         [InlineData("2024-02-29", "2024-01-31")] // 29 days overdue
@@ -131,8 +122,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// The same clamping mistake existed in the year calculation: Feb 29 plus one
-        /// year is Feb 28, which the day-number comparison counted as zero full years.
+        /// Years clamp like months: Feb 29 plus one year is Feb 28, which counts as one full
+        /// year.
         /// </summary>
         [Fact]
         public void ToDueDateText_GivenSpanFromALeapDayToTheClampedAnniversary_ReturnsOneYear()
@@ -150,11 +141,9 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Regression test for a second structural bug: the unit was picked from the
-        /// FULL month count while the amount was calculated separately, so the two
-        /// could disagree and the card read "12 months" - a unit the display should
-        /// never produce. Pins the exact boundary: the text switches to years only
-        /// once a whole calendar year has elapsed, never a day earlier.
+        /// Unit and amount have to come from the same count; a separate amount could disagree
+        /// with the unit and make the card read "12 months". The text switches to years once a
+        /// whole calendar year has elapsed, not a day earlier.
         /// </summary>
         [Theory]
         [InlineData("2025-12-31", "11 months")] // one day short of the year
@@ -200,11 +189,9 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Keeps the historical "12 months" symptom nailed down for every calendar
-        /// position rather than for the two pinned dates above. Counting only whole
-        /// units makes that rendering impossible by construction - this test is what
-        /// would notice if a later change reintroduced a separate amount calculation
-        /// that can overshoot its own branch again.
+        /// Checks every calendar position, not only the two pinned dates above, for the text
+        /// "12 months". Counting whole units rules it out; this test notices if a separate
+        /// amount calculation comes back.
         /// </summary>
         [Fact]
         public void ToDueDateText_ForEveryReferenceDayOfALeapYear_NeverRendersTwelveMonths()
@@ -227,9 +214,9 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// The week branch is the one unit that is not calendar-dependent, so it
-        /// truncates on a plain seven-day basis. Pinned days make the boundaries
-        /// explicit: a second week is only reported once all fourteen days are over.
+        /// Weeks do not depend on the calendar and count in steps of seven days. Pinned days
+        /// make the boundaries explicit: a second week is only reported once all fourteen days
+        /// are over.
         /// </summary>
         [Theory]
         [InlineData(7, "1 week")]
@@ -251,13 +238,12 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Pins the day on which the text switches from one unit to the next. The
-        /// property test below only checks the amount, so without these pairs a
-        /// span of 28 days could silently start reading "28 days" instead of
-        /// "4 weeks" and still pass.
+        /// Pins the day on which the text switches from one unit to the next. The property test
+        /// below only checks the amount, so without these pairs a span of 28 days could read
+        /// "28 days" instead of "4 weeks" and still pass.
         ///
-        /// May is used as the reference month because its 31 days let the week
-        /// branch reach its widest before a full month is complete.
+        /// May is the reference month because its 31 days let the week branch reach its widest
+        /// before a full month is complete.
         /// </summary>
         [Theory]
         [InlineData(6, "6 days")]     // days ...
@@ -276,19 +262,16 @@ namespace GreenKeeper.Tests.Scheduling
             // When: the due date text is calculated
             var result = DueDateCalculator.ToDueDateText(nextDueAt, reference);
 
-            // Then: the unit changes exactly one day after the larger one is full
+            // Then: the text switches to the larger unit on the day that unit is complete
             Assert.Equal(expected, result);
         }
 
         /// <summary>
-        /// The defining property of the new rule, checked across every calendar
-        /// position instead of on single pinned dates: the reported span must have
-        /// elapsed completely, and the next one up must not have. Both bounds
-        /// together are exactly what "truncate, never round up" means.
+        /// Checks the rule on every calendar position instead of on single pinned dates: the
+        /// reported amount has fully elapsed, and one unit more has not.
         ///
-        /// The check converts the rendered text back into a date through the class's
-        /// own ToDueDate, so it measures against the same definition of a unit that
-        /// the rest of the app schedules by.
+        /// The check turns the text back into a date with ToDueDate, so it measures against the
+        /// same definition of a unit that the app schedules by.
         /// </summary>
         [Fact]
         public void ToDueDateText_ForEveryCalendarPosition_NeverReportsMoreTimeThanHasElapsed()
@@ -307,8 +290,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         // Then: the stated amount fits into the span, and one more would not.
-        // Which end of the span is the due date depends on the direction, so it is
-        // passed in rather than guessed - "earlier" is always the start of the span.
+        // The direction decides which end of the span is the due date, so the caller passes it;
+        // "earlier" is the start of the span.
         private static void AssertTruncated(DateTime earlier, DateTime later, bool isOverdue)
         {
             var nextDueAt = isOverdue ? earlier : later;
@@ -348,7 +331,7 @@ namespace GreenKeeper.Tests.Scheduling
             // When: the due date text is calculated
             var result = DueDateCalculator.ToDueDateText(nextDueAt, Today);
 
-            // Then: the result should be an empty string, not an exception or "null"
+            // Then: the text is empty, not an exception or "null"
             Assert.Equal(string.Empty, result);
         }
 
@@ -373,9 +356,9 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Months and years are calendar steps, not fixed day counts: a target month
-        /// that is too short clamps to its last day. This is what lets a schedule
-        /// set on the 31st survive February.
+        /// Months and years are calendar steps, not fixed day counts: a target month that is too
+        /// short clamps to its last day, so a schedule set on the 31st still falls due in
+        /// February.
         /// </summary>
         [Theory]
         [InlineData("2025-01-31", 1, TimeUnit.Months, "2025-02-28")]
@@ -424,7 +407,7 @@ namespace GreenKeeper.Tests.Scheduling
             // When: it is converted into a flat TimeSpan
             var exception = Record.Exception(convert);
 
-            // Then: the conversion refuses instead of silently assuming 30 or 365 days
+            // Then: the conversion refuses instead of assuming 30 or 365 days
             Assert.IsType<ArgumentOutOfRangeException>(exception);
         }
     }

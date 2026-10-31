@@ -19,9 +19,12 @@ namespace GreenKeeper.Scheduling
         }
 
         /// <summary>
-        /// Starts the interval at the given moment: the care counts as done now and
-        /// is due again one interval later. Used when a schedule is created and when
-        /// the user completes it. Requires HasInterval.
+        /// Starts the interval at the given moment: the care counts as done now and is due
+        /// again one interval later. Requires HasInterval.
+        ///
+        /// PlantListViewModel calls it for each schedule of a new plant, DashboardViewModel for a
+        /// schedule from the Add Schedule wizard or the edit dialog. Completing a care sets the
+        /// same two dates in DashboardViewModel, but only after the database has saved them.
         /// </summary>
         public static void StartIntervalAt(this CareSchedule schedule, DateTime now)
         {

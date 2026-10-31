@@ -1,13 +1,11 @@
 ﻿namespace GreenKeeper.Scheduling
 {
     /// <summary>
-    /// The one place that decides what "overdue", "due today" and "upcoming" mean.
-    /// The status cards, the plant's status dot and the due date text all follow
-    /// these rules, so they can never disagree with each other.
+    /// Decides what "overdue", "due today" and "upcoming" mean. The status cards, the plant's
+    /// status dot and the due date text all follow these rules, so they agree.
     ///
-    /// All of them compare calendar dates, not timestamps: a schedule due later
-    /// on the current day is due today, and it is only overdue once the day has
-    /// actually been missed.
+    /// The rules compare calendar dates, not timestamps: a schedule due later on the current
+    /// day is due today, and it is overdue only once the day has passed.
     /// </summary>
     public static class DueDateRules
     {

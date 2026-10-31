@@ -10,7 +10,7 @@ namespace GreenKeeper.Scheduling
     /// </summary>
     public abstract class ScheduleInput
     {
-        // Fills the question "There is already a ... for this plant." - hence the casing.
+        // Fills the question "There is already a ... for this plant.", hence the lower case.
         public abstract string ExistingEntryName { get; }
 
         public abstract string OverwriteTitle { get; }
