@@ -8,8 +8,8 @@ using GreenKeeper.ViewModels.Wizards.Base;
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
 {
     /// <summary>
-    /// Five fixed steps - name, watering, fertilizing, sunlight, summary - whose
-    /// entries are turned into a plant object when the wizard is finished.
+    /// Five fixed steps (name, watering, fertilizing, sunlight, summary). Finishing the
+    /// wizard turns their entries into a plant.
     /// </summary>
     public class AddPlantWizardViewModel : WizardViewModel
     {
@@ -21,7 +21,6 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
         private readonly List<IWizardStepViewModel> _steps;
         private int _currentStepIndex;
 
-        // After finishing the wizard, the View reads the property when RequestClose has closed the window.
         // Null if the wizard was canceled.
         public Plant? CreatedPlant { get; private set; }
 
@@ -65,7 +64,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             CurrentStep = _steps[_currentStepIndex];
         }
 
-        // The wizard only collects the intervals; the due dates are set when the plant is saved (MainViewModel).
+        // The wizard only collects the intervals; PlantListViewModel sets the due dates when it saves the plant.
         private Plant BuildPlant()
         {
             var plant = new Plant { Name = _plantNameStep.PlantName };
@@ -73,13 +72,11 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
             // Watering: Mandatory field, so no further check is needed.
             plant.CareSchedules.Add(_wateringStep.ToCareSchedule(CareType.Watering));
 
-            // Fertilizing: Optional, only add if the user didn't skip the step and entered a valid value.
             if (_fertilizingStep.HasValidAmount)
             {
                 plant.CareSchedules.Add(_fertilizingStep.ToCareSchedule(CareType.Fertilizing));
             }
 
-            // Sunlight: Optional, same rule as Fertilizing.
             if (_sunlightStep.HasValidAmount)
             {
                 plant.SunlightRequirement = _sunlightStep.ToSunlightRequirement();

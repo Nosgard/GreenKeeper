@@ -17,7 +17,6 @@
 
     <Window.Resources>
 
-        <!-- Plant Name Step -->
         <DataTemplate DataType="{x:Type steps:PlantNameStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock x:Name="StepHeading"
@@ -39,7 +38,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- Watering Step -->
         <DataTemplate DataType="{x:Type activeSteps:WateringStepViewModel}">
             <StackPanel Margin="20">
                 <!-- Required steps carry no marker; only the optional ones say "(optional)" -->
@@ -55,7 +53,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- Fertilizing Step -->
         <DataTemplate DataType="{x:Type activeSteps:FertilizingStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock x:Name="StepHeading"
@@ -69,7 +66,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- Sunlight Step -->
         <DataTemplate DataType="{x:Type passiveSteps:SunlightStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock x:Name="StepHeading"
@@ -83,33 +79,28 @@
             </StackPanel>
         </DataTemplate>
 
-        <!-- Summary Step -->
         <DataTemplate DataType="{x:Type steps:SummaryStepViewModel}">
             <StackPanel Margin="20">
                 <TextBlock Style="{StaticResource DialogHeading}"
                            Text="Summary" />
 
-                <!-- Plant Name Line -->
                 <TextBlock Text="{Binding PlantName}"
                            Foreground="{DynamicResource PrimaryText}"
                            FontSize="16"
                            Margin="0, 0, 0, 6"
                            TextWrapping="Wrap" />
 
-                <!-- Watering Line -->
                 <TextBlock Text="{Binding Watering, StringFormat='Watering: {0}'}"
                            Foreground="{DynamicResource SecondaryText}"
                            FontSize="16"
                            Margin="0, 0, 0, 6" />
 
-                <!-- Fertilizing Line -->
                 <TextBlock Text="{Binding Fertilizing, StringFormat='Fertilizing: {0}'}"
                            Foreground="{DynamicResource SecondaryText}"
                            FontSize="16"
                            Margin="0, 0, 0, 6"
                            Visibility="{Binding HasFertilizing, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                <!-- Sunlight Line -->
                 <TextBlock Text="{Binding Sunlight, StringFormat='Sunlight: {0}'}"
                            AutomationProperties.Name="{Binding SpokenSunlight}"
                            Foreground="{DynamicResource SecondaryText}"
@@ -120,7 +111,7 @@
         </DataTemplate>
     </Window.Resources>
 
-    <!-- Button Section -->
+    <!-- The current step, with Back, Next and Cancel below it -->
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -134,19 +125,16 @@
                     HorizontalAlignment="Right"
                     Margin="0, 12, 0, 0">
 
-            <!-- Back -->
             <Button Style="{StaticResource DialogButton}"
                     Content="Back"
                     Margin="0, 0, 10, 0"
                     Command="{Binding BackCommand}" />
 
-            <!-- Next -->
             <Button Style="{StaticResource DialogButton}"
                     Content="{Binding CurrentStep.NextButtonLabel}"
                     IsDefault="True"
                     Command="{Binding NextCommand}" />
 
-            <!-- Cancel -->
             <Button Style="{StaticResource DialogButton}"
                     Content="Cancel"
                     Margin="10, 0, 0, 0"

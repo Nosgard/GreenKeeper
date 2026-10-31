@@ -4,13 +4,11 @@ using GreenKeeper.ViewModels.Wizards.Base;
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps.Passive
 {
     /// <summary>
-    /// Optional sunlight step of the Add Plant wizard: the user either enters
-    /// a positive amount of hours per period or leaves it empty and skips.
+    /// Optional sunlight step of the Add Plant wizard.
     /// </summary>
     public class SunlightStepViewModel : HoursPerPeriodInputViewModel, IWizardStepViewModel
     {
-        // The step is optional: empty, it can be skipped. Once something is entered it has
-        // to be valid, because skipping would drop the entry without a word.
+        // Same rule as the fertilizing step (see FertilizingStepViewModel).
         public bool CanProceed => IsLeftEmpty || HasValidAmount;
 
         public string NextButtonLabel => IsLeftEmpty ? "Skip" : "Next";

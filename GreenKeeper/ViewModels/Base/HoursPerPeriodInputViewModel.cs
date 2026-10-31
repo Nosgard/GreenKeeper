@@ -10,10 +10,6 @@ namespace GreenKeeper.ViewModels.Base
     /// </summary>
     public class HoursPerPeriodInputViewModel : ObservableObject
     {
-        /// <summary>
-        /// Every available period has a maximum amount to prevent misuse.
-        /// The limits are declared in hours per period and can be set from here.
-        /// </summary>
         private static readonly Dictionary<SunlightPeriod, int> MaxHoursByPeriod = new()
         {
             { SunlightPeriod.Day, 24 },
@@ -22,15 +18,8 @@ namespace GreenKeeper.ViewModels.Base
             { SunlightPeriod.Year, 8760 },      // 365 * 24
         };
 
-        // The length limit of the hours field, see AmountLimit.
         public static int MaxAmountLength { get; } = AmountLimit.FieldLengthFor(MaxHoursByPeriod.Values);
 
-        /// <summary>
-        /// Options for the ComboBox.
-        ///
-        /// Key: Actual enum value (will be bound)
-        /// Value: Text that the user sees.
-        /// </summary>
         public static IReadOnlyList<KeyValuePair<SunlightPeriod, string>> AvailablePeriods { get; } =
             new List<KeyValuePair<SunlightPeriod, string>>
             {
@@ -76,28 +65,23 @@ namespace GreenKeeper.ViewModels.Base
 
         public int MaxAmount => MaxHoursByPeriod[SelectedPeriod];
 
-        // Positive, but more than the selected period allows.
         public bool IsAmountTooLarge => Hours > MaxAmount;
 
-        // The line below the field, see AmountLimit.
         public string AmountHint => AmountLimit.HintFor(MaxAmount, IsAmountTooLarge);
 
-        // The entered text as a number, or null while it is not a number at all.
         public int? Hours => int.TryParse(AmountText, out int hours) ? hours : null;
 
-        // A positive number of hours that fits into the selected period.
         public bool HasValidAmount => Hours is > 0 && Hours <= MaxAmount;
 
-        // The entered hours as a requirement. Only meaningful while HasValidAmount is true.
+        // Only meaningful while HasValidAmount is true.
         public SunlightRequirement ToSunlightRequirement()
         {
             return new SunlightRequirement { Hours = Hours!.Value, Period = SelectedPeriod };
         }
 
         /// <summary>
-        /// Hook for subclasses that need to react whenever AmountText or SelectedPeriod
-        /// changes (e.g. to re-raise OnPropertyChanged for CanProceed/NextButtonLabel).
-        /// Default implementation remains empty.
+        /// Called after AmountText or SelectedPeriod changed, for subclasses whose properties
+        /// depend on them (CanProceed, NextButtonLabel).
         /// </summary>
         protected virtual void OnHoursOrPeriodChanged() { }
     }

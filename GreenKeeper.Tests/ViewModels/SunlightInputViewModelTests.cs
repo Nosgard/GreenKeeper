@@ -134,7 +134,7 @@ namespace GreenKeeper.Tests.ViewModels
             var canProceed = step.CanProceed;
             var label = step.NextButtonLabel;
 
-            // Then: it can always proceed, the label tells skip from next
+            // Then: it can proceed empty or with valid hours; the label tells skip from next
             Assert.True(canProceed);
             Assert.Equal(expectedLabel, label);
         }

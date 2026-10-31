@@ -9,10 +9,9 @@ using System.ComponentModel;
 namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 {
     /// <summary>
-    /// The last step, which repeats what was entered in the steps before. Its
-    /// properties have no backing fields but read the other steps directly, and
-    /// it listens to them, so going back and changing a value shows up here
-    /// without anyone having to refresh the summary by hand.
+    /// The last step, which repeats what was entered in the steps before. It reads the
+    /// other steps directly and listens to them, so a value changed after going back
+    /// shows up here.
     /// </summary>
     public class SummaryStepViewModel : ObservableObject, IWizardStepViewModel
     {
@@ -39,16 +38,16 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
 
         public string PlantName => _nameStepViewModel.PlantName;
 
-        // Watering is mandatory - it always has a value to show.
+        // Watering is mandatory, so it always has a value to show.
         public string Watering =>
             $"{_wateringStepViewModel.AmountText} {GetUnit(_wateringStepViewModel)}";
 
-        // Fertilizing is optional - only show a value if a value was entered (not skipped).
+        // Fertilizing is optional: the summary shows it only if a value was entered.
         public bool HasFertilizing => _fertilizingStepViewModel.HasValidAmount;
         public string Fertilizing =>
             $"{_fertilizingStepViewModel.AmountText} {GetUnit(_fertilizingStepViewModel)}";
 
-        // Sunlight is optional - the same principle as Fertilizing but with a value per period.
+        // Sunlight is optional like Fertilizing, with a value per period.
         public bool HasSunlight => _sunlightStepViewModel.HasValidAmount;
         public string Sunlight =>
             $"{_sunlightStepViewModel.AmountText} Hours {GetPeriod(_sunlightStepViewModel)}";
@@ -57,13 +56,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
         public string SpokenSunlight =>
             $"Sunlight: {_sunlightStepViewModel.SelectedPeriod.SpokenHours(_sunlightStepViewModel.Hours ?? 0)}";
 
-        // The summary step is the last step, so proceeding is always possible.
         public bool CanProceed => true;
 
-        // Last step -> always "Finish".
         public string NextButtonLabel => "Finish";
 
-        // Resolves the text of the selected TimeUnit via AvailableUnits (e.g. TimeUnit.Days -> "Days").
         private static string GetUnit(ActiveStepViewModel step) =>
             AmountAndUnitInputViewModel.AvailableUnits.First(u => u.Key == step.SelectedUnit).Value;
 

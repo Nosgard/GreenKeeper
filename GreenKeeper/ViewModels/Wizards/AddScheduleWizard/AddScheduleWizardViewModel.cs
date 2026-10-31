@@ -10,9 +10,8 @@ using GreenKeeper.ViewModels.Wizards.Base;
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
 {
     /// <summary>
-    /// Two steps: the user picks a care type, then enters its values. Unlike the
-    /// Add Plant wizard there is no fixed list of steps - the second one depends
-    /// on the choice made in the first.
+    /// Two steps: the user picks a care type, then enters its values. Unlike in the Add Plant
+    /// wizard, the second step depends on the choice in the first.
     /// </summary>
     public class AddScheduleWizardViewModel : WizardViewModel
     {
@@ -20,10 +19,10 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
         private readonly IDialogService _dialogService;
         private readonly CareTypeSelectionStepViewModel _selectionStep = new();
 
-        // Created once the user has made their decision on the first step.
+        // Created for the chosen care type when the user moves on from the first step.
         private IScheduleWizardStep? _detailStep;
 
-        // Holds the finished result. Null until the wizard has been finished.
+        // Null until the wizard has been finished.
         public ScheduleInput? Result { get; private set; }
 
         public AddScheduleWizardViewModel(Plant plant, IDialogService dialogService)
@@ -45,8 +44,6 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
                 return;
             }
 
-            // "Finish" tries to apply the entry, but can abort without closing the
-            // wizard, e.g. when the user answers "No" to the overwrite warning.
             if (TryApply())
             {
                 Close(true);

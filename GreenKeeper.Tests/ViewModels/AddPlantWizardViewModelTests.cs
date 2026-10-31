@@ -61,7 +61,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void NextCommand_VisitsTheStepsInOrder()
         {
-            // Given: a wizard with a valid name and watering interval
+            // Given: a wizard with a valid name; the test types the watering interval on the way
             var wizard = new AddPlantWizardViewModel();
             ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = "Aloe Vera";
 
@@ -251,7 +251,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the summary step is read
             var summary = (SummaryStepViewModel)wizard.CurrentStep;
 
-            // Then: it repeats the entered values in words
+            // Then: it repeats the entered values with their units, and Next reads "Finish"
             Assert.Equal("Aloe Vera", summary.PlantName);
             Assert.Equal("7 Days", summary.Watering);
             Assert.True(summary.HasFertilizing);
