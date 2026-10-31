@@ -14,7 +14,6 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 
         public CareType Care { get; }
 
-        // Title of the care type (Watering / Fertilizing).
         public string Title => Care.DisplayName();
 
         public EditActiveScheduleViewModel(CareType care, int? initialAmount, TimeUnit initialUnit, TimeProvider timeProvider)
@@ -22,7 +21,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
             Care = care;
             _timeProvider = timeProvider;
 
-            // Fill the amount text with the original value that was set in the wizard beforehand.
+            // Pre-fill with the interval of the existing schedule.
             if (initialAmount.HasValue)
             {
                 AmountText = initialAmount.Value.ToString(CultureInfo.InvariantCulture);
@@ -32,9 +31,8 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         }
 
         /// <summary>
-        /// Shows the next expected due date.
-        /// This is important so that the user knows that the countdown is NOW running.
-        /// The calculation of the next due date takes place NOW and not at the old due date.
+        /// The due date the schedule gets when saved now. Saving restarts the interval at this
+        /// moment, not at the old due date, and the preview tells the user so.
         /// </summary>
         public string PreviewText
         {

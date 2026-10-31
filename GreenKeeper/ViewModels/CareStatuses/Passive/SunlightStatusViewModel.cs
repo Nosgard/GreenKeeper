@@ -6,12 +6,8 @@ using GreenKeeper.ViewModels.CareStatuses.Abstract;
 namespace GreenKeeper.ViewModels.CareStatuses.Passive
 {
     /// <summary>
-    /// Set the status card for Sunlight via the related sunlight requirement (passive care status).
-    /// onEdit / onRemove: Are provided by MainViewModel and encapsulate the EditScheduleView
-    /// for this care type and the confirmation + removal.
-    ///
-    /// Note: The ViewModel knows neither the plant object nor any window class;
-    /// it only triggers the given callbacks.
+    /// The status card for Sunlight, a passive care without a due date. DashboardViewModel
+    /// passes the callbacks for Edit and Remove.
     /// </summary>
     public class SunlightStatusViewModel : CareStatusViewModel
     {

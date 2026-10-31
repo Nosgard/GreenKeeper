@@ -97,7 +97,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the preview is read
             var preview = step.PreviewText;
 
-            // Then: there is nothing to announce
+            // Then: there is no preview to show
             Assert.Equal(string.Empty, preview);
             Assert.False(viewModel.SaveCommand.CanExecute(null));
         }

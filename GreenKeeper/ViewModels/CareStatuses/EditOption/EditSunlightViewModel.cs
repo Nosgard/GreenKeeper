@@ -6,10 +6,9 @@ using System.Globalization;
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Input of the Edit button for the sunlight status. Unlike the wizard step
-    /// there is no option to skip: the user is actively editing an existing
-    /// value, so a valid amount is always required. No PreviewText needed,
-    /// since Sunlight has no due date.
+    /// Input of the Edit button for the sunlight card. Unlike the wizard step it cannot be
+    /// skipped: the user edits an existing value, so a valid amount is required. It needs no
+    /// PreviewText, since Sunlight has no due date.
     /// </summary>
     public class EditSunlightViewModel : HoursPerPeriodInputViewModel, IScheduleInputStep
     {

@@ -14,12 +14,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public CareType Care { get; }
         public string Title => Care.DisplayName();
 
-        // Removes an optional status card (Fertilizing, Sunlight).
-        // Nullable because mandatory status cards such as Watering are unremovable, so for them it is null.
+        // Removes an optional card (Fertilizing, Sunlight); null for Watering, which is mandatory.
         public ICommand? RemoveCommand { get; protected set; }
 
-        // Allows the user to edit the value of a status card that was set beforehand.
-        // This applies to all available status cards, but it is set by the concrete ViewModel of the status.
+        // Opens the edit dialog of the card; every card has one, set by the subclass.
         public ICommand? EditCommand { get; protected set; }
 
         protected CareStatusViewModel(CareType care)
@@ -27,7 +25,6 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
             Care = care;
         }
 
-        // All status cards implement the status text in their own way.
         public abstract string StatusText { get; }
 
         // The status text the way a screen reader should say it. Most status texts
@@ -35,9 +32,8 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public virtual string SpokenStatusText => StatusText;
 
         /// <summary>
-        /// Whether the status text should read as overdue. Sits on the base class
-        /// so the shared card template can bind it on every card - Sunlight has no
-        /// due date and stays false.
+        /// Whether the status text reads as overdue. It sits on the base class so the shared card
+        /// template can bind it on every card; Sunlight has no due date and stays false.
         /// </summary>
         public virtual bool IsOverdue => false;
 

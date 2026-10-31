@@ -7,9 +7,9 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.CareStatuses.Active
 {
     /// <summary>
-    /// A status card with a due date (Watering / Fertilizing). Everything that
-    /// depends on "today" judges by the calendar day - see DueDateRules - so the
-    /// text, the Complete button and the plant's status dot always agree.
+    /// A status card with a due date (Watering, Fertilizing). Everything that depends on
+    /// "today" judges by the calendar day (see DueDateRules), so the text, the Complete
+    /// button and the plant's status dot agree.
     /// </summary>
     public abstract class ActiveCareStatusViewModel : CareStatusViewModel
     {
@@ -23,19 +23,17 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
             _timeProvider = timeProvider;
         }
 
-        // Fires the completion of the care;
-        // once it's done, the new due date is recalculated from NOW.
+        // Completes the care; the next due date then counts from this moment.
         public ICommand? CompleteCommand { get; protected set; }
 
         /// <summary>
-        /// Whether the Complete button can be used: from the due day onwards. Judging
-        /// by the day keeps the button in line with the "Due today" text; a card must
-        /// not read "Due today" while the button waits for the exact due time.
+        /// Whether the Complete button can be used: from the due day on, in line with the
+        /// "Due today" text.
         /// </summary>
         public bool IsCompletable => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsDue(dueAt, Today);
 
         /// <summary>
-        /// A due date that is still ahead reads as "Due in 3 days" rather than just
+        /// A due date that is still ahead reads as "Due in 3 days" rather than a bare
         /// "3 days", and the due day itself as "Due today", so the card uses the same
         /// form every time. "Overdue for ..." already says it.
         ///
@@ -58,17 +56,16 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
             }
         }
 
-        // Deliberately false when no due date is set at all, so an empty status text
-        // never turns into a bare "Due in".
+        // False without a due date, so an empty status text never turns into a bare "Due in".
         private bool IsUpcoming => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsUpcoming(dueAt, Today);
 
         private bool IsDueToday => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsDueToday(dueAt, Today);
 
         // Drives the red status text. Strict ("before today"), so a card reading "Due today"
-        // is not painted red - the plant's status dot only turns red once a day was missed.
+        // is not painted red; the plant's status dot also turns red only once a day was missed.
         public override bool IsOverdue => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsOverdue(dueAt, Today);
 
-        // The Complete button becomes usable on the due day, so it follows the day too.
+        // IsCompletable depends on the day as well.
         public override void NotifyDueStatusChanged()
         {
             base.NotifyDueStatusChanged();
