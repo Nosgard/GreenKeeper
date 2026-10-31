@@ -8,10 +8,8 @@ namespace GreenKeeper.Views
     /// Lets the arrow keys step through everything in a region of a window, as ArrowKeys
     /// describes it. WPF's own arrow key handling goes by the position on screen and
     /// leaves traps: a scroll area and a list keep the focus, a text field lets it go
-    /// nowhere, and a step can end in another region. Here every element is one step
-    /// from its neighbor in the order of Tab, and only F6 crosses to another region. A
-    /// closed drop-down gives its arrow keys to that walk; Space opens it, and inside
-    /// the arrow keys choose again.
+    /// nowhere, and a step can end in another region. Here only F6 crosses to another
+    /// region.
     /// </summary>
     public sealed class ArrowNavigation
     {
@@ -24,8 +22,7 @@ namespace GreenKeeper.Views
 
         /// <summary>
         /// Lets the arrow keys step through each of the regions; without regions, the
-        /// whole window is one. The key event of the window holds the navigation, so it
-        /// lives as long as the window.
+        /// whole window is one. The window's key event keeps it alive.
         /// </summary>
         public static void Attach(Window window, params FrameworkElement[] regions)
         {
@@ -48,13 +45,15 @@ namespace GreenKeeper.Views
                 _ => false
             };
 
-            // Only ever set: another handler of the window may have used the key already.
+            // Set, never cleared: another handler of the window may have used the key already.
             if (wasUsed)
             {
                 e.Handled = true;
             }
         }
 
+        // The arrow keys walk past a closed drop-down (see FocusStopKind.Selection), so Space
+        // opens it; inside it, the arrow keys choose again.
         private static bool TryOpenSelection(UIElement focused)
         {
             if (focused is not ComboBox { IsDropDownOpen: false } selection)
@@ -108,7 +107,6 @@ namespace GreenKeeper.Views
                 ?? (focused is Window ? _regions[0] : null);
         }
 
-        // The step the key takes from the stop that holds the focus.
         private static int StepAt(Control stop, UIElement focused, Key key)
         {
             if (stop is ListBox list && focused is ListBoxItem entry)

@@ -70,7 +70,7 @@ namespace GreenKeeper.Views
         /// <summary>
         /// The element next to a gap between the elements, on the side of the step. The
         /// focus is in a gap while it is on none of them: on the window right after the
-        /// start, or on a list that just lost its last entry.
+        /// start, or on a list that has lost its last entry.
         /// </summary>
         /// <param name="elementsBefore">How many elements of the region come before the gap</param>
         /// <param name="step">Back or On</param>

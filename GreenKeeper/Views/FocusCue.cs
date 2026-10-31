@@ -31,7 +31,7 @@ namespace GreenKeeper.Views
 
         /// <summary>
         /// Lets the window follow its own keyboard and mouse use from now on. The
-        /// events of the window hold the state, so it lives as long as the window.
+        /// window's events keep the state alive.
         /// </summary>
         public static void Attach(Window window)
         {

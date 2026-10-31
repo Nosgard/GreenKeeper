@@ -3,8 +3,8 @@
 namespace GreenKeeper.Tests.Views
 {
     /// <summary>
-    /// When a window holds its focus ring back: after it comes back to the front
-    /// without the keyboard having been used in it, and only until a key is pressed.
+    /// When a window holds its focus ring back: after it comes back to the front with the
+    /// mouse used last in it, and only until a key is pressed.
     /// </summary>
     public class FocusCueStateTests
     {

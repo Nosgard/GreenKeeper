@@ -4,9 +4,9 @@
     /// Whether one window holds its focus ring back. WPF decides on the ring by the
     /// device used last anywhere in the app, so a dialog opened with a click and
     /// confirmed with Enter leaves a ring on the clicked button, in a window the
-    /// keyboard was never used in. This keeps the answer per window: the ring is held
-    /// back while the mouse was the last device used in the window, and shows again
-    /// with the first key pressed in it.
+    /// keyboard was never used in. One instance per window decides for that window alone:
+    /// if the mouse was used last in it, the ring stays hidden after the window comes back
+    /// to the front, until the first key is pressed there.
     /// </summary>
     public sealed class FocusCueState
     {

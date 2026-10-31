@@ -24,8 +24,8 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Lets F6 and Shift+F6 move through the regions, in the order given. The events
-        /// of the window hold the regions, so they live as long as the window.
+        /// Lets F6 and Shift+F6 move through the regions, in the order given. The window's
+        /// events keep the regions alive.
         /// </summary>
         public static void Attach(Window window, params FocusRegion[] regions)
         {
@@ -70,8 +70,8 @@ namespace GreenKeeper.Views
         {
             int? current = RegionWithFocus();
 
-            // The region with the focus is never the target, so its own start, which may
-            // scroll, is not even looked for.
+            // The region with the focus is never the target, so its own start, which may scroll,
+            // is not looked for.
             var targets = _regions.Select((region, index) => index == current ? null : TargetIn(region)).ToList();
             int? next = FocusRegionOrder.Next(current, targets.Select(target => target != null).ToList(), backwards);
 

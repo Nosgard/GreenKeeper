@@ -14,7 +14,7 @@ namespace GreenKeeper.Views
     /// (Complete, Remove, a changed status in the periodic refresh), and a button can
     /// become disabled under the focus (Delete Plant). The focus then falls back to the
     /// window, and a keyboard or screen reader user would have to start over from the
-    /// top. This class remembers what had the focus and puts it on the counterpart in
+    /// top. FocusKeeper remembers what had the focus and puts it on its counterpart in
     /// the rebuilt screen, or on the nearest element that is still there.
     /// </summary>
     public sealed class FocusKeeper
@@ -37,7 +37,7 @@ namespace GreenKeeper.Views
 
         /// <summary>
         /// Keeps the focus in place in the window from now on. The window's focus
-        /// event holds the keeper, so it lives as long as the window.
+        /// event keeps the keeper alive.
         /// </summary>
         public static void Attach(Window window, ListView plantList, ItemsControl careStatusList)
         {
@@ -92,7 +92,7 @@ namespace GreenKeeper.Views
 
         // The same button of the same card; if it is gone or disabled, the first button
         // of the card; if the card is gone, the first button of the card that took its
-        // place, never its "Remove" just because the removed card's "Remove" had the focus.
+        // place, never its "Remove", even if the removed card's "Remove" had the focus.
         private Button? CardButton()
         {
             if (_lastCardButton is not { } lastCardButton)
