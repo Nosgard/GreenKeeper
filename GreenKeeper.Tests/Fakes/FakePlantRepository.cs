@@ -4,20 +4,14 @@ using GreenKeeper.Repositories;
 namespace GreenKeeper.Tests.Fakes
 {
     /// <summary>
-    /// In-memory fake for IPlantRepository. Behaves like a tiny, self-contained
-    /// database: every method operates on the same internal list, so tests can
-    /// verify realistic sequences (e.g. "after AddPlantAsync, GetPlantsAsync
-    /// returns the new plant") without a real SQLite database or DbContext.
+    /// In-memory IPlantRepository.
     ///
-    /// Like the real repository, it never shares the objects it stores: what is
-    /// handed in is copied before it is stored, and what is handed out is a copy
-    /// of what is stored. A change to a stored plant therefore does not show up in
-    /// the objects a ViewModel holds, and the other way round - so a test can tell
-    /// whether the ViewModel went through the repository, updated its own objects,
-    /// or did both.
+    /// Like the real repository, it never shares the objects it stores: it copies what is
+    /// handed in and what it hands out. A change to a stored plant does not show up in the
+    /// objects a ViewModel holds, or the other way round, so a test can tell whether the
+    /// ViewModel went through the repository, updated its own objects, or did both.
     ///
-    /// Tests can pre-populate the repository via SeedPlants(...) before
-    /// creating a MainViewModel, to set up a "Given" state.
+    /// SeedPlants(...) sets up the Given state before a test builds its ViewModels.
     /// </summary>
     public class FakePlantRepository : IPlantRepository
     {
@@ -228,8 +222,6 @@ namespace GreenKeeper.Tests.Fakes
         }
 
         // -- Copies --
-        // A copy carries every value of its original and is otherwise on its own,
-        // like a row the real repository reads from or writes to the database.
 
         private static Plant Copy(Plant plant)
         {

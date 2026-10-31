@@ -10,7 +10,6 @@
         public string? ImagePath { get; set; }
         public string? Notes { get; set; }
 
-        // Navigation properties
         public List<CareSchedule> CareSchedules { get; } = new();
         public SunlightRequirement? SunlightRequirement { get; set; }
 

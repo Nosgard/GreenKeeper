@@ -9,6 +9,8 @@ namespace GreenKeeper.Models
         public int Hours { get; set; }
         public SunlightPeriod Period { get; set; }
 
+        // EF Core navigation to the plant that owns this requirement; despite its name, it is
+        // unrelated to the selection in the sidebar.
         public Plant SelectedPlant { get; set; } = null!;
     }
 }
