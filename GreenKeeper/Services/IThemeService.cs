@@ -5,14 +5,12 @@ namespace GreenKeeper.Services
     public interface IThemeService
     {
         /// <summary>
-        /// The theme currently applied to the application.
+        /// The theme the app shows. During a fade it is already the new one.
         /// </summary>
         Theme CurrentTheme { get; }
 
         /// <summary>
-        /// Fades the application over to the given theme. Because every style
-        /// references its colors via DynamicResource, the whole UI transitions
-        /// along with it - no windows need to be recreated or reopened.
+        /// Fades the app to the given theme. Open windows follow without being recreated.
         /// </summary>
         void ApplyTheme(Theme theme);
     }

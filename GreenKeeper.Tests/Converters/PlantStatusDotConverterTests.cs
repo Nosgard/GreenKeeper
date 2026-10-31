@@ -52,8 +52,8 @@ namespace GreenKeeper.Tests.Converters
             Assert.Equal(expectedStatus, status);
         }
 
-        // Converts the way the sidebar binding does: the plant is the bound value,
-        // the other arguments of the WPF interface are not used by the converter.
+        // Converts the way the sidebar binding does: the plant is the bound value, and the
+        // converter ignores the other arguments.
         private static PlantStatus StatusOf(Plant plant)
         {
             var converter = new PlantStatusDotConverter(new FakeTimeProvider(Now));

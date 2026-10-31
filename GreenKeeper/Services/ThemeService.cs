@@ -7,13 +7,13 @@ using System.Windows.Media.Animation;
 namespace GreenKeeper.Services
 {
     /// <summary>
-    /// Concrete implementation that manipulates WPF's application-level
-    /// resource dictionaries. ViewModels only ever see IThemeService, so
-    /// they stay free of WPF-specific types and remain testable with a fake.
+    /// Fades the app to another theme. The first change puts a copy of the loaded theme with
+    /// animatable brushes into Application.Resources; later changes only fade the colors of
+    /// those brushes.
     /// </summary>
     public class ThemeService : IThemeService
     {
-        // Fast enough to feel responsive, slow enough to read as a transition.
+        // 200 ms reads as a fade without keeping the user waiting.
         private const int TransitionMilliseconds = 200;
 
         private static readonly Dictionary<Theme, string> ThemePaths = new()
@@ -22,12 +22,10 @@ namespace GreenKeeper.Services
             [Theme.Bright] = "/Resources/Styles/Themes/BrightTheme.xaml"
         };
 
-        // Only ever read for their target colors, so one instance per theme is enough.
+        // Only read for their target colors, so one instance per theme is enough.
         private readonly Dictionary<Theme, ResourceDictionary> _themeCache = new();
 
-        // The dictionary that ends up in Application.Resources. Its brushes are
-        // unfrozen clones, so their Color can be animated in place. Built lazily
-        // on the first theme change.
+        // The copy in Application.Resources; null until ApplyTheme first runs.
         private ResourceDictionary? _liveTheme;
 
         public Theme CurrentTheme { get; private set; } = Theme.Bright;
@@ -43,8 +41,8 @@ namespace GreenKeeper.Services
             var isFirstChange = _liveTheme == null;
             var live = _liveTheme ??= CloneBrushes(FindLoadedTheme() ?? LoadTheme(CurrentTheme));
 
-            // Set before animating, so IsDarkTheme - and the toggle icon with it -
-            // flips right away instead of trailing the fade.
+            // Set before animating, so IsDarkTheme and the toggle icon with it flip at once
+            // instead of after the fade.
             CurrentTheme = theme;
 
             // Dark title bar in the window background, not the Windows accent color.
@@ -62,8 +60,8 @@ namespace GreenKeeper.Services
 
             if (isFirstChange)
             {
-                // Only now, with the animations already running - an animating
-                // brush cannot be sealed. See the note in AnimateTo.
+                // Only now that the animations run, because an animating brush cannot be sealed
+                // (see the note in AnimateTo).
                 SwapIntoApplicationResources(live);
             }
         }
@@ -81,11 +79,10 @@ namespace GreenKeeper.Services
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
-            // Never release this clock. WPF seals Freezables that live in
-            // Application.Resources, and a sealed brush rejects any animation -
-            // but a brush that is animating cannot be sealed. Clearing the clock
-            // (to write the color as a base value, say) brings back "the object
-            // is sealed or frozen" on the next theme change.
+            // Never release this clock. WPF seals Freezables that live in Application.Resources,
+            // and a sealed brush rejects any animation, but a brush that is animating cannot be
+            // sealed. Clearing the clock (to write the color as a base value, say) brings back
+            // "the object is sealed or frozen" on the next theme change.
             if (!brush.IsFrozen)
             {
                 // Replaces a running animation and picks up from its current
@@ -94,8 +91,8 @@ namespace GreenKeeper.Services
                 return;
             }
 
-            // Should a brush end up sealed anyway, swap in an animating clone
-            // instead of throwing - consumers follow it through the dictionary.
+            // If a brush is sealed anyway, swap in an animating clone instead of throwing;
+            // consumers follow it through the dictionary.
             var replacement = brush.CloneCurrentValue();
             replacement.BeginAnimation(SolidColorBrush.ColorProperty, animation);
             live[key] = replacement;
@@ -120,8 +117,8 @@ namespace GreenKeeper.Services
         }
 
         /// <summary>
-        /// The theme dictionary App.xaml loaded, found by source path rather than
-        /// by index - the position would shift if App.xaml is ever reordered.
+        /// The theme dictionary App.xaml loaded, found by its source path. An index would shift
+        /// if App.xaml were reordered.
         /// </summary>
         private static ResourceDictionary? FindLoadedTheme()
         {

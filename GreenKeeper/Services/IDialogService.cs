@@ -7,8 +7,8 @@
         /// </summary>
         /// <param name="message">The question</param>
         /// <param name="title">The title of the window that asks</param>
-        /// <param name="safeAnswer">The answer that loses nothing. It is offered first, so a
-        /// hasty key neither deletes nor discards anything</param>
+        /// <param name="safeAnswer">The answer that loses nothing. It is offered first, so
+        /// pressing Enter right away neither deletes nor discards anything</param>
         bool Confirm(string message, string title, Answer safeAnswer);
 
         /// <summary>

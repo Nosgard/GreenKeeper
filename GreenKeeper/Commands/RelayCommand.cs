@@ -30,10 +30,9 @@ namespace GreenKeeper.Commands
         }
 
         /// <summary>
-        /// Asks WPF to re-evaluate CanExecute of every command, for state changes
-        /// that no UI interaction announces (e.g. switching steps in the wizard).
-        /// Static because CommandManager.RequerySuggested is global: one call
-        /// refreshes all commands, not only a single instance.
+        /// Asks WPF to re-evaluate CanExecute of every command. WPF does that on its own only after
+        /// UI input, so a state change without input (a wizard step switch) needs this call.
+        /// Static, because CommandManager.RequerySuggested is global.
         /// </summary>
         public static void RaiseCanExecuteChanged()
         {
