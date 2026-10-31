@@ -3,9 +3,6 @@ using GreenKeeper.ViewModels.RenamePlant;
 
 namespace GreenKeeper.Views.RenamePlant
 {
-    /// <summary>
-    /// Interaction logic for RenamePlantView.xaml.
-    /// </summary>
     public partial class RenamePlantView : DialogWindow
     {
         private readonly RenamePlantViewModel _renamePlantViewModel;
@@ -17,8 +14,7 @@ namespace GreenKeeper.Views.RenamePlant
             Attach(_renamePlantViewModel);
         }
 
-        // Exposes the name to the caller (MainWindow), analogous to
-        // EditScheduleView.Result - the actual persistence happens in the MainViewModel.
+        // The confirmed name for MainWindow, which saves it through PlantListViewModel.
         public string? ConfirmedName => _renamePlantViewModel.ConfirmedName;
     }
 }

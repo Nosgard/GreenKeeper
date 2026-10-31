@@ -10,37 +10,21 @@ namespace GreenKeeper.ViewModels.Notes
     {
         private readonly Plant _plant;
 
-        // The dependency is passed in from outside (Constructor Injection),
-        // instead of an explicit implementation.
         private readonly IDialogService _dialogService;
 
         /// <summary>
-        /// Handles the actual persistence via DashboardViewModel.UpdatePlantNotesAsync -
-        /// NotesViewModel itself still knows neither the repository nor the database.
-        /// Func is used instead of Action because saving needs to await the result
-        /// to keep the dialog open on failure.
+        /// Saves through DashboardViewModel.UpdatePlantNotesAsync, so this ViewModel knows
+        /// neither the repository nor the database. It returns a Task, so a failed save can keep
+        /// the dialog open.
         /// </summary>
         private readonly Func<string, Task> _saveNotesAsync;
 
-        // Value when opening the NotesView. Reference if changes to the notes are made.
-        // Used to compare via IsDirty (for more info scroll down) with the edited notes.
-        // After saving changes, IsDirty "forgets" the saved changes and treats the
-        // changed notes as the original.
+        // The notes as last saved; IsDirty compares the edited text with them.
         private string _originalNotes;
 
-        // Takes the original notes so that changes can be recognized.
-        // Separated from the notes in the plant object so that the
-        // Cancel button can discard changes without changing the
-        // plant object in the meantime.
+        // The text being edited, kept apart from plant.Notes so Cancel leaves the plant as it was.
         private string _editableNotes;
 
-        /// <summary>
-        /// SaveCommand: saves via the callback; only active while IsDirty is true,
-        /// i.e. while the notes differ from the original.
-        ///
-        /// CancelCommand: always executable, even if there are no changes - then it
-        /// simply closes the View without any warning.
-        /// </summary>
         public NotesViewModel(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
         {
             _plant = plant;
@@ -60,8 +44,7 @@ namespace GreenKeeper.ViewModels.Notes
         public string PlantName => _plant.Name;
 
         /// <summary>
-        /// Extract the Notes property from the plant model to present it in the related view
-        /// and make it editable. Changes to the original notes will be recognized by OnPropertyChanged.
+        /// The text in the notes field. It starts as the plant's notes, empty if it has none.
         /// </summary>
         public string EditableNotes
         {
@@ -70,26 +53,20 @@ namespace GreenKeeper.ViewModels.Notes
             {
                 if (SetProperty(ref _editableNotes, value))
                 {
-                    // IsDirty depends on _editableNotes.
-                    // Manually signal that IsDirty could change, and with that the Save button as well.
                     OnPropertyChanged(nameof(IsDirty));
                 }
             }
         }
 
-        // True once the current notes differ from the original.
-        // Controls CanExecute of SaveCommand (Save button enabled/disabled).
+        // Save works only while this is true.
         public bool IsDirty => _editableNotes != _originalNotes;
 
-        // Commands to be bound in NotesView.xaml
         public ICommand SaveCommand { get; }
         public ICommand CancelCommand { get; }
 
         /// <summary>
-        /// Signals the NotesView that the window is about to be closed.
-        /// This is necessary to warn the user about unsaved changes.
-        /// NotesView.xaml.cs subscribes to it.
-        /// Only fired by CancelAsync: true = saved and close, false = discard and close.
+        /// Asks the window to close (see IDialogViewModel). Only CancelAsync raises it, after any
+        /// question about unsaved changes.
         /// </summary>
         public event EventHandler<bool>? RequestClose;
 
@@ -100,9 +77,9 @@ namespace GreenKeeper.ViewModels.Notes
         public event EventHandler? Saved;
 
         /// <summary>
-        /// Runs the actual save via the callback, updates _originalNotes on success (resets IsDirty)
-        /// and returns whether it worked. Used by both commands so both share the same
-        /// error behavior - on failure the entered text stays untouched instead of being lost.
+        /// Saves through the callback, marks the text as saved on success and returns whether it
+        /// worked. After a failure both commands keep the dialog open, with the entered text
+        /// still in the field.
         /// </summary>
         private async Task<bool> TrySaveAsync()
         {
@@ -132,9 +109,8 @@ namespace GreenKeeper.ViewModels.Notes
         }
 
         /// <summary>
-        /// Called when the Cancel button is clicked (or the window is closed otherwise).
-        /// Without changes the window simply closes. With unsaved changes the user is
-        /// asked: "Yes" saves first and closes only if that worked, "No" discards.
+        /// Called for the Cancel button and for every other way of closing the window (see
+        /// NotesView).
         /// </summary>
         private async Task CancelAsync()
         {

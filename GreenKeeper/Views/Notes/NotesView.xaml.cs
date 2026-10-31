@@ -5,17 +5,13 @@ using System.ComponentModel;
 
 namespace GreenKeeper.Views.Notes
 {
-    /// <summary>
-    /// Interaction logic for NotesView.xaml.
-    /// </summary>
     public partial class NotesView : DialogWindow
     {
         private readonly NotesViewModel _notesViewModel;
 
-        // Guards against re-entrancy: false as long as the close hasn't been confirmed yet.
-        // Once set to true, the Closing handler lets the window close without intercepting it again -
-        // otherwise the DialogResult assignment in CloseWithResult would immediately re-trigger
-        // Closing and loop back into the confirmation flow a second time.
+        // Set once the close is confirmed, so the Closing handler lets the window close.
+        // Without it, setting DialogResult in CloseWithResult would raise Closing again and
+        // run the confirmation a second time.
         private bool _closeConfirmed;
 
         public NotesView(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
@@ -43,13 +39,8 @@ namespace GreenKeeper.Views.Notes
         }
 
         /// <summary>
-        /// Intercepts ANY way the window could close natively (X button, Alt+F4, taskbar close) -
-        /// these all bypass CancelCommand entirely and would otherwise close the window without
-        /// ever checking for unsaved changes.
-        ///
-        /// Reuses the ViewModel's existing CancelCommand instead of duplicating the confirm/save logic here:
-        /// clicking X behaves identically to clicking the Cancel button, using the exact same
-        /// warning and save flow.
+        /// Sends every other way of closing (the X button, Alt+F4, the taskbar) through
+        /// CancelCommand, so it asks about unsaved changes like the Cancel button.
         /// </summary>
         private void NotesView_Closing(object? sender, CancelEventArgs e)
         {
@@ -60,6 +51,8 @@ namespace GreenKeeper.Views.Notes
 
             e.Cancel = true;
 
+            // Runs after this handler, once the close is canceled. CancelCommand then asks about
+            // unsaved changes, if there are any, and closes the window itself unless a save fails.
             Dispatcher.BeginInvoke(() => _notesViewModel.CancelCommand.Execute(null));
         }
     }

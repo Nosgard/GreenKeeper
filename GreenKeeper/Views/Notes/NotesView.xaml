@@ -21,7 +21,6 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Section for the plant name -->
         <TextBlock Grid.Row="0"
                    Style="{StaticResource DialogHeading}"
                    Text="{Binding PlantName}" />

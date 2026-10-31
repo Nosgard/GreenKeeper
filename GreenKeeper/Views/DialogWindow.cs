@@ -28,9 +28,8 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Shows the window as a modal dialog of the owner; true if it was confirmed. The
-        /// XAML describes the dialog at scale 1, like the main window; it opens at the
-        /// scale its owner is drawn at.
+        /// Shows the window as a modal dialog of the owner, at the owner's scale; true if it was
+        /// confirmed. The XAML describes the dialog at scale 1, like the main window.
         /// </summary>
         public bool ShowDialog(Window owner)
         {
@@ -123,8 +122,8 @@ namespace GreenKeeper.Views
             CloseWithResult(dialogResult);
         }
 
-        // Setting DialogResult closes the window. Overridable for windows that
-        // intercept Closing and have to let this close through (see NotesView).
+        // Overridable for windows that intercept Closing and have to let this close through
+        // (see NotesView).
         protected virtual void CloseWithResult(bool dialogResult)
         {
             DialogResult = dialogResult;

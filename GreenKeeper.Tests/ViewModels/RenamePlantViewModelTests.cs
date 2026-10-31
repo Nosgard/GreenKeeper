@@ -30,7 +30,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a RenamePlantViewModel is created for it
             var viewModel = new RenamePlantViewModel(plant);
 
-            // Then: the counter reflects the remaining budget of the 50-character limit
+            // Then: 41 of the 50 characters are left
             Assert.Equal(Plant.MaxNameLength - "Aloe Vera".Length, viewModel.CharactersRemaining);
         }
 
@@ -43,7 +43,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a RenamePlantViewModel is created, but nothing is confirmed yet
             var viewModel = new RenamePlantViewModel(plant);
 
-            // Then: ConfirmedName stays null until the user actually saves
+            // Then: ConfirmedName stays null until the user saves
             Assert.Null(viewModel.ConfirmedName);
         }
 
@@ -62,9 +62,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the name is changed
             viewModel.NewName = "Basil";
 
-            // Then: all three properties that depend on the name must notify,
-            // otherwise the input field, the counter and the Save button's
-            // enabled state would fall out of sync in the UI
+            // Then: PropertyChanged was raised for NewName, CharactersRemaining and HasValidName
             Assert.Contains(nameof(RenamePlantViewModel.NewName), raisedProperties);
             Assert.Contains(nameof(RenamePlantViewModel.CharactersRemaining), raisedProperties);
             Assert.Contains(nameof(RenamePlantViewModel.HasValidName), raisedProperties);
@@ -80,7 +78,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a shorter name is entered
             viewModel.NewName = "Basil";
 
-            // Then: the counter reflects the new length, not the original one
+            // Then: the counter follows the new name: 45 of the 50 characters are left
             Assert.Equal(Plant.MaxNameLength - "Basil".Length, viewModel.CharactersRemaining);
         }
 
@@ -96,41 +94,40 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the enabled state of the Save button is read
             var canSave = viewModel.SaveCommand.CanExecute(null);
 
-            // Then: saving should be possible
+            // Then: saving is allowed
             Assert.True(canSave);
         }
 
         [Fact]
         public void SaveCommand_GivenEmptyName_CanExecuteReturnsFalse()
         {
-            // Given: a ViewModel whose name was cleared entirely
+            // Given: a ViewModel for a plant with a name
             var plant = new Plant { Name = "Aloe Vera" };
             var viewModel = new RenamePlantViewModel(plant);
 
-            // When: saving must be blocked
+            // When: the name is cleared
             viewModel.NewName = string.Empty;
 
-            // Then: a plant without a name would show up
-            // as an empty entry in the sidebar
+            // Then: saving is blocked, since a plant without a name would show up as an empty
+            // entry in the sidebar
             Assert.False(viewModel.SaveCommand.CanExecute(null));
         }
 
         /// <summary>
-        /// Covers the specific reason HasValidName uses IsNullOrWhiteSpace
-        /// rather than IsNullOrEmpty: a name made purely of spaces passes an
-        /// empty-check but would still look blank in the sidebar.
+        /// A name of spaces only passes an empty check but looks blank in the sidebar, so it has
+        /// to be refused like an empty one (see Plant.IsValidName).
         /// </summary>
         [Fact]
         public void SaveCommand_GivenWhitespaceOnlyName_CanExecuteReturnsFalse()
         {
-            // Given: a ViewModel whose name consists only of spaces
+            // Given: a ViewModel for a plant with a name
             var plant = new Plant { Name = "Aloe Vera" };
             var viewModel = new RenamePlantViewModel(plant);
 
-            // When: saving must be blocked
+            // When: the name is replaced by spaces
             viewModel.NewName = "   ";
 
-            // Then: it would show as an empty entry
+            // Then: saving is blocked, since the name would show as an empty entry
             Assert.False(viewModel.SaveCommand.CanExecute(null));
         }
 
@@ -167,9 +164,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: SaveCommand is executed
             viewModel.SaveCommand.Execute(null);
 
-            // Then: the stored name is trimmed - invisible leading/trailing
-            // spaces would otherwise end up in the database and affect
-            // sorting and searching
+            // Then: the confirmed name comes without the spaces at its start and end
             Assert.Equal("Basil", viewModel.ConfirmedName);
         }
 

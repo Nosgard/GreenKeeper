@@ -14,14 +14,13 @@ namespace GreenKeeper.Tests.ViewModels
             var plant = new Plant { Name = "Aloe Vera", Notes = "Loves indirect sunlight." };
             var dialogService = new FakeDialogService();
 
-            // A callback stand-in for the actual save logic - not expected to
-            // be called in this test, since we're only checking the initial state.
+            // A save callback this test never calls, since it only checks the start state.
             Func<string, Task> saveNotesAsync = _ => Task.CompletedTask;
 
             // When: a NotesViewModel is created for this plant
             var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
 
-            // Then: EditableNotes should reflect the plant's existing notes,
+            // Then: EditableNotes holds the plant's existing notes,
             // and nothing has been changed yet
             Assert.Equal("Loves indirect sunlight.", viewModel.EditableNotes);
             Assert.False(viewModel.IsDirty);
@@ -50,8 +49,7 @@ namespace GreenKeeper.Tests.ViewModels
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService();
 
-            // Captures whatever text the ViewModel attempts to save, so the test
-            // can verify it without needing a real repository/database.
+            // Records the text the ViewModel saves.
             string? savedText = null;
             Func<string, Task> saveNotesAsync = text =>
             {
@@ -82,7 +80,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a NotesViewModel is created for this plant
             var viewModel = new NotesViewModel(plant, dialogService, saveNotesAsync);
 
-            // Then: SaveCommand should not be executable, since nothing changed
+            // Then: SaveCommand cannot run, since nothing changed
             Assert.False(viewModel.SaveCommand.CanExecute(null));
         }
 
@@ -111,7 +109,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void CancelCommand_GivenModifiedNotesAndUserConfirmsSave_SavesAndClosesWithTrue()
         {
             // Given: a plant with notes, EditableNotes changed to a new value,
-            // and the dialog service configured to simulate the user choosing "Yes"
+            // and the user answering "Yes" when asked to save
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService { ConfirmResult = true };
 
@@ -158,7 +156,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void CancelCommand_GivenModifiedNotesAndUserDeclinesSave_DiscardsAndClosesWithFalse()
         {
             // Given: a plant with notes, EditableNotes changed to a new value,
-            // and the dialog service configured to simulate the user choosing "No"
+            // and the user answering "No" when asked to save
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService { ConfirmResult = false };
 
@@ -228,8 +226,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: SaveCommand is executed
             viewModel.SaveCommand.Execute(null);
 
-            // Then: an error is shown, the change is NOT marked as saved, and the
-            // dialog stays open (no RequestClose) so the user doesn't lose their input
+            // Then: an error is shown, the change still counts as unsaved, and the dialog stays
+            // open (no RequestClose), so the user keeps their input
             Assert.True(dialogService.ShowErrorWasCalled);
             Assert.True(viewModel.IsDirty);
             Assert.False(closeWasRequested);
@@ -238,9 +236,8 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void CancelCommand_GivenModifiedNotesAndSavingFails_ShowsErrorAndKeepsTheWindowOpen()
         {
-            // Given: a plant with notes, EditableNotes changed, the dialog service
-            // configured to simulate the user choosing "Yes", and a callback that
-            // simulates a failing save
+            // Given: a plant with notes, EditableNotes changed, the user answering "Yes"
+            // when asked to save, and a callback that simulates a failing save
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
             var dialogService = new FakeDialogService { ConfirmResult = true };
 
@@ -255,8 +252,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: CancelCommand is executed
             viewModel.CancelCommand.Execute(null);
 
-            // Then: an error is shown, and the window stays open with the change still
-            // unsaved - closing now would throw away the text the user asked to keep
+            // Then: an error is shown, and the window stays open with the change still unsaved;
+            // closing now would throw away the text the user asked to keep
             Assert.True(dialogService.ShowErrorWasCalled);
             Assert.True(viewModel.IsDirty);
             Assert.False(closeWasRequested);
