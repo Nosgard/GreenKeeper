@@ -13,6 +13,11 @@
 
         /// <summary>
         /// Tells the user about an error; the message is only acknowledged with OK.
+        /// Work that uses the database starts in an async void method of App or
+        /// MainWindow, or in a method an AsyncRelayCommand runs. That method awaits a
+        /// private helper. Only the helper catches a failed database call and calls
+        /// ShowError, so the helper's class writes the message and decides what happens
+        /// next, for example whether the app closes.
         /// </summary>
         /// <param name="message">What went wrong</param>
         /// <param name="title">The title of the window that tells it</param>
