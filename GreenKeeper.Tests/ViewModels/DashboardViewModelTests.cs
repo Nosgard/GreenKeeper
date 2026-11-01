@@ -992,24 +992,6 @@ namespace GreenKeeper.Tests.ViewModels
             _ => throw new ArgumentOutOfRangeException(nameof(commandName))
         };
 
-        // -- RefreshCareStatuses Tests --
-
-        [Fact]
-        public async Task RefreshCareStatuses_WhenCalled_RaisesPropertyChangedForCareStatuses()
-        {
-            // Given: an initialized MainViewModel
-            var viewModel = await CreateInitializedViewModelAsync();
-
-            var raisedProperties = new List<string>();
-            viewModel.Dashboard.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
-
-            // When: RefreshCareStatuses is called directly
-            viewModel.Dashboard.RefreshCareStatuses();
-
-            // Then: PropertyChanged was raised for CareStatuses
-            Assert.Contains(nameof(DashboardViewModel.CareStatuses), raisedProperties);
-        }
-
         // -- Announcement Tests --
         // What a screen reader says after an action: the result is otherwise only visible.
 

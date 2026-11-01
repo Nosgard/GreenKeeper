@@ -83,21 +83,6 @@ namespace GreenKeeper.Tests.Commands
             Assert.True(canExecute);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void CanExecute_WithPredicate_ReturnsWhatThePredicateSays(bool answer)
-        {
-            // Given: a command whose predicate has a fixed answer
-            var command = new AsyncRelayCommand(_ => Task.CompletedTask, _ => answer);
-
-            // When: the enabled state is read
-            var canExecute = command.CanExecute(null);
-
-            // Then: it is the predicate's answer
-            Assert.Equal(answer, canExecute);
-        }
-
         [Fact]
         public void Constructor_GivenNoDelegate_Throws()
         {

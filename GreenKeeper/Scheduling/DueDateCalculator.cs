@@ -19,11 +19,6 @@ namespace GreenKeeper.Scheduling
             { TimeUnit.Years, "year" },
         };
 
-        // FullCalendarUnitsBetween takes the step as an argument, so months and years share one
-        // implementation instead of two that drift apart.
-        private static readonly Func<DateTime, int, DateTime> MonthStep = (date, count) => date.AddMonths(count);
-        private static readonly Func<DateTime, int, DateTime> YearStep = (date, count) => date.AddYears(count);
-
         /// <summary>
         /// Only for the time simulation of the debug panel, which subtracts a flat TimeSpan
         /// from existing dates instead of adding onto a start date.
@@ -97,8 +92,7 @@ namespace GreenKeeper.Scheduling
         /// Nothing is rounded, so the text never claims more time than has passed: "2 weeks"
         /// begins on day 14, not on day 11, and "2 months" with the second full calendar month.
         ///
-        /// The month branch ends below 12, so "12 months" cannot occur. Twelve full months are
-        /// always one full year, so the year branch starts at "1 year".
+        /// The month branch ends below 12, so "12 months" cannot occur.
         /// </summary>
         private static (int Amount, TimeUnit Unit) ElapsedUnitsBetween(DateTime earlier, DateTime later)
         {
@@ -121,45 +115,38 @@ namespace GreenKeeper.Scheduling
                 return (fullMonths, TimeUnit.Months);
             }
 
-            return (FullCalendarYearsBetween(earlier, later), TimeUnit.Years);
+            // A year is twelve calendar months: AddYears(n) lands where AddMonths(12 * n) does,
+            // even from Feb 29 (both give Feb 28 in a common year). So the full years are the
+            // full months divided by twelve.
+            return (fullMonths / MonthsPerYear, TimeUnit.Years);
         }
 
-        // -- Calculation of time differences for calendar months and years --
+        // -- Calculation of full calendar months --
 
         /// <summary>
-        /// Counts the full calendar units between two dates, floored: Jan 15 to Mar 10 is one
+        /// Counts the full calendar months between two dates, floored: Jan 15 to Mar 10 is one
         /// month (Jan 15 to Feb 15), since Mar 10 has not reached Feb 15 + 1 month.
         ///
         /// The loop steps the date instead of comparing day-of-month numbers, because a step can
         /// be clamped: Jan 31 + 1 month is Feb 28, a full month, while comparing 28 &lt; 31 would
         /// count zero months and the card would read "4 weeks".
         ///
-        /// The caller passes the difference of the month or year numbers as the estimate. It is
-        /// never too small and at most one step too large, so the loop only steps back.
+        /// The count starts at the difference of the month numbers. That is never too small and
+        /// at most one month too large, so the loop only steps back.
         /// </summary>
-        private static int FullCalendarUnitsBetween(
-            DateTime earlier, DateTime later, int estimate, Func<DateTime, int, DateTime> step)
-        {
-            int units = Math.Max(estimate, 0);
-
-            while (units > 0 && step(earlier, units) > later)
-            {
-                units--;
-            }
-
-            return units;
-        }
-
         private static int FullCalendarMonthsBetween(DateTime earlier, DateTime later)
         {
-            int estimate = ((later.Year - earlier.Year) * MonthsPerYear) + (later.Month - earlier.Month);
+            int monthNumberDifference = ((later.Year - earlier.Year) * MonthsPerYear) + (later.Month - earlier.Month);
 
-            return FullCalendarUnitsBetween(earlier, later, estimate, MonthStep);
-        }
+            // At least zero, in case the two dates come in the wrong order.
+            int months = Math.Max(monthNumberDifference, 0);
 
-        private static int FullCalendarYearsBetween(DateTime earlier, DateTime later)
-        {
-            return FullCalendarUnitsBetween(earlier, later, later.Year - earlier.Year, YearStep);
+            while (months > 0 && earlier.AddMonths(months) > later)
+            {
+                months--;
+            }
+
+            return months;
         }
     }
 }

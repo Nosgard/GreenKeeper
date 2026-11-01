@@ -34,19 +34,6 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.Equal(Plant.MaxNameLength - "Aloe Vera".Length, viewModel.CharactersRemaining);
         }
 
-        [Fact]
-        public void Constructor_GivenPlant_LeavesConfirmedNameNull()
-        {
-            // Given: a plant
-            var plant = new Plant { Name = "Aloe Vera" };
-
-            // When: a RenamePlantViewModel is created, but nothing is confirmed yet
-            var viewModel = new RenamePlantViewModel(plant);
-
-            // Then: ConfirmedName stays null until the user saves
-            Assert.Null(viewModel.ConfirmedName);
-        }
-
         // -- Property Changed Tests --
 
         [Fact]

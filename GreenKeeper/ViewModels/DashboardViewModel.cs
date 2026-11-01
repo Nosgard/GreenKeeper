@@ -62,7 +62,6 @@ namespace GreenKeeper.ViewModels
         public void ShowSelectedPlant()
         {
             RebuildCareStatuses();
-            OnPropertyChanged(nameof(CareStatuses));
             OnPropertyChanged(nameof(IsPlantSelected));
         }
 
@@ -150,7 +149,6 @@ namespace GreenKeeper.ViewModels
         public void RefreshCareStatuses()
         {
             RebuildCareStatuses();
-            OnPropertyChanged(nameof(CareStatuses));
             _plantList.RefreshSidebar();
         }
 

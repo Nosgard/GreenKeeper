@@ -30,16 +30,15 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a plant is selected
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Then: IsPlantSelected is true, and PropertyChanged was raised for SelectedPlant,
-            // IsPlantSelected and CareStatuses
+            // Then: IsPlantSelected is true, and PropertyChanged was raised for SelectedPlant
+            // and IsPlantSelected
             Assert.True(viewModel.Dashboard.IsPlantSelected);
             Assert.Contains(nameof(PlantListViewModel.SelectedPlant), raisedProperties);
             Assert.Contains(nameof(DashboardViewModel.IsPlantSelected), raisedProperties);
-            Assert.Contains(nameof(DashboardViewModel.CareStatuses), raisedProperties);
         }
 
         [Fact]
-        public async Task SelectedPlant_GivenPlantIsSelected_RaisesSelectedPlantThenCareStatusesThenIsPlantSelected()
+        public async Task SelectedPlant_GivenPlantIsSelected_RaisesSelectedPlantThenIsPlantSelectedAfterTheCardsAreBuilt()
         {
             // Given: an initialized MainViewModel with one plant, nothing selected yet
             var plantRepository = new FakePlantRepository();
@@ -48,22 +47,31 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
 
             var raisedProperties = new List<string>();
+            int? cardsWhenIsPlantSelectedWasRaised = null;
             viewModel.PlantList.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
-            viewModel.Dashboard.PropertyChanged += (_, e) => raisedProperties.Add(e.PropertyName!);
+            viewModel.Dashboard.PropertyChanged += (_, e) =>
+            {
+                raisedProperties.Add(e.PropertyName!);
+                if (e.PropertyName == nameof(DashboardViewModel.IsPlantSelected))
+                {
+                    cardsWhenIsPlantSelectedWasRaised = viewModel.Dashboard.CareStatuses.Count();
+                }
+            };
 
             // When: a plant is selected
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Then: PropertyChanged was raised for SelectedPlant first, then for CareStatuses, and
-            // only then for IsPlantSelected, so the status heading appears with the cards in place
+            // Then: the ViewModels raised PropertyChanged for SelectedPlant, then IsPlantSelected
+            // with the watering card already built, so the heading appears with the cards. None for
+            // CareStatuses: it stays the same collection and reports its own changes.
             Assert.Equal(
                 new[]
                 {
                     nameof(PlantListViewModel.SelectedPlant),
-                    nameof(DashboardViewModel.CareStatuses),
                     nameof(DashboardViewModel.IsPlantSelected)
                 },
                 raisedProperties);
+            Assert.Equal(1, cardsWhenIsPlantSelectedWasRaised);
         }
 
         // -- Timer Tests --

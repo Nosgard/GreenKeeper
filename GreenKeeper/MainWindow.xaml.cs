@@ -12,7 +12,6 @@ using GreenKeeper.Views.Wizards.AddScheduleWizard;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace GreenKeeper
 {
@@ -307,7 +306,8 @@ namespace GreenKeeper
 
         // -- Search Box Focus Section --
 
-        // Clicking anywhere outside the search box takes the keyboard focus away from it.
+        // Clicking anywhere outside the search box takes the keyboard focus away from it
+        // (IsAncestorOf counts the box itself as inside).
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!SearchTextBox.IsFocused)
@@ -315,27 +315,12 @@ namespace GreenKeeper
                 return;
             }
 
-            if (e.OriginalSource is DependencyObject clickedElement && IsDescendantOf(clickedElement, SearchTextBox))
+            if (e.OriginalSource is DependencyObject clickedElement && SearchTextBox.IsAncestorOf(clickedElement))
             {
                 return;
             }
 
             Keyboard.ClearFocus();
-        }
-
-        private static bool IsDescendantOf(DependencyObject child, DependencyObject parent)
-        {
-            DependencyObject? current = child;
-
-            while (current != null)
-            {
-                if (current == parent)
-                {
-                    return true;
-                }
-                current = VisualTreeHelper.GetParent(current);
-            }
-            return false;
         }
     }
 }
