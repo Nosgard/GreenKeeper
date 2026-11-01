@@ -23,6 +23,7 @@ namespace GreenKeeper.Commands
             return _canExecute?.Invoke(parameter) ?? true;
         }
 
+        // Without a catch: an exception that gets this far reaches App.ReportUnexpectedError.
         public async void Execute(object? parameter)
         {
             await ExecuteAsync(parameter);

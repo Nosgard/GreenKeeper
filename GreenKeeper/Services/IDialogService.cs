@@ -17,7 +17,9 @@
         /// MainWindow, or in a method an AsyncRelayCommand runs. That method awaits a
         /// private helper. Only the helper catches a failed database call and calls
         /// ShowError, so the helper's class writes the message and decides what happens
-        /// next, for example whether the app closes.
+        /// next, for example whether the app closes. While the main window is open, an
+        /// exception that no helper catches reaches App.ReportUnexpectedError, which
+        /// writes its own message and decides whether the app keeps running.
         /// </summary>
         /// <param name="message">What went wrong</param>
         /// <param name="title">The title of the window that tells it</param>

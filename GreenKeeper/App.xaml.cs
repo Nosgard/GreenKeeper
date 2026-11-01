@@ -5,6 +5,7 @@ using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.Themes;
 using Microsoft.EntityFrameworkCore;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace GreenKeeper
 {
@@ -13,6 +14,9 @@ namespace GreenKeeper
     /// </summary>
     public partial class App : Application
     {
+        // True while ReportUnexpectedError shows its dialog.
+        private bool _isReportingUnexpectedError;
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -44,6 +48,10 @@ namespace GreenKeeper
             // the code above has run.
             var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System, settingsService);
             mainWindow.Show();
+
+            // The app subscribes only after Show, so an exception before this line ends the app,
+            // also one while the "Database Error" dialog is open.
+            DispatcherUnhandledException += (_, args) => ReportUnexpectedError(args, mainWindow, dialogService);
         }
 
         /// <summary>
@@ -65,6 +73,38 @@ namespace GreenKeeper
                     "Database Error");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Once OnStartup has shown the main window, this method receives each exception
+        /// on the UI thread that no helper caught (see IDialogService.ShowError). It shows
+        /// the dialog "Unexpected Error", and the app keeps running. After the main window
+        /// has closed, or while that dialog is already open, this method does nothing and
+        /// the exception ends the app.
+        /// </summary>
+        private void ReportUnexpectedError(DispatcherUnhandledExceptionEventArgs e, Window mainWindow, IDialogService dialogService)
+        {
+            // IsVisible turns false when the main window closes.
+            if (!mainWindow.IsVisible)
+            {
+                return;
+            }
+
+            // A second exception while the dialog is open ends the app. Without this check,
+            // this method would stack dialog on dialog for a layout pass that fails every time.
+            if (_isReportingUnexpectedError)
+            {
+                return;
+            }
+
+            _isReportingUnexpectedError = true;
+            dialogService.ShowError(
+                $"Something unexpected went wrong:\n{e.Exception.Message}\n\n" +
+                "If anything looks wrong now, restart the application to see what is saved",
+                "Unexpected Error");
+            _isReportingUnexpectedError = false;
+
+            e.Handled = true;
         }
     }
 }
