@@ -2,7 +2,6 @@
 using GreenKeeper.Models;
 using GreenKeeper.Services;
 using GreenKeeper.ViewModels.Base;
-using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.Notes
 {
@@ -61,8 +60,8 @@ namespace GreenKeeper.ViewModels.Notes
         // Save works only while this is true.
         public bool IsDirty => _editableNotes != _originalNotes;
 
-        public ICommand SaveCommand { get; }
-        public ICommand CancelCommand { get; }
+        public AsyncRelayCommand SaveCommand { get; }
+        public AsyncRelayCommand CancelCommand { get; }
 
         /// <summary>
         /// Asks the window to close (see IDialogViewModel). Only CancelAsync raises it, after any

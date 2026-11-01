@@ -33,7 +33,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
             // When: DeletePlantCommand is executed
-            viewModel.Dashboard.DeletePlantCommand.Execute(null);
+            await viewModel.Dashboard.DeletePlantCommand.ExecuteAsync(null);
 
             // Then: the plant is gone from both the UI collection and the repository and no plant remains selected
             Assert.Empty(viewModel.PlantList.Plants);
@@ -56,7 +56,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = selectedPlant;
 
             // When: DeletePlantCommand is executed
-            viewModel.Dashboard.DeletePlantCommand.Execute(null);
+            await viewModel.Dashboard.DeletePlantCommand.ExecuteAsync(null);
 
             // Then: nothing changed; the plant remains in both the collection and the repository, and stays selected
             Assert.Single(viewModel.PlantList.Plants);
@@ -78,7 +78,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = selectedPlant;
 
             // When: DeletePlantCommand is executed
-            viewModel.Dashboard.DeletePlantCommand.Execute(null);
+            await viewModel.Dashboard.DeletePlantCommand.ExecuteAsync(null);
 
             // Then: an error is shown, and the plant stays as it was, still in the UI collection and
             // still selected, since the deletion failed
@@ -194,7 +194,7 @@ namespace GreenKeeper.Tests.ViewModels
             var wateringCard = viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
             // When: CompleteCommand is executed
-            wateringCard.CompleteCommand!.Execute(null);
+            await wateringCard.CompleteCommand!.ExecuteAsync(null);
 
             // Then: the stored schedule is due exactly 7 days from now (NextDueAt) and was cared
             // for now (LastCaredAt), read from the repository rather than from the ViewModel
@@ -222,7 +222,7 @@ namespace GreenKeeper.Tests.ViewModels
             var wateringCard = viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
             // When: CompleteCommand is executed
-            wateringCard.CompleteCommand!.Execute(null);
+            await wateringCard.CompleteCommand!.ExecuteAsync(null);
 
             // Then: the card the dashboard shows afterwards reads the new due date and can no
             // longer be completed, without the plants being loaded again
@@ -262,7 +262,7 @@ namespace GreenKeeper.Tests.ViewModels
             var fertilizingCard = viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
             // When: CompleteCommand is executed on the Fertilizing card
-            fertilizingCard.CompleteCommand!.Execute(null);
+            await fertilizingCard.CompleteCommand!.ExecuteAsync(null);
 
             // Then: only the Fertilizing schedule was recalculated and stored; the due date of Watering is untouched
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
@@ -299,7 +299,7 @@ namespace GreenKeeper.Tests.ViewModels
             var wateringCard = viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
             // When: CompleteCommand is executed
-            wateringCard.CompleteCommand!.Execute(null);
+            await wateringCard.CompleteCommand!.ExecuteAsync(null);
 
             // Then: the repository was never called, and the due date is untouched
             Assert.Equal(0, plantRepository.CompleteCareScheduleAsyncCallCount);
@@ -330,7 +330,7 @@ namespace GreenKeeper.Tests.ViewModels
             var wateringCard = viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single();
 
             // When: CompleteCommand is executed
-            wateringCard.CompleteCommand!.Execute(null);
+            await wateringCard.CompleteCommand!.ExecuteAsync(null);
 
             // Then: an error is shown, and the schedule stays overdue and uncared for; the card
             // must not show a new due date the database never took
@@ -361,7 +361,7 @@ namespace GreenKeeper.Tests.ViewModels
             var fertilizingCard = viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>();
 
             // When: RemoveCommand is executed on the Fertilizing card
-            fertilizingCard.Single().RemoveCommand!.Execute(null);
+            await fertilizingCard.Single().RemoveCommand!.ExecuteAsync(null);
 
             // Then: Fertilizing is gone from the repository and from the cards, while Watering stays
             var persistedSchedules = (await plantRepository.GetPlantsAsync()).Single().CareSchedules;
@@ -391,7 +391,7 @@ namespace GreenKeeper.Tests.ViewModels
             var fertilizingCard = viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
             // When: RemoveCommand is executed on the Fertilizing card
-            fertilizingCard.RemoveCommand!.Execute(null);
+            await fertilizingCard.RemoveCommand!.ExecuteAsync(null);
 
             // Then: nothing changed; the Fertilizing card is still shown among CareStatuses
             var updatedCareStatuses = viewModel.Dashboard.CareStatuses.ToList();
@@ -416,7 +416,7 @@ namespace GreenKeeper.Tests.ViewModels
             var fertilizingCard = viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single();
 
             // When: RemoveCommand is executed on the Fertilizing card
-            fertilizingCard.RemoveCommand!.Execute(null);
+            await fertilizingCard.RemoveCommand!.ExecuteAsync(null);
 
             // Then: an error is shown, and the Fertilizing schedule stays both in the repository and among CareStatuses
             Assert.True(dialogService.ShowErrorWasCalled);
@@ -447,7 +447,7 @@ namespace GreenKeeper.Tests.ViewModels
             var sunlightCard = viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
             // When: RemoveCommand is executed on the Sunlight card
-            sunlightCard.RemoveCommand!.Execute(null);
+            await sunlightCard.RemoveCommand!.ExecuteAsync(null);
 
             // Then: the sunlight requirement is gone from the repository and from the cards, while Watering stays
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
@@ -478,7 +478,7 @@ namespace GreenKeeper.Tests.ViewModels
             var sunlightCard = viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
             // When: RemoveCommand is executed on the Sunlight card
-            sunlightCard.RemoveCommand!.Execute(null);
+            await sunlightCard.RemoveCommand!.ExecuteAsync(null);
 
             // Then: nothing changed; the sunlight requirement remains in the repository and its card is still shown among CareStatuses
             var persistedPlant = (await plantRepository.GetPlantsAsync()).Single();
@@ -507,7 +507,7 @@ namespace GreenKeeper.Tests.ViewModels
             var sunlightCard = viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single();
 
             // When: RemoveCommand is executed on the Sunlight card
-            sunlightCard.RemoveCommand!.Execute(null);
+            await sunlightCard.RemoveCommand!.ExecuteAsync(null);
 
             // Then: an error is shown, and the sunlight requirement stays both in the repository and among CareStatuses
             Assert.True(dialogService.ShowErrorWasCalled);
@@ -1024,7 +1024,7 @@ namespace GreenKeeper.Tests.ViewModels
             var announcements = AnnouncementsOf(viewModel);
 
             // When: the watering is completed
-            viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.ExecuteAsync(null);
 
             // Then: the announcement names the care and what its card reads now
             Assert.Equal(new[] { "Watering completed. Due in 1 week" }, announcements);
@@ -1041,7 +1041,7 @@ namespace GreenKeeper.Tests.ViewModels
             var announcements = AnnouncementsOf(viewModel);
 
             // When: the watering is completed
-            viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.ExecuteAsync(null);
 
             // Then: no announcement; the error dialog already says what happened
             Assert.Empty(announcements);
@@ -1060,7 +1060,7 @@ namespace GreenKeeper.Tests.ViewModels
             var announcements = AnnouncementsOf(viewModel);
 
             // When: the fertilizing schedule is removed
-            viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.ExecuteAsync(null);
 
             // Then: the removal is announced once it happened, and not when it was declined
             Assert.Equal(expected, announcements);
@@ -1079,7 +1079,7 @@ namespace GreenKeeper.Tests.ViewModels
             var announcements = AnnouncementsOf(viewModel);
 
             // When: the sunlight requirement is removed
-            viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.ExecuteAsync(null);
 
             // Then: the removal is announced
             Assert.Equal(new[] { "Sunlight requirement removed" }, announcements);
@@ -1130,7 +1130,7 @@ namespace GreenKeeper.Tests.ViewModels
             var announcements = AnnouncementsOf(viewModel);
 
             // When: the plant is deleted
-            viewModel.Dashboard.DeletePlantCommand.Execute(null);
+            await viewModel.Dashboard.DeletePlantCommand.ExecuteAsync(null);
 
             // Then: the announcement names the deleted plant
             Assert.Equal(new[] { "Aloe Vera deleted" }, announcements);
@@ -1150,7 +1150,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
             // When: the plant is about to be deleted
-            viewModel.Dashboard.DeletePlantCommand.Execute(null);
+            await viewModel.Dashboard.DeletePlantCommand.ExecuteAsync(null);
 
             // Then: "No" keeps the plant, so it is offered first
             Assert.Equal(Answer.No, dialogService.OfferedAnswer);
@@ -1167,7 +1167,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
             // When: the schedule is about to be removed
-            viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<FertilizingStatusViewModel>().Single().RemoveCommand!.ExecuteAsync(null);
 
             // Then: "No" keeps the schedule, so it is offered first
             Assert.Equal(Answer.No, dialogService.OfferedAnswer);
@@ -1186,7 +1186,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
             // When: the requirement is about to be removed
-            viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.Execute(null);
+            await viewModel.Dashboard.CareStatuses.OfType<SunlightStatusViewModel>().Single().RemoveCommand!.ExecuteAsync(null);
 
             // Then: "No" keeps the requirement, so it is offered first
             Assert.Equal(Answer.No, dialogService.OfferedAnswer);

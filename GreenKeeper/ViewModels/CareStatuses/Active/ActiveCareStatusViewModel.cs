@@ -1,8 +1,8 @@
-﻿using GreenKeeper.Models;
+﻿using GreenKeeper.Commands;
+using GreenKeeper.Models;
 using GreenKeeper.Models.Enums;
 using GreenKeeper.Scheduling;
 using GreenKeeper.ViewModels.CareStatuses.Abstract;
-using System.Windows.Input;
 
 namespace GreenKeeper.ViewModels.CareStatuses.Active
 {
@@ -24,7 +24,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         }
 
         // Completes the care; the next due date then counts from this moment.
-        public ICommand? CompleteCommand { get; protected set; }
+        public AsyncRelayCommand? CompleteCommand { get; protected set; }
 
         /// <summary>
         /// Whether the Complete button can be used: from the due day on, in line with the

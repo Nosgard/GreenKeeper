@@ -43,7 +43,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
+        public async Task SaveCommand_GivenModifiedNotes_PersistsViaCallbackAndClearsIsDirty()
         {
             // Given: a plant with existing notes, and EditableNotes changed to a new value
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
@@ -61,7 +61,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.EditableNotes = "New notes";
 
             // When: SaveCommand is executed
-            viewModel.SaveCommand.Execute(null);
+            await viewModel.SaveCommand.ExecuteAsync(null);
 
             // Then: the callback received the new text, and IsDirty is now false
             // (the newly saved text counts as the current "original" state)
@@ -85,7 +85,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void CancelCommand_GivenUnmodifiedNotes_ClosesImmediatelyWithoutConfirmation()
+        public async Task CancelCommand_GivenUnmodifiedNotes_ClosesImmediatelyWithoutConfirmation()
         {
             // Given: a plant with notes, EditableNotes left untouched (IsDirty == false)
             var plant = new Plant { Name = "Aloe Vera", Notes = "Unchanged notes" };
@@ -98,7 +98,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.RequestClose += (_, result) => closeResult = result;
 
             // When: CancelCommand is executed
-            viewModel.CancelCommand.Execute(null);
+            await viewModel.CancelCommand.ExecuteAsync(null);
 
             // Then: the window closes immediately with false, no confirmation dialog needed
             Assert.False(dialogService.ConfirmWasCalled);
@@ -106,7 +106,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void CancelCommand_GivenModifiedNotesAndUserConfirmsSave_SavesAndClosesWithTrue()
+        public async Task CancelCommand_GivenModifiedNotesAndUserConfirmsSave_SavesAndClosesWithTrue()
         {
             // Given: a plant with notes, EditableNotes changed to a new value,
             // and the user answering "Yes" when asked to save
@@ -127,7 +127,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.RequestClose += (_, result) => closeResult = result;
 
             // When: CancelCommand is executed
-            viewModel.CancelCommand.Execute(null);
+            await viewModel.CancelCommand.ExecuteAsync(null);
 
             // Then: the user was asked, the new text was saved, and the window
             // closes with true (saved)
@@ -137,7 +137,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void CancelCommand_GivenModifiedNotes_OffersYesFirst()
+        public async Task CancelCommand_GivenModifiedNotes_OffersYesFirst()
         {
             // Given: notes that were changed
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
@@ -146,14 +146,14 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.EditableNotes = "New notes";
 
             // When: the window is closed and asks "Do you want to save?"
-            viewModel.CancelCommand.Execute(null);
+            await viewModel.CancelCommand.ExecuteAsync(null);
 
             // Then: "No" would discard the changes here, so "Yes" is offered first
             Assert.Equal(Answer.Yes, dialogService.OfferedAnswer);
         }
 
         [Fact]
-        public void CancelCommand_GivenModifiedNotesAndUserDeclinesSave_DiscardsAndClosesWithFalse()
+        public async Task CancelCommand_GivenModifiedNotesAndUserDeclinesSave_DiscardsAndClosesWithFalse()
         {
             // Given: a plant with notes, EditableNotes changed to a new value,
             // and the user answering "No" when asked to save
@@ -174,7 +174,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.RequestClose += (_, result) => closeResults.Add(result);
 
             // When: CancelCommand is executed
-            viewModel.CancelCommand.Execute(null);
+            await viewModel.CancelCommand.ExecuteAsync(null);
 
             // Then: the user was asked, but the change was discarded (never saved),
             // and the window closes exactly once with false
@@ -186,7 +186,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Theory]
         [InlineData(false, 1)]   // the save works -> one signal
         [InlineData(true, 0)]    // the save fails -> no signal
-        public void SaveCommand_GivenSaveWorksOrFails_SignalsSavedOnlyWhenItWorked(bool callbackThrows, int expectedSignals)
+        public async Task SaveCommand_GivenSaveWorksOrFails_SignalsSavedOnlyWhenItWorked(bool callbackThrows, int expectedSignals)
         {
             // Given: changed notes, a save that works or fails, and a listener for the signal
             var plant = new Plant { Name = "Aloe Vera", Notes = "Old notes" };
@@ -200,7 +200,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.Saved += (_, _) => signals++;
 
             // When: SaveCommand is executed
-            viewModel.SaveCommand.Execute(null);
+            await viewModel.SaveCommand.ExecuteAsync(null);
 
             // Then: Saved is raised once after a successful save, never after a failure.
             // The window stays open, so the disabled Save button would be the only other sign
@@ -208,7 +208,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void SaveCommand_GivenCallbackThrows_ShowsErrorAndKeepsChangesUnsaved()
+        public async Task SaveCommand_GivenCallbackThrows_ShowsErrorAndKeepsChangesUnsaved()
         {
             // Given: a plant with notes, EditableNotes changed, and a
             // callback that simulates a failing save (e.g. a database error)
@@ -224,7 +224,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.RequestClose += (_, _) => closeWasRequested = true;
 
             // When: SaveCommand is executed
-            viewModel.SaveCommand.Execute(null);
+            await viewModel.SaveCommand.ExecuteAsync(null);
 
             // Then: an error is shown, the change still counts as unsaved, and the dialog stays
             // open (no RequestClose), so the user keeps their input
@@ -234,7 +234,7 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
-        public void CancelCommand_GivenModifiedNotesAndSavingFails_ShowsErrorAndKeepsTheWindowOpen()
+        public async Task CancelCommand_GivenModifiedNotesAndSavingFails_ShowsErrorAndKeepsTheWindowOpen()
         {
             // Given: a plant with notes, EditableNotes changed, the user answering "Yes"
             // when asked to save, and a callback that simulates a failing save
@@ -250,7 +250,7 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.RequestClose += (_, _) => closeWasRequested = true;
 
             // When: CancelCommand is executed
-            viewModel.CancelCommand.Execute(null);
+            await viewModel.CancelCommand.ExecuteAsync(null);
 
             // Then: an error is shown, and the window stays open with the change still unsaved;
             // closing now would throw away the text the user asked to keep

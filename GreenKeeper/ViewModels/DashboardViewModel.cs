@@ -217,7 +217,7 @@ namespace GreenKeeper.ViewModels
         // -- Card and Button Actions Section --
         // Bound to commands, so nobody awaits them: a failure ends in an error dialog here.
 
-        public ICommand DeletePlantCommand { get; }
+        public AsyncRelayCommand DeletePlantCommand { get; }
 
         private async Task DeleteSelectedPlantAsync()
         {

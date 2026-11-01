@@ -1,4 +1,5 @@
-﻿using GreenKeeper.Models.Enums;
+﻿using GreenKeeper.Commands;
+using GreenKeeper.Models.Enums;
 using GreenKeeper.ViewModels.Base;
 using System.Windows.Input;
 
@@ -15,7 +16,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public string Title => Care.DisplayName();
 
         // Removes an optional card (Fertilizing, Sunlight); null for Watering, which is mandatory.
-        public ICommand? RemoveCommand { get; protected set; }
+        public AsyncRelayCommand? RemoveCommand { get; protected set; }
 
         // Opens the edit dialog of the card; every card has one, set by the subclass.
         public ICommand? EditCommand { get; protected set; }
