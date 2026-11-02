@@ -67,7 +67,7 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard
         // The wizard only collects the intervals; PlantListViewModel sets the due dates when it saves the plant.
         private Plant BuildPlant()
         {
-            var plant = new Plant { Name = _plantNameStep.PlantName };
+            var plant = new Plant { Name = Plant.NormalizeName(_plantNameStep.PlantName) };
 
             // Watering: Mandatory field, so no further check is needed.
             plant.CareSchedules.Add(_wateringStep.ToCareSchedule(CareType.Watering));

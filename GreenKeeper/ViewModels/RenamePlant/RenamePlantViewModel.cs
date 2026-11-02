@@ -55,8 +55,7 @@ namespace GreenKeeper.ViewModels.RenamePlant
 
         private void Save()
         {
-            // Trim, so the stored name has no invisible spaces at its start or end.
-            ConfirmedName = _newName.Trim();
+            ConfirmedName = Plant.NormalizeName(_newName);
 
             RequestClose?.Invoke(this, true);
         }

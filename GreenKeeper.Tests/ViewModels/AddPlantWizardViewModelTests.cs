@@ -11,11 +11,12 @@ namespace GreenKeeper.Tests.ViewModels
     {
         // Walks the wizard up to the summary step with a valid name and watering
         // interval, so a test only has to fill in what it is about.
-        private static AddPlantWizardViewModel WizardAtSummary(string fertilizingAmount = "", string sunlightHours = "")
+        private static AddPlantWizardViewModel WizardAtSummary(
+            string plantName = "Aloe Vera", string fertilizingAmount = "", string sunlightHours = "")
         {
             var wizard = new AddPlantWizardViewModel();
 
-            ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = "Aloe Vera";
+            ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = plantName;
             wizard.NextCommand.Execute(null);
 
             ((WateringStepViewModel)wizard.CurrentStep).AmountText = "7";
@@ -240,6 +241,19 @@ namespace GreenKeeper.Tests.ViewModels
             Assert.NotNull(plant.SunlightRequirement);
             Assert.Equal(6, plant.SunlightRequirement.Hours);
             Assert.Equal(SunlightPeriod.Day, plant.SunlightRequirement.Period);
+        }
+
+        [Fact]
+        public void NextCommand_OnTheSummaryStep_GivenNameWithSurroundingWhitespace_TrimsThePlantName()
+        {
+            // Given: a wizard on the summary step with a name that has stray spaces
+            var wizard = WizardAtSummary(plantName: "  Basil  ");
+
+            // When: Finish is executed
+            wizard.NextCommand.Execute(null);
+
+            // Then: the plant gets the name without the spaces at its start and end
+            Assert.Equal("Basil", wizard.CreatedPlant!.Name);
         }
 
         [Fact]
