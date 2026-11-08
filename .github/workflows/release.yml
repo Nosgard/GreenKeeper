@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build-and-release:
-    # WPF builds only on Windows.
+    # Both projects target net9.0-windows, so they build only on Windows.
     runs-on: windows-latest
 
     steps:

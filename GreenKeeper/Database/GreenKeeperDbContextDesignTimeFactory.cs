@@ -3,8 +3,8 @@
 namespace GreenKeeper.Database
 {
     /// <summary>
-    /// For the EF Core tools (Add-Migration, dotnet ef): GreenKeeperDbContext has no
-    /// parameterless constructor, and the app has no DI setup the tools could discover.
+    /// For the EF Core tools (Add-Migration, dotnet ef), which cannot create
+    /// GreenKeeperDbContext without this class.
     /// </summary>
     public class GreenKeeperDbContextDesignTimeFactory : IDesignTimeDbContextFactory<GreenKeeperDbContext>
     {

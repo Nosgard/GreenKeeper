@@ -42,7 +42,7 @@ namespace GreenKeeper.Tests.Commands
         [Fact]
         public void Execute_RunsTheDelegate()
         {
-            // Given: a command bound the way WPF binds it, through ICommand
+            // Given: a command held as ICommand, the way a button bound to it calls it
             bool wasRun = false;
             System.Windows.Input.ICommand command = new AsyncRelayCommand(_ =>
             {
