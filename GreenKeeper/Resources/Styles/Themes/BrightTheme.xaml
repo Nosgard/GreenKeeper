@@ -11,8 +11,9 @@
     <SolidColorBrush x:Key="SelectedBackground" Color="#B9BCC1" />
     <SolidColorBrush x:Key="SelectedBorder" Color="#74777C" />
 
-    <!-- Keyboard focus: the ring around the control Tab has reached, in the color of
-         the primary text, the strongest contrast to every background of the theme. -->
+    <!-- Keyboard focus: the ring and the border of a text box with the keyboard focus
+         take the color of the primary text, the strongest contrast to every background of
+         the theme. -->
     <SolidColorBrush x:Key="FocusBorder" Color="#1C1E22" />
 
     <!-- Buttons -->
@@ -26,10 +27,10 @@
     <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#CACCD0" />
     <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#8A8C92" />
 
-    <!-- Borders, separators, scrollbar. ControlBorder is the soft frame of buttons,
-         cards and popups. ControlOutline marks a control that stands on its own (text
-         boxes, drop-downs, the scroll bar thumb) and keeps 3:1 against every
-         background it sits on. -->
+    <!-- Borders, separators, scroll bar. ControlBorder is the soft frame of buttons,
+         cards and popups. ControlOutline marks standalone controls such as text boxes
+         and fills the scroll bar thumb. It keeps 3:1 against every background it
+         sits on. -->
     <SolidColorBrush x:Key="ControlBorder" Color="#B3B6BC" />
     <SolidColorBrush x:Key="ControlOutline" Color="#74777C" />
     <SolidColorBrush x:Key="DividerBrush" Color="#C5C8CD" />

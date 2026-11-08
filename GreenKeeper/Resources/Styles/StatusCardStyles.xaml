@@ -59,8 +59,8 @@
     </Style>
 
     <!-- Buttons of a card. A screen reader names each one with its card ("Complete
-         Watering"), since every card has an "Edit", and hears the status of the card,
-         which otherwise comes before the button only when the whole card is read. -->
+         Watering"), since every card has an "Edit". The help text gives the card's
+         status to a user who lands on the button directly. -->
     <Style x:Key="CareStatusCardButton" TargetType="Button" BasedOn="{StaticResource StatusCardActionButton}">
         <Setter Property="Padding" Value="10" />
         <Setter Property="AutomationProperties.Name">
@@ -106,8 +106,8 @@
                        FontWeight="SemiBold" />
 
                     <!-- Wraps where the buttons leave too little room for one line.
-                         Foreground belongs in the style, not on the element: a
-                         local value would outrank the trigger below. -->
+                         With Foreground on the TextBlock itself, an overdue status
+                         would not take the overdue color. -->
                     <TextBlock Text="{Binding StatusText}"
                        AutomationProperties.Name="{Binding SpokenStatusText}"
                        FontSize="16"

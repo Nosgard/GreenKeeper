@@ -25,7 +25,7 @@
     <SolidColorBrush x:Key="StatusButtonDisabledBorder" Color="#4A4C55" />
     <SolidColorBrush x:Key="StatusButtonDisabledForeground" Color="#8A8D92" />
 
-    <!-- Borders, separators, scrollbar (roles: see BrightTheme.xaml) -->
+    <!-- Borders, separators, scroll bar (roles: see BrightTheme.xaml) -->
     <SolidColorBrush x:Key="ControlBorder" Color="#5B5E69" />
     <SolidColorBrush x:Key="ControlOutline" Color="#83868F" />
     <SolidColorBrush x:Key="DividerBrush" Color="#4B4D55" />

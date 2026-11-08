@@ -22,9 +22,9 @@
         <Setter Property="Margin" Value="0, 6, 0, 0" />
     </Style>
 
-    <!-- The limit below an amount field. Once the amount exceeds it, it turns into
-         the reason ("Too large, max. 365") in the overdue color, and a screen reader
-         hears it right then, while the focus stays in the field. -->
+    <!-- The limit below an amount field. Above the limit the hint turns into the reason
+         ("Too large, max. 365") in the overdue color, and a screen reader announces it
+         while the focus stays in the field. -->
     <Style x:Key="AmountLimitHint" TargetType="TextBlock" BasedOn="{StaticResource InputHint}">
         <Style.Triggers>
             <DataTrigger Binding="{Binding IsAmountTooLarge}" Value="True">
@@ -34,9 +34,8 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Text input on a themed surface. Its own template, because the default one
-         paints a system blue border on hover and focus that fits neither theme. The
-         field with the cursor shows a border in the text color instead. -->
+    <!-- A TextBox with its own template, because otherwise the field shows a system blue
+         border on hover and focus that fits neither theme. -->
     <Style x:Key="ThemedTextBox" TargetType="TextBox">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
@@ -54,9 +53,10 @@
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
                             SnapsToDevicePixels="True">
-                        <!-- The TextBox applies Padding itself and hands its scroll bar settings to
-                             this host, where they replace the Hidden values below (the notes field
-                             scrolls that way) -->
+                        <!-- The fields keep the inner spacing set in Padding, though nothing
+                             here binds to it. The notes field still shows a scroll bar once
+                             its text runs long, because NotesView sets
+                             VerticalScrollBarVisibility on it. -->
                         <ScrollViewer x:Name="PART_ContentHost"
                                       Focusable="False"
                                       HorizontalScrollBarVisibility="Hidden"
@@ -72,9 +72,9 @@
         </Setter>
     </Style>
 
-    <!-- The field of an amount input. Its heading lies outside the input templates
-         below, so the hosting ContentControl carries the field's name and whether it is
-         required as AutomationProperties, and the field takes them over. -->
+    <!-- The field of an amount input. It takes its name and required state from the
+         hosting ContentControl, since its heading lies outside the input templates
+         below. -->
     <Style x:Key="AmountTextBox" TargetType="TextBox" BasedOn="{StaticResource ThemedTextBox}">
         <Setter Property="Width" Value="80" />
         <Setter Property="AutomationProperties.Name" Value="{Binding (AutomationProperties.Name), RelativeSource={RelativeSource AncestorType=ContentControl}}" />

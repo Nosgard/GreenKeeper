@@ -73,10 +73,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <!-- Hover and pressed are separate layers with animated Opacity. Swapping one
-                         Background between brushes would be instant and flash on click. The colors
-                         still come from the theme brushes, so they fade along. Keep 0.2s in sync
-                         with ThemeService. -->
+                    <!-- Hover and pressed are separate layers with animated Opacity, because
+                         swapping one Background between brushes would be instant and flash on
+                         click. Keep 0.2s in sync with the theme fade in ThemeService. -->
                     <Grid Background="{TemplateBinding Background}">
                         <Border x:Name="hoverLayer"
                                 Background="{DynamicResource SurfaceBackground}"
