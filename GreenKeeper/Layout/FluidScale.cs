@@ -3,11 +3,10 @@
 namespace GreenKeeper.Layout
 {
     /// <summary>
-    /// The scale a window draws its UI at. At the design size the factor is 1. Any
-    /// other size is followed at a rate: at 0.5, half of the difference goes into the
-    /// size of the UI and half into the room around it. A smaller window has its own
-    /// rate, because there the room runs out first. The factor stays between Minimum
-    /// and Maximum.
+    /// The factor a window scales its UI by, 1 at the design size. GrowRate and
+    /// ShrinkRate set how much of a size difference goes into the UI; the rest goes
+    /// into the room around it. A smaller window has its own rate because the room
+    /// runs out first there.
     /// </summary>
     public class FluidScale
     {

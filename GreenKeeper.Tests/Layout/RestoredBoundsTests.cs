@@ -5,8 +5,8 @@ using System.Windows;
 namespace GreenKeeper.Tests.Layout
 {
     /// <summary>
-    /// Where the main window opens after a restart: at its stored place, as far as
-    /// the current screen still has that place.
+    /// Where the main window opens after a restart: at its stored place, moved or
+    /// shrunk to fit the current screen.
     /// </summary>
     public class RestoredBoundsTests
     {
