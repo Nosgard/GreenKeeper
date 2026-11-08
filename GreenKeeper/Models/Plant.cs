@@ -21,7 +21,7 @@
         }
 
         /// <summary>
-        /// Trims the name, so the stored name has no whitespace at either end.
+        /// The name as it is stored, without whitespace at either end.
         /// </summary>
         public static string NormalizeName(string name)
         {

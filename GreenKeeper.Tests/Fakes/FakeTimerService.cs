@@ -5,8 +5,7 @@ namespace GreenKeeper.Tests.Fakes
 
     /// <summary>
     /// ITimerService without a real timer, so no tick fires during or after a test.
-    /// MainViewModel's constructor still calls Start, and the fake keeps the callback:
-    /// TriggerTick() runs it as if the interval had passed.
+    /// TriggerTick() runs the callback as if the interval had passed.
     /// </summary>
     public class FakeTimerService : ITimerService
     {

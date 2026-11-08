@@ -3,8 +3,8 @@
 namespace GreenKeeper.Services
 {
     /// <summary>
-    /// ITimerService on a DispatcherTimer. Tick runs on the UI thread, so the callback can
-    /// raise PropertyChanged directly.
+    /// ITimerService on a DispatcherTimer. Its tick runs on the same thread as the windows,
+    /// so the callback can change the ViewModels directly, as a button command does.
     /// </summary>
     public class DispatcherTimerService : ITimerService
     {

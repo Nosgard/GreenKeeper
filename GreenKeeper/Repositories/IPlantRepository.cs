@@ -16,7 +16,7 @@ namespace GreenKeeper.Repositories
         Task<Plant> AddPlantAsync(Plant plant);
 
         /// <summary>
-        /// Saves a completed care: the next due date and the date of the last care.
+        /// Saves a completed care schedule: the next due date and the date of the last care.
         /// DashboardViewModel calculates both; the repository only stores them.
         /// </summary>
         Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt);
@@ -48,8 +48,7 @@ namespace GreenKeeper.Repositories
         Task UpdatePlantNotesAsync(int plantId, string notes);
 
         /// <summary>
-        /// Saves a new name for the plant. Only the name column changes; care schedules and due
-        /// dates stay as they are.
+        /// Saves a new name for the plant. Only the name column changes.
         /// </summary>
         Task RenamePlantAsync(int plantId, string newName);
     }

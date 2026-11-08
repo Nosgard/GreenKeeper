@@ -48,13 +48,13 @@ namespace GreenKeeper.Services
 
                 var json = File.ReadAllText(path);
 
-                // Deserialize returns null for a file whose whole content is "null".
+                // A file that holds only "null" also gives the default settings.
                 return JsonSerializer.Deserialize<AppSettings>(json, Options) ?? new AppSettings();
             }
             catch (Exception)
             {
-                // Broad on purpose: a damaged or locked file or an unreachable path is no reason to fail
-                // the start. The defaults keep the app usable, and the next Save repairs the file.
+                // Broad on purpose: a damaged or locked file or an unreachable path must not stop
+                // the start. The next Save overwrites a damaged file.
                 return new AppSettings();
             }
         }
@@ -68,7 +68,7 @@ namespace GreenKeeper.Services
             }
             catch (Exception)
             {
-                // Same reason as in Load (see ISettingsService.Save).
+                // Broad on purpose, like in Load (see ISettingsService.Save).
             }
         }
     }

@@ -1,8 +1,8 @@
 ﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
-    /// The period the hours of sunlight refer to. EF Core stores it as an integer, so the
-    /// numbers are part of the saved data (see CareType).
+    /// The period the hours of sunlight refer to. The numbers are part of the saved data
+    /// (see CareType).
     /// </summary>
     public enum SunlightPeriod
     {

@@ -5,10 +5,10 @@ namespace GreenKeeper.Database
     public static class DbPathProvider
     {
         /// <summary>
-        /// The path of the SQLite file. The app and the EF Core migration tooling both take it
-        /// from here, so migrations reach the file the app uses. It lies under
-        /// %LocalAppData%\GreenKeeper rather than next to the program: the user can write there
-        /// wherever the app is installed, and the file survives updates and reinstalls.
+        /// The path of the SQLite file. GreenKeeperDbContextFactory opens it, and the EF Core
+        /// tools reach it through GreenKeeperDbContextDesignTimeFactory, so migrations go to the
+        /// same file. It lies under %LocalAppData%\GreenKeeper because the user can write there
+        /// and the file survives updates and reinstalls.
         /// </summary>
         public static string GetDatabasePath()
         {

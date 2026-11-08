@@ -3,9 +3,9 @@
 namespace GreenKeeper.Commands
 {
     /// <summary>
-    /// RelayCommand for asynchronous work. ICommand.Execute has to be void, so the "async void"
-    /// of every asynchronous command sits here; the ViewModels stay on plain Tasks, and tests
-    /// can await ExecuteAsync and see its exceptions.
+    /// RelayCommand for asynchronous work. The ViewModels pass it methods that return a Task,
+    /// so they write no async void themselves: Execute here is the async void. Tests await
+    /// ExecuteAsync and see its exceptions.
     /// </summary>
     public class AsyncRelayCommand : ICommand
     {

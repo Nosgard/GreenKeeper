@@ -4,14 +4,12 @@ using GreenKeeper.Repositories;
 namespace GreenKeeper.Tests.Fakes
 {
     /// <summary>
-    /// In-memory IPlantRepository.
-    ///
-    /// Like the real repository, it never shares the objects it stores: it copies what is
-    /// handed in and what it hands out. A change to a stored plant does not show up in the
-    /// objects a ViewModel holds, or the other way round, so a test can tell whether the
-    /// ViewModel went through the repository, updated its own objects, or did both.
-    ///
-    /// SeedPlants(...) sets up the Given state before a test builds its ViewModels.
+    /// In-memory IPlantRepository. Like the real repository, it never shares the objects it
+    /// stores: it stores copies, and GetPlantsAsync hands out copies, so a test can tell
+    /// whether a ViewModel went through the repository, updated its own objects, or did both.
+    /// AddPlantAsync and the AddOrReplace methods return the object they were given, as
+    /// PlantRepository does. SeedPlants(...) sets up the Given state before a test builds its
+    /// ViewModels.
     /// </summary>
     public class FakePlantRepository : IPlantRepository
     {
@@ -40,8 +38,7 @@ namespace GreenKeeper.Tests.Fakes
             }
         }
 
-        // Gives the plant and everything attached to it an Id, like the database
-        // would on insert. Ids that are already set stay as they are.
+        // Gives the plant and everything attached to it an Id, like the database would on insert.
         private void AssignIds(Plant plant)
         {
             if (plant.Id == 0)

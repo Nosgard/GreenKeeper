@@ -15,7 +15,7 @@ namespace GreenKeeper.Tests.Repositories
     /// </summary>
     public class PlantRepositoryTests : IDisposable
     {
-        // The in-memory database only exists as long as this connection stays open.
+        // Stays open until Dispose, because closing it would delete the test's database.
         private readonly SqliteConnection _connection = new("Data Source=:memory:");
         private readonly InMemoryDbContextFactory _contextFactory;
         private readonly PlantRepository _repository;
@@ -124,8 +124,7 @@ namespace GreenKeeper.Tests.Repositories
         }
 
         /// <summary>
-        /// A failing insert must not cost the plant its schedule of that care type: removing the
-        /// old schedule and inserting the new one succeed or fail together.
+        /// Removing the old schedule and inserting the new one succeed or fail together.
         /// </summary>
         [Fact]
         public async Task AddOrReplaceCareScheduleAsync_GivenTheInsertFails_KeepsTheExistingSchedule()
@@ -180,8 +179,7 @@ namespace GreenKeeper.Tests.Repositories
         }
 
         /// <summary>
-        /// A failing insert must not cost the plant its sunlight requirement: removing the old
-        /// requirement and inserting the new one succeed or fail together.
+        /// Removing the old requirement and inserting the new one succeed or fail together.
         /// </summary>
         [Fact]
         public async Task AddOrReplaceSunlightRequirementAsync_GivenTheInsertFails_KeepsTheExistingRequirement()
@@ -296,8 +294,7 @@ namespace GreenKeeper.Tests.Repositories
 
         // -- Helpers --
 
-        // Maps the name from [InlineData] to the repository call. The values next to the Id are
-        // never stored.
+        // The values next to the Id are never stored.
         private Task RunOperation(string operation, int id) => operation switch
         {
             "CompleteCareSchedule" => _repository.CompleteCareScheduleAsync(id, DateTime.MinValue, DateTime.MinValue),

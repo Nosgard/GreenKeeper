@@ -45,7 +45,7 @@ namespace GreenKeeper.Services
             // instead of after the fade.
             CurrentTheme = theme;
 
-            // Dark title bar in the window background, not the Windows accent color.
+            // The dark title bar takes the window background, not the Windows accent color.
             TitleBarTheme.Apply(theme == Theme.Dark ? ((SolidColorBrush)target["WindowBackground"]).Color : null);
 
             foreach (var key in live.Keys.Cast<object>().ToList())
@@ -60,15 +60,16 @@ namespace GreenKeeper.Services
 
             if (isFirstChange)
             {
-                // Only now that the animations run, because an animating brush cannot be sealed
-                // (see the note in AnimateTo).
+                // Only now that the animations run (see the note in AnimateTo).
                 SwapIntoApplicationResources(live);
             }
         }
 
         /// <summary>
-        /// Fades one brush to its new color. DynamicResource resolves to the brush
-        /// object, so every control using it follows along without a resource lookup.
+        /// Fades one brush to its new color. Everything that takes it through DynamicResource
+        /// fades along. An element with StaticResource keeps the brush it got, and its color no
+        /// longer changes once this service puts another brush in that place (see
+        /// SwapIntoApplicationResources).
         /// </summary>
         private static void AnimateTo(ResourceDictionary live, object key, SolidColorBrush brush, Color targetColor)
         {
@@ -79,10 +80,8 @@ namespace GreenKeeper.Services
                 EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
             };
 
-            // Never release this clock. WPF seals Freezables that live in Application.Resources,
-            // and a sealed brush rejects any animation, but a brush that is animating cannot be
-            // sealed. Clearing the clock (to write the color as a base value, say) brings back
-            // "the object is sealed or frozen" on the next theme change.
+            // Keep this animation, also after the fade. A brush in Application.Resources
+            // without one fails its next fade with "the object is sealed or frozen".
             if (!brush.IsFrozen)
             {
                 // Replaces a running animation and picks up from its current
@@ -91,8 +90,9 @@ namespace GreenKeeper.Services
                 return;
             }
 
-            // If a brush is sealed anyway, swap in an animating clone instead of throwing;
-            // consumers follow it through the dictionary.
+            // If a brush cannot fade anyway, an animating clone takes its place in the theme.
+            // The color still fades, and everything that takes it through DynamicResource
+            // follows.
             var replacement = brush.CloneCurrentValue();
             replacement.BeginAnimation(SolidColorBrush.ColorProperty, animation);
             live[key] = replacement;
