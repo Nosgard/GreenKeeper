@@ -12,19 +12,17 @@ using GreenKeeper.Views.Wizards.AddScheduleWizard;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml. Opens the dialogs the ViewModel asks
-    /// for through its events and hands their results back to it - the only place
-    /// where ViewModel and windows meet.
+    /// Opens the windows that PlantListViewModel and DashboardViewModel ask for through their
+    /// events and hands the results back to them, so those ViewModels never see a window class.
     /// </summary>
     public partial class MainWindow : Window
     {
-        // How far the focus ring reaches beyond a control: 5 (Margin="-5" of FocusRing in
-        // FocusStyles.xaml) and 3 of air.
+        // How far the focus ring reaches beyond a control (Margin="-5" of FocusRing in
+        // FocusStyles.xaml), plus some air.
         private const double FocusRingReach = 8;
 
         private readonly MainViewModel _mainViewModel;
@@ -64,22 +62,19 @@ namespace GreenKeeper
 
             _mainViewModel.Announced += MainViewModel_Announced;
 
-            _mainViewModel.AddPlantRequested += MainViewModel_AddPlantRequested;
-            _mainViewModel.AddScheduleRequested += MainViewModel_AddScheduleRequested;
-            _mainViewModel.EditScheduleRequested += MainViewModel_EditScheduleRequested;
-            _mainViewModel.OpenNotesRequested += MainViewModel_OpenNotesRequested;
-            _mainViewModel.RenamePlantRequested += MainViewModel_RenamePlantRequested;
+            _mainViewModel.PlantList.AddPlantRequested += MainViewModel_AddPlantRequested;
+            _mainViewModel.Dashboard.AddScheduleRequested += MainViewModel_AddScheduleRequested;
+            _mainViewModel.Dashboard.EditScheduleRequested += MainViewModel_EditScheduleRequested;
+            _mainViewModel.Dashboard.OpenNotesRequested += MainViewModel_OpenNotesRequested;
+            _mainViewModel.PlantList.RenamePlantRequested += MainViewModel_RenamePlantRequested;
 
-            // Stops the periodic status card refresh once this window (and therefore the application)
-            // is closed, so the timer doesn't keep firing after the app is meant to shut down.
+            // Otherwise the refresh timer keeps firing while the app shuts down.
             Closed += (_, _) => _mainViewModel.StopCareStatusRefreshTimer();
 
             Closing += (_, _) => SavePlacement();
 
             PreviewMouseDown += Window_PreviewMouseDown;
 
-            // The constructor cannot be async, so loading the plants will be fired
-            // via the Loaded event once the window is ready.
             Loaded += MainWindow_Loaded;
 
             DataContext = _mainViewModel;
@@ -88,8 +83,9 @@ namespace GreenKeeper
         // -- Keyboard Section --
 
         // Tab focuses an entry without choosing it, and the list chooses only with Space
-        // or the arrow keys. Enter opens the entry as users expect; without it the
-        // dashboard would stay empty and its cards out of reach.
+        // or the arrow keys. While no plant is chosen, Enter opens the entry as users
+        // expect. With another plant chosen, Enter only adds the entry to the selection and
+        // opens nothing (see FocusStops.Focus).
         private void PlantEntry_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Enter || sender is not ListViewItem entry)
@@ -112,8 +108,9 @@ namespace GreenKeeper
 
         // -- Responsive Size Section --
 
-        // The size in the XAML is the design size. The window opens at it, or at the size
-        // that suits the screen, and draws its content at the scale of its current size.
+        // Sets the start size that suits the screen (see StartSize). The window opens at it
+        // only without a saved placement, since RestorePlacement overwrites it. The content
+        // is drawn at the scale of the window's current size.
         private void InitializeResponsiveSize()
         {
             var designSize = new Size(Width, Height);
@@ -171,7 +168,7 @@ namespace GreenKeeper
         {
             var settings = _settingsService.Load();
 
-            // RestoreBounds is the window in its normal state, also while it is maximized.
+            // RestoreBounds, so a maximized window keeps its normal position and size.
             settings.WindowPlacement = new WindowPlacement
             {
                 Left = RestoreBounds.Left,
@@ -204,12 +201,13 @@ namespace GreenKeeper
             }
         }
 
-        // A card button the keyboard scrolls into view comes in only up to its own edge,
-        // and the scroll area would cut its focus ring off. So the ring comes along.
+        // The keyboard scrolls a card button into view only up to the button's edge, so the
+        // scroll area would cut off its focus ring. This handler asks again with FocusRingReach
+        // added on every side.
         private void StatusPanel_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
-            // Requests that already name a rectangle, including the one raised below, and
-            // those of the panel itself go on to the scroll area unchanged.
+            // Requests with a rectangle, like the one raised below, and those of the panel
+            // itself go on unchanged.
             if (!e.TargetRect.IsEmpty || e.TargetObject is not FrameworkElement target || ReferenceEquals(target, sender))
             {
                 return;
@@ -224,15 +222,16 @@ namespace GreenKeeper
         }
 
         // -- Dialogs Section --
-        // Event handlers have to be "async void", so nobody can await them: every database
-        // call goes through RunAsync, which reports a failure as an error dialog.
+        // An exception from these handlers would reach App.ReportUnexpectedError, which shows
+        // only a general message, so loading the plants and saving a dialog's result go through
+        // RunAsync, which names the failed step in its error dialog. The notes window handles
+        // its own failures.
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await RunAsync(() => _mainViewModel.InitializeAsync(), "Failed to load the plant", "Loading Error");
+            await RunAsync(() => _mainViewModel.PlantList.InitializeAsync(), "Failed to load the plant", "Loading Error");
         }
 
-        // Opens the Add Plant wizard. If the user completed it, the built plant is handed off to be persisted.
         private async void MainViewModel_AddPlantRequested(object? sender, EventArgs e)
         {
             var wizardView = new AddPlantWizardView();
@@ -242,10 +241,9 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => _mainViewModel.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
+            await RunAsync(() => _mainViewModel.PlantList.AddPlantAsync(wizardView.CreatedPlant), "Failed to save the plant", "Saving Error");
         }
 
-        // Opens the Add Schedule wizard. If completed, its result (a care schedule or a sunlight requirement) is persisted.
         private async void MainViewModel_AddScheduleRequested(object? sender, Plant plant)
         {
             var wizardView = new AddScheduleWizardView(plant, _dialogService);
@@ -255,11 +253,12 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel), "Schedule could not be saved", "Saving Error");
+            await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel.Dashboard), "Schedule could not be saved", "Saving Error");
         }
 
-        // Opens the edit dialog. If saved, its result is persisted the exact same way as a wizard result -
-        // editing a schedule and replacing it via the wizard are, from the database's point of view, the identical operation.
+        // The edit dialog's result is saved like a result of the Add Schedule wizard: for the
+        // database, editing a care schedule or the sunlight requirement and replacing it through
+        // that wizard are the same operation.
         private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
             var editView = new EditScheduleView(e.plant, e.care, _timeProvider);
@@ -269,18 +268,19 @@ namespace GreenKeeper
                 return;
             }
 
-            await RunAsync(() => editView.Result.SaveAsync(_mainViewModel), "The change could not be saved", "Saving Error");
+            await RunAsync(() => editView.Result.SaveAsync(_mainViewModel.Dashboard), "The change could not be saved", "Saving Error");
         }
 
-        // Opens the notes window. It saves through the callback itself, so there is nothing to persist afterwards.
+        // The notes window saves through the callback itself, so nothing is left to persist here.
         private void MainViewModel_OpenNotesRequested(object? sender, Plant plant)
         {
-            var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.UpdatePlantNotesAsync(plant, text));
+            var notesView = new NotesView(plant, _dialogService, saveNotesAsync: text => _mainViewModel.Dashboard.UpdatePlantNotesAsync(plant, text));
 
             notesView.ShowDialog(this);
         }
 
-        // Opens the rename dialog for the plant that was right-clicked in the sidebar.
+        // Opens the rename dialog for the plant whose context menu was used, which need not be the
+        // selected one.
         private async void MainViewModel_RenamePlantRequested(object? sender, Plant plant)
         {
             var renameView = new RenamePlantView(plant);
@@ -291,7 +291,7 @@ namespace GreenKeeper
             }
 
             await RunAsync(
-                () => _mainViewModel.RenamePlantAsync(plant, renameView.ConfirmedName),
+                () => _mainViewModel.PlantList.RenamePlantAsync(plant, renameView.ConfirmedName),
                 "The plant could not be renamed",
                 "Renaming Error");
         }
@@ -310,7 +310,8 @@ namespace GreenKeeper
 
         // -- Search Box Focus Section --
 
-        // Clicking anywhere outside the search box takes the keyboard focus away from it.
+        // Clicking anywhere outside the search box takes the keyboard focus away from it, so an
+        // empty box shows "Search..." again. A click inside the box keeps the focus there.
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!SearchTextBox.IsFocused)
@@ -318,27 +319,12 @@ namespace GreenKeeper
                 return;
             }
 
-            if (e.OriginalSource is DependencyObject clickedElement && IsDescendantOf(clickedElement, SearchTextBox))
+            if (e.OriginalSource is DependencyObject clickedElement && SearchTextBox.IsAncestorOf(clickedElement))
             {
                 return;
             }
 
             Keyboard.ClearFocus();
-        }
-
-        private static bool IsDescendantOf(DependencyObject child, DependencyObject parent)
-        {
-            DependencyObject? current = child;
-
-            while (current != null)
-            {
-                if (current == parent)
-                {
-                    return true;
-                }
-                current = VisualTreeHelper.GetParent(current);
-            }
-            return false;
         }
     }
 }

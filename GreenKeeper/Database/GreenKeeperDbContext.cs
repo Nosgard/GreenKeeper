@@ -28,8 +28,7 @@ namespace GreenKeeper.Database
                 .HasForeignKey<SunlightRequirement>(sr => sr.PlantId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Prevents two care schedules of the same care type from being
-            // accidentally created for the same plant object.
+            // One care schedule per care type and plant.
             modelBuilder.Entity<CareSchedule>()
                 .HasIndex(cs => new { cs.PlantId, cs.Care })
                 .IsUnique();

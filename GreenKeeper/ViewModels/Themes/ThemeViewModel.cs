@@ -26,16 +26,14 @@ namespace GreenKeeper.ViewModels.Themes
         public ICommand ToggleCommand { get; }
 
         /// <summary>
-        /// True while the dark theme is active. The toggle button binds its icon
-        /// to this property - showing a sun (switch TO bright) while dark is
-        /// active, and a moon (switch TO dark) while bright is active.
+        /// True while the dark theme is active. The toggle button picks its icon from it (see
+        /// ThemeToggleIconConverter).
         /// </summary>
         public bool IsDarkTheme => _themeService.CurrentTheme == Theme.Dark;
 
         /// <summary>
         /// What a click on the toggle does, in words, since the button shows only an icon.
-        /// A screen reader announces the button by it, and the tooltip shows it. Like the
-        /// icon, it names the theme the click switches to.
+        /// A screen reader announces the button by it, and the tooltip shows it.
         /// </summary>
         public string ToggleLabel => IsDarkTheme ? "Switch to light theme" : "Switch to dark theme";
 
@@ -45,9 +43,8 @@ namespace GreenKeeper.ViewModels.Themes
 
             _themeService.ApplyTheme(newTheme);
 
-            // Remember the choice for the next start. Read-modify-write rather than
-            // writing a fresh object, so later settings are not dropped on the way.
-            // Neither call throws - see SettingsService.
+            // Remember the choice for the next start. Read-modify-write, so the other settings
+            // such as the window placement stay as they are.
             var settings = _settingsService.Load();
             settings.Theme = newTheme;
             _settingsService.Save(settings);

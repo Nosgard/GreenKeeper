@@ -8,9 +8,8 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.CareStatuses.EditOption
 {
     /// <summary>
-    /// Orchestrator for the edit dialog, analogous to the wizard ViewModels,
-    /// but without step navigation - there is only ONE step, chosen
-    /// once in the constructor based on the given care type.
+    /// Backs the edit dialog. It works like a wizard with a single step, which the
+    /// constructor picks from the care type.
     /// </summary>
     public class EditScheduleViewModel : ObservableObject, IDialogViewModel
     {
@@ -19,7 +18,6 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         // The entered values as a new object, instead of changing the plant. Null until saved.
         public ScheduleInput? Result { get; private set; }
 
-        // Either an active (Watering / Fertilizing) or passive (Sunlight) care type.
         public EditScheduleViewModel(Plant plant, CareType careType, TimeProvider timeProvider)
         {
             CurrentStep = CreateStep(plant, careType, timeProvider);

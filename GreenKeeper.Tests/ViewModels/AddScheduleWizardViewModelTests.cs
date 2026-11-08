@@ -127,7 +127,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: Finish is executed
             wizard.NextCommand.Execute(null);
 
-            // Then: the schedule is handed out with the entered interval, the due date is left to MainViewModel
+            // Then: the schedule is handed out with the entered interval; DashboardViewModel sets the due date when it saves the schedule
             Assert.Equal(true, closeResult);
             var schedule = Assert.IsType<CareScheduleInput>(wizard.Result).CareSchedule;
             Assert.Equal(CareType.Fertilizing, schedule.Care);

@@ -7,10 +7,8 @@ using System.Text.Json.Serialization;
 namespace GreenKeeper.Services
 {
     /// <summary>
-    /// Stores the preferences as JSON next to the database, in
-    /// %LocalAppData%\GreenKeeper. Deliberately not in the database: these are
-    /// settings of the installation, not data the user works with, and they must
-    /// be readable before the database has even been opened.
+    /// Stores the preferences as JSON next to the database, in %LocalAppData%\GreenKeeper
+    /// (see DbPathProvider.GetSettingsPath).
     /// </summary>
     public class SettingsService : ISettingsService
     {
@@ -18,10 +16,7 @@ namespace GreenKeeper.Services
         {
             WriteIndented = true,
 
-            // Enums are written as text, not as numbers. There is no database
-            // column behind them, so the numeric values carry no meaning - and
-            // "Bright" keeps the file readable and survives a later reordering
-            // of the enum, which a stored 0 or 1 would not.
+            // Enums as text: the file stays readable, and the enum can be reordered (see Theme).
             Converters = { new JsonStringEnumConverter() }
         };
 
@@ -45,7 +40,7 @@ namespace GreenKeeper.Services
             {
                 var path = _settingsPath();
 
-                // First start on this machine - no file yet, and that is normal.
+                // First start on this machine: no file yet.
                 if (!File.Exists(path))
                 {
                     return new AppSettings();
@@ -53,15 +48,13 @@ namespace GreenKeeper.Services
 
                 var json = File.ReadAllText(path);
 
-                // Deserialize returns null for a file whose whole content is "null".
+                // A file that holds only "null" also gives the default settings.
                 return JsonSerializer.Deserialize<AppSettings>(json, Options) ?? new AppSettings();
             }
             catch (Exception)
             {
-                // Intentionally broad: a damaged file, a locked file, a path that
-                // suddenly is not reachable - none of it is worth failing the
-                // start over. Falling back to the defaults always leaves the app
-                // in a usable state, and the next Save repairs the file.
+                // Broad on purpose: a damaged or locked file or an unreachable path must not stop
+                // the start. The next Save overwrites a damaged file.
                 return new AppSettings();
             }
         }
@@ -75,9 +68,7 @@ namespace GreenKeeper.Services
             }
             catch (Exception)
             {
-                // Same reasoning as in Load, and it matters even more here: the
-                // user just clicked a toggle. Losing that choice on the next start
-                // is a nuisance, crashing the app over it would not be.
+                // Broad on purpose, like in Load (see ISettingsService.Save).
             }
         }
     }

@@ -55,12 +55,10 @@ namespace GreenKeeper.Views
         /// </summary>
         public static void Focus(UIElement stop, EntryChoice choice = EntryChoice.Chosen)
         {
-            // A list chooses an entry on its own only while it moves the focus itself, from
-            // one entry to the next. A focus put on it from outside (an arrow key step, F6
-            // coming back, a rebuilt list) would leave the ring on one plant while the
-            // dashboard shows another. So the list is told which entry it is on, never the
-            // entry itself: an entry that marks itself leaves the selection of the list
-            // behind, and the two then name different plants.
+            // A focus put on a list from outside selects no entry, so the ring would sit on
+            // one plant while the dashboard shows another. Setting the list's SelectedIndex
+            // keeps the two together. An entry's own IsSelected would not: it only adds the
+            // entry to the selection, and the dashboard stays on the old plant.
             if (stop is ListBox { HasItems: true } list)
             {
                 list.SelectedIndex = EntryToFocus(choice, list.SelectedIndex, list.Items.Count);
@@ -76,8 +74,7 @@ namespace GreenKeeper.Views
             stop.Focus();
         }
 
-        // A list is no tab stop itself. Tab goes to one of its entries, but here it
-        // stands for them, as long as it has any.
+        // Here a list stands for its entries, as long as it has any.
         private static bool IsStop(Control control)
         {
             return control is ListBox list ? list.HasItems : control.Focusable && control.IsTabStop;

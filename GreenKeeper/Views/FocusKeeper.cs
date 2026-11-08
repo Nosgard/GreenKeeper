@@ -9,13 +9,12 @@ using System.Windows.Threading;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// Keeps the keyboard focus where the user was working in the main window. The
-    /// status cards and the plant entries are rebuilt when their data changes
-    /// (Complete, Remove, a changed status in the periodic refresh), and a button can
-    /// become disabled under the focus (Delete Plant). The focus then falls back to the
-    /// window, and a keyboard or screen reader user would have to start over from the
-    /// top. This class remembers what had the focus and puts it on the counterpart in
-    /// the rebuilt screen, or on the nearest element that is still there.
+    /// Keeps the keyboard focus where the user was working in the main window. When the
+    /// focused element is rebuilt or becomes disabled, like Delete Plant, the focus falls back
+    /// to the window or the plant list, and a keyboard or screen reader user would start over
+    /// from the top. FocusKeeper remembers what had the focus and puts it on the matching
+    /// button of the rebuilt cards (see CardButton), or else on a plant entry (see
+    /// PlantToFocus), which it also selects so the dashboard shows its cards.
     /// </summary>
     public sealed class FocusKeeper
     {
@@ -36,8 +35,7 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Keeps the focus in place in the window from now on. The window's focus
-        /// event holds the keeper, so it lives as long as the window.
+        /// Keeps the focus in place in the window from now on.
         /// </summary>
         public static void Attach(Window window, ListView plantList, ItemsControl careStatusList)
         {
@@ -85,14 +83,14 @@ namespace GreenKeeper.Views
 
             UIElement target = CardButton() ?? PlantEntry();
 
-            // Through FocusStops, so a plant entry the focus lands on is the chosen one:
-            // after a deletion the dashboard would otherwise stay empty below the ring.
+            // Through FocusStops, so a plant entry the focus lands on is also chosen:
+            // after a deletion the dashboard would otherwise stay empty.
             FocusStops.Focus(target);
         }
 
-        // The same button of the same card; if it is gone or disabled, the first button
-        // of the card; if the card is gone, the first button of the card that took its
-        // place, never its "Remove" just because the removed card's "Remove" had the focus.
+        // The same button of the same card, else the first usable button of that card. If
+        // the card is gone, the first usable button of the card in its place. That is never
+        // its "Remove", because every card puts the always enabled "Edit" before it.
         private Button? CardButton()
         {
             if (_lastCardButton is not { } lastCardButton)

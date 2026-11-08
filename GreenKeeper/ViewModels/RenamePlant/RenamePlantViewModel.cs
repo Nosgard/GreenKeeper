@@ -6,10 +6,7 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.RenamePlant
 {
     /// <summary>
-    /// Backs the rename dialog. Like the wizard and edit ViewModels, it only
-    /// prepares the new value and signals the result - the actual persistence
-    /// happens in the MainViewModel via the repository, so this class knows
-    /// nothing about databases or windows.
+    /// Backs the rename dialog. PlantListViewModel saves the confirmed name.
     /// </summary>
     public class RenamePlantViewModel : ObservableObject, IDialogViewModel
     {
@@ -21,8 +18,6 @@ namespace GreenKeeper.ViewModels.RenamePlant
 
         public RenamePlantViewModel(Plant plant)
         {
-            // Pre-fill with the current name, so the user sees what they're
-            // changing and can make small corrections without retyping.
             _newName = plant.Name;
 
             SaveCommand = new RelayCommand(
@@ -40,8 +35,6 @@ namespace GreenKeeper.ViewModels.RenamePlant
             {
                 if (SetProperty(ref _newName, value))
                 {
-                    // All three depend on _newName and must be re-evaluated whenever
-                    // the text changes.
                     OnPropertyChanged(nameof(CharactersRemaining));
                     OnPropertyChanged(nameof(CharactersRemainingText));
                     OnPropertyChanged(nameof(HasValidName));
@@ -49,14 +42,10 @@ namespace GreenKeeper.ViewModels.RenamePlant
             }
         }
 
-        // The number behind CharactersRemainingText.
         public int CharactersRemaining => Plant.MaxNameLength - _newName.Length;
 
-        // The counter as it is shown below the field.
         public string CharactersRemainingText => NameLengthCounter.TextFor(CharactersRemaining);
 
-        // Same rule as the Add Plant wizard's name step - it would be
-        // inconsistent to accept other names when renaming.
         public bool HasValidName => Plant.IsValidName(_newName);
 
         public ICommand SaveCommand { get; }
@@ -66,9 +55,7 @@ namespace GreenKeeper.ViewModels.RenamePlant
 
         private void Save()
         {
-            // Trim so leading/trailing spaces don't end up in the database -
-            // they'd be invisible in the UI but affect sorting and searching.
-            ConfirmedName = _newName.Trim();
+            ConfirmedName = Plant.NormalizeName(_newName);
 
             RequestClose?.Invoke(this, true);
         }

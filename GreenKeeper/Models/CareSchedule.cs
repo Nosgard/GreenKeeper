@@ -12,7 +12,8 @@ namespace GreenKeeper.Models
         public TimeUnit? IntervalUnit { get; set; }
         public int? IntervalAmount { get; set; }
 
-        // Navigation property
+        // EF Core navigation to the plant that owns this schedule; despite its name, it is
+        // unrelated to the selection in the sidebar.
         public Plant SelectedPlant { get; set; } = null!;
     }
 }

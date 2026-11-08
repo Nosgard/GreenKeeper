@@ -14,18 +14,11 @@ namespace GreenKeeper.Repositories
             _contextFactory = contextFactory;
         }
 
-        /// <summary>
-        /// Loads all plants including their care schedules and
-        /// sunlight requirement from the database, to be displayed in the sidebar.
-        /// </summary>
+        /// <inheritdoc />
         public async Task<List<Plant>> GetPlantsAsync()
         {
-            // Fresh, short-lived context for this one step.
-            // Will be disposed at the end of the "await using" block.
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            // Include: Mandatory because otherwise care schedules/sunlight requirements remain empty.
-            // AsNoTracking: Data will be shown read-only, so they won't get changed during the execution.
             return await context.Plants
                 .Include(p => p.CareSchedules)
                 .Include(p => p.SunlightRequirement)
@@ -33,40 +26,19 @@ namespace GreenKeeper.Repositories
                 .ToListAsync();
         }
 
-        /// <summary>
-        /// Saves a new plant object - together with everything the Add Plant wizard
-        /// may have already attached to it in memory - to the database in one single
-        /// operation.
-        ///
-        /// How this works under the hood:
-        /// EF Core's "change tracker" walks the entire object graph reachable
-        /// from "plant" once it's added (plant itself, every care schedule in
-        /// plant.CareSchedules, and plant.SunlightRequirement if set). Any
-        /// object in that graph whose Id is still 0 is treated as "new" and
-        /// will be INSERTed. This is why nothing needs to be done manually
-        /// here to link the care schedules/sunlight requirement to the plant.
-        /// EF Core figures out the PlantId foreign keys automatically once
-        /// it knows the new plant object's generated Id.
-        /// </summary>
+        /// <inheritdoc />
         public async Task<Plant> AddPlantAsync(Plant plant)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
 
-            // Marks "plant" as newly added, pending data to be written to the
-            // database on the next SaveChangesAsync() call.
             context.Plants.Add(plant);
 
-            // Executes the INSERT statements against the database.
-            // After that, the data is permanently stored on disk.
             await context.SaveChangesAsync();
 
             return plant;
         }
 
-        /// <summary>
-        /// Loads a single care schedule by its Id, updates its next due date (NextDueAt) and
-        /// the date of the last care (LastCaredAt), and saves that change back to the database.
-        /// </summary>
+        /// <inheritdoc />
         public async Task CompleteCareScheduleAsync(int careScheduleId, DateTime nextDueAt, DateTime lastCaredAt)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -80,11 +52,7 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Deletes the plant object identified by the Id (plantId), along with everything
-        /// the database's cascading foreign keys automatically remove with it
-        /// (care schedules and sunlight requirement).
-        /// </summary>
+        /// <inheritdoc />
         public async Task DeletePlantAsync(int plantId)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -96,14 +64,7 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Adds a new care schedule for the given plant, or replaces the existing
-        /// one of the same care type if one already exists. Used both by the
-        /// Add Schedule wizard and the edit dialog - both cases boil down
-        /// to the same database operation. The passed-in schedule should already
-        /// have the next due date (NextDueAt) and the last date of care (LastCaredAt)
-        /// calculated by the caller (MainViewModel); this method only persists it.
-        /// </summary>
+        /// <inheritdoc />
         public Task<CareSchedule> AddOrReplaceCareScheduleAsync(int plantId, CareSchedule careSchedule)
         {
             return ReplaceAsync(
@@ -113,12 +74,7 @@ namespace GreenKeeper.Repositories
                 existing => existing.PlantId == plantId && existing.Care == careSchedule.Care);
         }
 
-        /// <summary>
-        /// Adds a new sunlight requirement for the given plant, or replaces the
-        /// existing one if present - analogous to AddOrReplaceCareScheduleAsync,
-        /// just for the 1:1 sunlight requirement relationship instead of the
-        /// 1:many care schedules.
-        /// </summary>
+        /// <inheritdoc />
         public Task<SunlightRequirement> AddOrReplaceSunlightRequirementAsync(int plantId, SunlightRequirement sunlightRequirement)
         {
             return ReplaceAsync(
@@ -129,9 +85,8 @@ namespace GreenKeeper.Repositories
         }
 
         /// <summary>
-        /// Removes the row matched by isExisting (if any) and inserts the replacement
-        /// for the given plant, as one unit: if the insert fails, the transaction is
-        /// disposed without a commit and the removal is rolled back too.
+        /// Removes the row matched by isExisting (if any) and inserts the replacement for the
+        /// given plant in one transaction, so a failed insert keeps the old row.
         /// </summary>
         private async Task<TEntity> ReplaceAsync<TEntity>(
             int plantId,
@@ -148,8 +103,7 @@ namespace GreenKeeper.Repositories
 
             if (existing != null)
             {
-                // Remove + own SaveChangesAsync BEFORE the Add: guarantees the old row is gone
-                // before the new one is inserted, avoiding a brief clash with the unique index.
+                // Save the removal before the Add, so the unique index never sees both rows.
                 entities.Remove(existing);
                 await context.SaveChangesAsync();
             }
@@ -163,10 +117,7 @@ namespace GreenKeeper.Repositories
             return replacement;
         }
 
-        /// <summary>
-        /// Permanently deletes a single care schedule row, identified by its Id.
-        /// Only ever called for optional care types (Fertilizing).
-        /// </summary>
+        /// <inheritdoc />
         public async Task RemoveCareScheduleAsync(int careScheduleId)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -178,10 +129,6 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Permanently deletes a single sunlight requirement row, identified
-        /// by its Id.
-        /// </summary>
         public async Task RemoveSunlightRequirementAsync(int sunlightRequirementId)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -193,10 +140,6 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
-        /// <summary>
-        /// Persists the given text as the notes for the specified plant,
-        /// identified by its Id.
-        /// </summary>
         public async Task UpdatePlantNotesAsync(int plantId, string notes)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -208,6 +151,7 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
+        /// <inheritdoc />
         public async Task RenamePlantAsync(int plantId, string newName)
         {
             await using var context = await _contextFactory.CreateDbContextAsync();
@@ -219,8 +163,8 @@ namespace GreenKeeper.Repositories
             await context.SaveChangesAsync();
         }
 
-        // A row can disappear through other means in the meantime (e.g. a deleted plant
-        // takes its schedules with it), so the user gets an explanatory exception.
+        // The row may be gone by now (deleting a plant deletes its schedules too). The message
+        // names the missing row, because the error dialog shows it.
         private static InvalidOperationException NotFound(string entityName, int id)
         {
             return new InvalidOperationException($"{entityName} with Id {id} was not found.");

@@ -9,13 +9,13 @@ using static GreenKeeper.Tests.TestPlants;
 namespace GreenKeeper.Tests.Repositories
 {
     /// <summary>
-    /// Runs PlantRepository against a real SQLite database that only lives in memory,
-    /// so that transactions and constraints behave exactly like in the app.
-    /// xUnit creates a new instance for every test, so each test starts with an empty database.
+    /// Runs PlantRepository against an SQLite database that lives only in memory, so
+    /// transactions and constraints behave as in the app. Each test starts with an empty
+    /// database.
     /// </summary>
     public class PlantRepositoryTests : IDisposable
     {
-        // The in-memory database only exists as long as this connection stays open.
+        // Stays open until Dispose, because closing it would delete the test's database.
         private readonly SqliteConnection _connection = new("Data Source=:memory:");
         private readonly InMemoryDbContextFactory _contextFactory;
         private readonly PlantRepository _repository;
@@ -67,8 +67,8 @@ namespace GreenKeeper.Tests.Repositories
             // When: the plant is deleted
             await _repository.DeletePlantAsync(plant.Id);
 
-            // Then: no row of the plant is left - an orphaned schedule or requirement
-            // would never be shown again, but stay in the database for good
+            // Then: no row of the plant is left; an orphaned schedule or requirement would never
+            // be shown again but stay in the database for good
             using var context = _contextFactory.CreateDbContext();
             Assert.Empty(context.Plants);
             Assert.Empty(context.CareSchedules);
@@ -124,9 +124,7 @@ namespace GreenKeeper.Tests.Repositories
         }
 
         /// <summary>
-        /// Regression test for a lost schedule: the old schedule used to be deleted and
-        /// saved before the new one was inserted, so a failing insert left the plant
-        /// without any schedule of that care type.
+        /// Removing the old schedule and inserting the new one succeed or fail together.
         /// </summary>
         [Fact]
         public async Task AddOrReplaceCareScheduleAsync_GivenTheInsertFails_KeepsTheExistingSchedule()
@@ -181,9 +179,7 @@ namespace GreenKeeper.Tests.Repositories
         }
 
         /// <summary>
-        /// Regression test for a lost requirement: the old requirement used to be deleted
-        /// and saved before the new one was inserted, so a failing insert left the plant
-        /// without any sunlight requirement.
+        /// Removing the old requirement and inserting the new one succeed or fail together.
         /// </summary>
         [Fact]
         public async Task AddOrReplaceSunlightRequirementAsync_GivenTheInsertFails_KeepsTheExistingRequirement()
@@ -298,8 +294,7 @@ namespace GreenKeeper.Tests.Repositories
 
         // -- Helpers --
 
-        // Maps the name from [InlineData] to the repository call - attributes can only
-        // carry constants, no delegates. The values next to the Id are never stored.
+        // The values next to the Id are never stored.
         private Task RunOperation(string operation, int id) => operation switch
         {
             "CompleteCareSchedule" => _repository.CompleteCareScheduleAsync(id, DateTime.MinValue, DateTime.MinValue),
@@ -329,8 +324,8 @@ namespace GreenKeeper.Tests.Repositories
         }
 
         /// <summary>
-        /// Hands out contexts that all share the one open in-memory connection,
-        /// just like the app's factory hands out contexts for the one database file.
+        /// Hands out contexts that all share the one open in-memory connection, as the app's
+        /// factory does for the one database file.
         /// </summary>
         private sealed class InMemoryDbContextFactory : IDbContextFactory<GreenKeeperDbContext>
         {

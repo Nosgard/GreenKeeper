@@ -15,17 +15,15 @@ namespace GreenKeeper.Tests.ViewModels
             // When: IsDarkTheme is read
             var isDarkTheme = viewModel.IsDarkTheme;
 
-            // Then: it should be false, so the toggle button shows the moon
+            // Then: it is false, so the toggle button shows the moon
             Assert.False(isDarkTheme);
         }
 
         [Fact]
         public void IsDarkTheme_GivenDarkThemeIsActive_ReturnsTrue()
         {
-            // Given: a theme service switched to dark before the ViewModel is built.
-            // The fake has no separate seeding method, so its own ApplyTheme sets
-            // up the starting state - exactly what the real service would have
-            // done when App restored a stored theme at startup
+            // Given: a theme service switched to dark before the ViewModel is built, as App does
+            // when it restores a stored theme
             var themeService = new FakeThemeService();
             themeService.ApplyTheme(Theme.Dark);
 
@@ -34,7 +32,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: IsDarkTheme is read
             var isDarkTheme = viewModel.IsDarkTheme;
 
-            // Then: it should be true, so the toggle button shows the sun
+            // Then: it is true, so the toggle button shows the sun
             Assert.True(isDarkTheme);
         }
 
@@ -67,7 +65,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: the dark theme should have been applied
+            // Then: the dark theme was applied
             Assert.Equal(Theme.Dark, themeService.CurrentTheme);
             Assert.True(viewModel.IsDarkTheme);
         }
@@ -83,8 +81,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: the bright theme should have been applied - the toggle works
-            // in both directions, not just away from the default
+            // Then: the bright theme was applied; the toggle works in both directions, not only
+            // away from the default
             Assert.Equal(Theme.Bright, themeService.CurrentTheme);
             Assert.False(viewModel.IsDarkTheme);
         }
@@ -99,8 +97,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed once
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: ApplyTheme ran exactly once. Applying twice would be invisible
-            // in the end state but would restart the color transition mid-flight
+            // Then: ApplyTheme ran exactly once
             Assert.Equal(1, themeService.ApplyThemeCallCount);
         }
 
@@ -116,7 +113,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: IsDarkTheme was announced. Without this the colors would change
+            // Then: PropertyChanged was raised for IsDarkTheme. Without it the colors would change
             // but the toggle button would keep showing the icon of the old theme
             Assert.Contains(nameof(ThemeViewModel.IsDarkTheme), raisedProperties);
         }
@@ -133,8 +130,8 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the toggle command is executed
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: ToggleLabel was announced. Otherwise the screen reader and the tooltip
-            // would keep offering the theme that has just become active
+            // Then: PropertyChanged was raised for ToggleLabel. Otherwise the screen reader and the
+            // tooltip would keep offering the theme that is now active
             Assert.Contains(nameof(ThemeViewModel.ToggleLabel), raisedProperties);
         }
 
@@ -165,8 +162,8 @@ namespace GreenKeeper.Tests.ViewModels
             viewModel.ToggleCommand.Execute(null);
             viewModel.ToggleCommand.Execute(null);
 
-            // Then: both the applied theme and the stored one are back where they
-            // started - the stored value follows every switch, not just the first
+            // Then: both the applied theme and the stored one are back where they started; the
+            // stored value follows every switch, not only the first
             Assert.Equal(Theme.Bright, themeService.CurrentTheme);
             Assert.Equal(Theme.Bright, settingsService.Settings.Theme);
             Assert.Equal(2, settingsService.SaveCallCount);
@@ -181,7 +178,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: CanExecute is evaluated
             var canExecute = viewModel.ToggleCommand.CanExecute(null);
 
-            // Then: switching the theme never depends on anything
+            // Then: the command has no condition, so the toggle button stays enabled
             Assert.True(canExecute);
         }
     }

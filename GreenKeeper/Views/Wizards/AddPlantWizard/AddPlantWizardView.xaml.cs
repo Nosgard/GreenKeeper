@@ -3,9 +3,6 @@ using GreenKeeper.ViewModels.Wizards.AddPlantWizard;
 
 namespace GreenKeeper.Views.Wizards.AddPlantWizard
 {
-    /// <summary>
-    /// Interaction logic for AddPlantWizardView.xaml.
-    /// </summary>
     public partial class AddPlantWizardView : WizardWindow
     {
         private readonly AddPlantWizardViewModel _addPlantWizardViewModel;
@@ -17,8 +14,7 @@ namespace GreenKeeper.Views.Wizards.AddPlantWizard
             Attach(_addPlantWizardViewModel);
         }
 
-        // After the wizard is finished, read the created plant object from the ViewModel.
-        // The plant object is null if the wizard was canceled.
+        // Null if the wizard was canceled.
         public Plant? CreatedPlant => _addPlantWizardViewModel.CreatedPlant;
     }
 }

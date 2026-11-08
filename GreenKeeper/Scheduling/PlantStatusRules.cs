@@ -5,8 +5,7 @@ namespace GreenKeeper.Scheduling
 {
     /// <summary>
     /// The status of a plant from its Watering and Fertilizing schedules; Sunlight has
-    /// no due date. Overdue wins over due today, due today over up to date. The status
-    /// dot and the name a screen reader announces both follow it.
+    /// no due date. Overdue wins over due today, due today over up to date.
     /// </summary>
     public static class PlantStatusRules
     {

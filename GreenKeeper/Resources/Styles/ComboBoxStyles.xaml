@@ -1,8 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!--ComboBox Style -->
 
-    <!-- ComboBox Item -->
     <Style x:Key="ThemedComboBoxItem" TargetType="ComboBoxItem">
         <!-- Every option list is a list of KeyValuePairs: without this, a screen reader
              would read an entry as "[Days, Days]" instead of the text it shows -->
@@ -24,7 +22,6 @@
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
-                        <!-- Currently selected entry -->
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="itemBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}" />
                         </Trigger>
@@ -34,7 +31,6 @@
         </Setter>
     </Style>
 
-    <!-- ComboBox Main Part -->
     <Style x:Key="ThemedComboBox" TargetType="ComboBox">
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
@@ -47,7 +43,8 @@
         <Setter Property="ItemContainerStyle" Value="{StaticResource ThemedComboBoxItem}" />
         <!-- Typing a letter selects the option that starts with it, matched against the shown text -->
         <Setter Property="TextSearch.TextPath" Value="Value" />
-        <!-- Explicit ItemTemplate because DisplayMemberPath + internally created ControlTemplate cause wrong behavior in WPF -->
+        <!-- An ItemTemplate instead of DisplayMemberPath: with DisplayMemberPath this template
+             shows the whole pair in the closed box, "[Weeks, Weeks]" -->
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
@@ -103,7 +100,6 @@
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Left" />
 
-                        <!-- Dropdown list of options -->
                         <Popup x:Name="popup"
                                IsOpen="{TemplateBinding IsDropDownOpen}"
                                Placement="Bottom"
@@ -131,7 +127,6 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonHoverBackground}" />
                         </Trigger>
-                        <!-- Disabled state -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter TargetName="toggleButton" Property="Background" Value="{DynamicResource ButtonDisabledBackground}" />
                             <Setter TargetName="toggleButton" Property="BorderBrush" Value="{DynamicResource ButtonDisabledBorder}" />

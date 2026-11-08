@@ -1,9 +1,9 @@
 ﻿namespace GreenKeeper.Views
 {
     /// <summary>
-    /// What kind of element has the focus, seen from the arrow keys: which of them the
-    /// element needs for itself (see ArrowKeys). A list entry is no kind of its own. Its
-    /// place in the list decides (see ArrowKeys.StepForEntry).
+    /// Which arrow keys the element with the focus needs for itself (see ArrowKeys). A
+    /// list entry is no kind of its own: its place in the list decides (see
+    /// ArrowKeys.StepForEntry).
     /// </summary>
     public enum FocusStopKind
     {

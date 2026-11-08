@@ -6,9 +6,9 @@ using System.IO;
 namespace GreenKeeper.Tests.Services
 {
     /// <summary>
-    /// Runs SettingsService against a settings file in a temporary folder of its own,
-    /// so the tests never touch the user's real settings.json. xUnit creates a new
-    /// instance for every test, so each test starts without a settings file.
+    /// Runs SettingsService against a settings file in a temporary folder of its own, so the
+    /// tests never touch the user's real settings.json. Each test starts without a settings
+    /// file.
     /// </summary>
     public class SettingsServiceTests : IDisposable
     {
@@ -32,7 +32,7 @@ namespace GreenKeeper.Tests.Services
         [Fact]
         public void Load_GivenNoSettingsFileYet_ReturnsTheDefaults()
         {
-            // Given: the first start on this machine - the folder holds no settings file yet
+            // Given: the first start on this machine; the folder holds no settings file yet
 
             // When: the settings are loaded
             var settings = _settingsService.Load();
@@ -123,7 +123,7 @@ namespace GreenKeeper.Tests.Services
             // When: the settings are saved
             var exception = Record.Exception(() => settingsService.Save(new AppSettings { Theme = Theme.Dark }));
 
-            // Then: the failure stays inside - losing the preference beats taking the app down
+            // Then: the failure stays inside; losing the preference beats taking the app down
             Assert.Null(exception);
         }
     }

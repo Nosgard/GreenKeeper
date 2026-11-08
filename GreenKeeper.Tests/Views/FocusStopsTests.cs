@@ -3,9 +3,8 @@
 namespace GreenKeeper.Tests.Views
 {
     /// <summary>
-    /// Which entry takes the focus when a list as a whole gets it: the entry at the
-    /// edge an arrow key step comes in from, or the chosen one when the focus arrives
-    /// without a step.
+    /// Which entry takes the focus when it reaches a list: the entry at the edge an arrow
+    /// key enters from, or the chosen one when no arrow key brought it there.
     /// </summary>
     public class FocusStopsTests
     {

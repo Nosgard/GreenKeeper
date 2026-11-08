@@ -5,14 +5,10 @@ using GreenKeeper.ViewModels.CareStatuses.EditOption;
 
 namespace GreenKeeper.Views.CareStatuses.EditOption
 {
-    /// <summary>
-    /// Interaction logic for EditScheduleView.xaml.
-    /// </summary>
     public partial class EditScheduleView : DialogWindow
     {
         private readonly EditScheduleViewModel _viewModel;
 
-        // The parameters determine which care schedule or sunlight requirement gets edited.
         public EditScheduleView(Plant plant, CareType careType, TimeProvider timeProvider)
         {
             InitializeComponent();
@@ -20,7 +16,7 @@ namespace GreenKeeper.Views.CareStatuses.EditOption
             Attach(_viewModel);
         }
 
-        // Exposes the edited entry to the caller (MainWindow); the persistence happens in the MainViewModel.
+        // The edited entry for MainWindow, which saves it through DashboardViewModel.
         public ScheduleInput? Result => _viewModel.Result;
     }
 }

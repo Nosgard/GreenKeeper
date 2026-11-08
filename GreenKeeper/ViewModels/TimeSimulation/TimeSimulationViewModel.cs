@@ -34,7 +34,6 @@ namespace GreenKeeper.ViewModels.TimeSimulation
 
         public ICommand FastForwardCommand { get; }
 
-        // Available jumps in the UI.
         public IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableUnits { get; } =
             new List<KeyValuePair<TimeUnit, string>>
             {
@@ -55,8 +54,8 @@ namespace GreenKeeper.ViewModels.TimeSimulation
         }
 
         /// <summary>
-        /// Subtracts the time span from NextDueAt (and optionally LastCaredAt, if set)
-        /// for ALL care schedules of the selected plant except the sunlight requirement.
+        /// Moves the dates of the care schedules back by the span. The sunlight requirement has
+        /// no dates.
         /// </summary>
         private void FastForward()
         {

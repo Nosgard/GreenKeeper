@@ -12,8 +12,8 @@ namespace GreenKeeper.Tests.Layout
         // The size MainWindow.xaml is designed at.
         private static readonly Size DesignSize = new(900, 650);
 
-        // The rates of Layout.xaml with limits wider than the app's 0.857 and 1.5, so the
-        // rate alone decides the factor in the tests below.
+        // The rates of WindowScale in Layout.xaml, with limits wider than its 0.857 and 1.5,
+        // so the rate alone decides the factor in the tests below.
         private static FluidScale ScaleWithoutLimits() =>
             new() { Minimum = 0.5, Maximum = 2, GrowRate = 0.5, ShrinkRate = 0.75 };
 
@@ -40,8 +40,7 @@ namespace GreenKeeper.Tests.Layout
             // When: the factor for a window of twice the design size is calculated
             var factor = scale.FactorFor(DesignSize, twiceTheDesignSize);
 
-            // Then: half of the difference to the design size makes the UI larger. 1.5 is
-            // also the app's upper limit, but no limit applies in this test
+            // Then: half of the difference to the design size makes the UI larger
             Assert.Equal(1.5, factor, precision: 10);
         }
 

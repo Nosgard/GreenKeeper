@@ -5,9 +5,9 @@ using GreenKeeper.Scheduling;
 namespace GreenKeeper.Tests.Scheduling
 {
     /// <summary>
-    /// Covers what the result of the Add Schedule wizard or the edit dialog knows
-    /// about itself: the question to ask before it replaces an existing entry,
-    /// and the operation it is saved through.
+    /// Covers the result of the Add Schedule wizard or the edit dialog: the question the
+    /// Add Schedule wizard asks before it replaces an existing entry, and the operation it
+    /// is saved through.
     /// </summary>
     public class ScheduleInputTests
     {
@@ -76,7 +76,7 @@ namespace GreenKeeper.Tests.Scheduling
             Assert.Null(editor.SavedCareSchedule);
         }
 
-        // Stands in for MainViewModel, which the app passes as the editor.
+        // Stands in for DashboardViewModel, which MainWindow passes as the editor.
         private sealed class RecordingPlantCareEditor : IPlantCareEditor
         {
             public CareSchedule? SavedCareSchedule { get; private set; }

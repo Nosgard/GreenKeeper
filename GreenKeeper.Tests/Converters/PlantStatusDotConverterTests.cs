@@ -8,9 +8,8 @@ using static GreenKeeper.Tests.TestPlants;
 namespace GreenKeeper.Tests.Converters
 {
     /// <summary>
-    /// The state the status dot of a sidebar entry is drawn from: overdue after a
-    /// missed care, due today while one falls on today, otherwise up to date.
-    /// StatusDotStyles.xaml decides how each state looks.
+    /// The state of a sidebar entry's status dot: overdue when a care schedule is overdue,
+    /// due today if one falls on today, otherwise up to date.
     /// </summary>
     public class PlantStatusDotConverterTests
     {
@@ -52,8 +51,7 @@ namespace GreenKeeper.Tests.Converters
             Assert.Equal(expectedStatus, status);
         }
 
-        // Converts the way the sidebar binding does: the plant is the bound value,
-        // the other arguments of the WPF interface are not used by the converter.
+        // The sidebar binding passes the plant; the converter ignores the other arguments.
         private static PlantStatus StatusOf(Plant plant)
         {
             var converter = new PlantStatusDotConverter(new FakeTimeProvider(Now));

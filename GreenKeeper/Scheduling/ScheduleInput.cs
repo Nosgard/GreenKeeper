@@ -3,14 +3,13 @@
 namespace GreenKeeper.Scheduling
 {
     /// <summary>
-    /// What the Add Schedule wizard or the edit dialog hands back: either a new
-    /// care schedule or a new sunlight requirement for the plant. Each kind knows
-    /// whether the plant already has one of its sort and where it is saved, so
-    /// the callers never have to ask which kind they are holding.
+    /// What the Add Schedule wizard or the edit dialog hands back: a new care schedule
+    /// or a new sunlight requirement. Callers do not have to ask which kind they hold,
+    /// because each kind knows whether the plant already has one and how it is saved.
     /// </summary>
     public abstract class ScheduleInput
     {
-        // Fills the question "There is already a ... for this plant." - hence the casing.
+        // Fills the question "There is already a ... for this plant.", hence the lower case.
         public abstract string ExistingEntryName { get; }
 
         public abstract string OverwriteTitle { get; }

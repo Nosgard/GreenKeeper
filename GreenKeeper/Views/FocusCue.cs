@@ -10,8 +10,8 @@ namespace GreenKeeper.Views
     public static class FocusCue
     {
         /// <summary>
-        /// Set on a window and inherited by everything in it, the focus rings included:
-        /// they are drawn in the adorner layer of the window.
+        /// Set on the window and inherited from there, so it reaches every focus ring in the
+        /// window.
         /// </summary>
         public static readonly DependencyProperty IsHiddenProperty = DependencyProperty.RegisterAttached(
             "IsHidden",
@@ -30,8 +30,7 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Lets the window follow its own keyboard and mouse use from now on. The
-        /// events of the window hold the state, so it lives as long as the window.
+        /// Lets the window follow its own keyboard and mouse use from now on.
         /// </summary>
         public static void Attach(Window window)
         {

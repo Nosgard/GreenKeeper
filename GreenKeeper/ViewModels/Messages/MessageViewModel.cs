@@ -6,8 +6,7 @@ namespace GreenKeeper.ViewModels.Messages
 {
     /// <summary>
     /// Backs the message window: a question answered with Yes or No, or a notice
-    /// acknowledged with OK. Like the other dialog ViewModels it only signals the
-    /// answer; what follows is up to the caller.
+    /// acknowledged with OK.
     /// </summary>
     public class MessageViewModel : IDialogViewModel
     {

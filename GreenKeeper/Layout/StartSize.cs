@@ -3,10 +3,9 @@
 namespace GreenKeeper.Layout
 {
     /// <summary>
-    /// The size the main window opens at: the design size on the screen it is meant
-    /// for and on any smaller one, on a larger screen larger in the same proportion as
-    /// the screen. It never exceeds the work area, the part of the screen the taskbar
-    /// leaves free.
+    /// The size the main window opens at without a stored window placement: the design
+    /// size, enlarged in proportion when the work area is larger than the reference screen
+    /// on both sides. It never exceeds the work area.
     /// </summary>
     public static class StartSize
     {

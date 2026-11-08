@@ -15,8 +15,8 @@
             };
         }
 
-        // Hours of sunlight the way a screen reader should say them: the card's "6h / day"
-        // would be read as "6 h slash day", the summary's "6 Hours / Day" as "6 Hours slash Day".
+        // Hours of sunlight the way a screen reader should say them: "6h / day" would be
+        // read as "6 h slash day".
         public static string SpokenHours(this SunlightPeriod period, int hours)
         {
             return $"{hours} {(hours == 1 ? "hour" : "hours")} per {period.NameInText()}";

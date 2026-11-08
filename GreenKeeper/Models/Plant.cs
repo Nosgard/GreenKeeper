@@ -10,7 +10,6 @@
         public string? ImagePath { get; set; }
         public string? Notes { get; set; }
 
-        // Navigation properties
         public List<CareSchedule> CareSchedules { get; } = new();
         public SunlightRequirement? SunlightRequirement { get; set; }
 
@@ -19,6 +18,14 @@
         public static bool IsValidName(string? name)
         {
             return !string.IsNullOrWhiteSpace(name) && name.Length <= MaxNameLength;
+        }
+
+        /// <summary>
+        /// The name as it is stored, without whitespace at either end.
+        /// </summary>
+        public static string NormalizeName(string name)
+        {
+            return name.Trim();
         }
     }
 }

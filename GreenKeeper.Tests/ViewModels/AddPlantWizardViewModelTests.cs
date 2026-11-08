@@ -11,11 +11,12 @@ namespace GreenKeeper.Tests.ViewModels
     {
         // Walks the wizard up to the summary step with a valid name and watering
         // interval, so a test only has to fill in what it is about.
-        private static AddPlantWizardViewModel WizardAtSummary(string fertilizingAmount = "", string sunlightHours = "")
+        private static AddPlantWizardViewModel WizardAtSummary(
+            string plantName = "Aloe Vera", string fertilizingAmount = "", string sunlightHours = "")
         {
             var wizard = new AddPlantWizardViewModel();
 
-            ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = "Aloe Vera";
+            ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = plantName;
             wizard.NextCommand.Execute(null);
 
             ((WateringStepViewModel)wizard.CurrentStep).AmountText = "7";
@@ -61,7 +62,7 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void NextCommand_VisitsTheStepsInOrder()
         {
-            // Given: a wizard with a valid name and watering interval
+            // Given: a wizard with a valid name; the test types the watering interval on the way
             var wizard = new AddPlantWizardViewModel();
             ((PlantNameStepViewModel)wizard.CurrentStep).PlantName = "Aloe Vera";
 
@@ -243,6 +244,19 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         [Fact]
+        public void NextCommand_OnTheSummaryStep_GivenNameWithSurroundingWhitespace_TrimsThePlantName()
+        {
+            // Given: a wizard on the summary step with a name that has stray spaces
+            var wizard = WizardAtSummary(plantName: "  Basil  ");
+
+            // When: Finish is executed
+            wizard.NextCommand.Execute(null);
+
+            // Then: the plant gets the name without the spaces at its start and end
+            Assert.Equal("Basil", wizard.CreatedPlant!.Name);
+        }
+
+        [Fact]
         public void SummaryStep_ReflectsTheValuesEnteredBefore()
         {
             // Given: a wizard on the summary step with fertilizing and sunlight entered
@@ -251,7 +265,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the summary step is read
             var summary = (SummaryStepViewModel)wizard.CurrentStep;
 
-            // Then: it repeats the entered values in words
+            // Then: it repeats the entered values with their units, and Next reads "Finish"
             Assert.Equal("Aloe Vera", summary.PlantName);
             Assert.Equal("7 Days", summary.Watering);
             Assert.True(summary.HasFertilizing);

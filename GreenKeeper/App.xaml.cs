@@ -5,15 +5,18 @@ using GreenKeeper.ViewModels;
 using GreenKeeper.ViewModels.Themes;
 using Microsoft.EntityFrameworkCore;
 using System.Windows;
+using System.Windows.Threading;
 
 namespace GreenKeeper
 {
     /// <summary>
-    /// Interaction logic for App.xaml. The composition root: everything the main
-    /// window needs is created and wired up here, in one place.
+    /// The composition root: creates everything the main window needs and wires it up.
     /// </summary>
     public partial class App : Application
     {
+        // True while ReportUnexpectedError shows its dialog.
+        private bool _isReportingUnexpectedError;
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -23,16 +26,13 @@ namespace GreenKeeper
 
             if (!await TryPrepareDatabaseAsync(contextFactory, dialogService))
             {
-                // If preparing the database fails, the app cannot work in any meaningful way.
-                // Every feature depends on the database, so the app must shut down.
+                // Every feature needs the database, so the app cannot run without it.
                 Shutdown();
                 return;
             }
 
-            // Restore the theme the user picked last time. This has to happen before
-            // the window is created - applying it afterwards would show the window in
-            // the default theme first and only then switch. Load never throws, so with a
-            // missing or damaged settings file the app simply starts in the default theme.
+            // Restore the last theme before the window exists; applied later, the window would
+            // show the default theme first.
             var settingsService = new SettingsService();
             var themeService = new ThemeService();
             themeService.ApplyTheme(settingsService.Load().Theme);
@@ -44,20 +44,18 @@ namespace GreenKeeper
                 TimeProvider.System,
                 new ThemeViewModel(themeService, settingsService));
 
-            // Create the main window manually. StartupUri would show the window immediately
-            // before the code above had any chance to run.
             var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System, settingsService);
             mainWindow.Show();
+
+            // OnStartup subscribes only after Show. An exception before this line ends the app,
+            // also one thrown while the "Database Error" dialog is open.
+            DispatcherUnhandledException += (_, args) => ReportUnexpectedError(args, mainWindow, dialogService);
         }
 
         /// <summary>
-        /// Applies every migration that hasn't run on this machine yet; on a first
-        /// launch, this creates the entire schema from scratch.
-        ///
-        /// Why this exists: An end user who downloads the released application never executes "Update-Database"
-        /// manually - therefore their machine would have no tables at all, and the app would crash on the
-        /// first data access with a "no such table" error. Applying migrations here, at startup, makes the app
-        /// self-sufficient on any machine.
+        /// Applies the pending migrations on every start, because users of the release never
+        /// update the database themselves. Without them the first query would fail with
+        /// "no such table".
         /// </summary>
         private static async Task<bool> TryPrepareDatabaseAsync(GreenKeeperDbContextFactory contextFactory, IDialogService dialogService)
         {
@@ -74,6 +72,35 @@ namespace GreenKeeper
                     "Database Error");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Shows the dialog "Unexpected Error" for each UI-thread exception that no helper
+        /// caught (see IDialogService.ShowError), and the app keeps running.
+        /// </summary>
+        private void ReportUnexpectedError(DispatcherUnhandledExceptionEventArgs e, Window mainWindow, IDialogService dialogService)
+        {
+            // After the main window has closed, the exception ends the app without a dialog.
+            if (!mainWindow.IsVisible)
+            {
+                return;
+            }
+
+            // An exception that comes back on every redraw would otherwise stack dialog on
+            // dialog, so an exception while this dialog is open ends the app.
+            if (_isReportingUnexpectedError)
+            {
+                return;
+            }
+
+            _isReportingUnexpectedError = true;
+            dialogService.ShowError(
+                $"Something unexpected went wrong:\n{e.Exception.Message}\n\n" +
+                "If anything looks wrong now, restart the application to see what is saved",
+                "Unexpected Error");
+            _isReportingUnexpectedError = false;
+
+            e.Handled = true;
         }
     }
 }

@@ -6,7 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Order matters: a dictionary can only use the StaticResources of those merged above it -->
+                <!-- Order matters: later dictionaries use resources of the ones merged above them -->
                 <ResourceDictionary Source="/Resources/Styles/Themes/BrightTheme.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/Layout.xaml" />
                 <ResourceDictionary Source="/Resources/Styles/FocusStyles.xaml" />

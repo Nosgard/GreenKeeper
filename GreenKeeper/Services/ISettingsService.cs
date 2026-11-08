@@ -6,14 +6,13 @@ namespace GreenKeeper.Services
     {
         /// <summary>
         /// Reads the stored preferences. Never throws: a missing, empty or damaged
-        /// file yields the defaults, so a first start and a corrupted file behave
-        /// the same way from the caller's point of view.
+        /// file yields the defaults.
         /// </summary>
         AppSettings Load();
 
         /// <summary>
-        /// Writes the preferences to disk. Never throws either - the user loses a
-        /// preference on the next start, which beats taking the app down over it.
+        /// Writes the preferences to disk. Never throws either: losing a preference on the next
+        /// start is better than a crash.
         /// </summary>
         void Save(AppSettings settings);
     }

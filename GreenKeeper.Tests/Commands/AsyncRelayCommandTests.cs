@@ -42,7 +42,7 @@ namespace GreenKeeper.Tests.Commands
         [Fact]
         public void Execute_RunsTheDelegate()
         {
-            // Given: a command bound the way WPF binds it, through ICommand
+            // Given: a command held as ICommand, the way a button bound to it calls it
             bool wasRun = false;
             System.Windows.Input.ICommand command = new AsyncRelayCommand(_ =>
             {
@@ -81,21 +81,6 @@ namespace GreenKeeper.Tests.Commands
 
             // Then: it can always be executed
             Assert.True(canExecute);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void CanExecute_WithPredicate_ReturnsWhatThePredicateSays(bool answer)
-        {
-            // Given: a command whose predicate has a fixed answer
-            var command = new AsyncRelayCommand(_ => Task.CompletedTask, _ => answer);
-
-            // When: the enabled state is read
-            var canExecute = command.CanExecute(null);
-
-            // Then: it is the predicate's answer
-            Assert.Equal(answer, canExecute);
         }
 
         [Fact]

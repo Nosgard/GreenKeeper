@@ -5,10 +5,8 @@ using GreenKeeper.ViewModels.Wizards.Base.Abstract;
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps.Active
 {
     /// <summary>
-    /// Is used for both Watering and Fertilizing, if the user
-    /// chose one of these two statuses.
-    /// Unlike in the AddPlantWizard, entering a value is always mandatory
-    /// because the user selected the status on purpose.
+    /// The watering or fertilizing step of the Add Schedule wizard. A value is always required,
+    /// fertilizing included, because the user chose the care type on purpose.
     /// </summary>
     public class ScheduleActiveStepViewModel : ActiveStepViewModel, IScheduleWizardStep
     {

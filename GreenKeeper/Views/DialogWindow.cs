@@ -7,10 +7,8 @@ namespace GreenKeeper.Views
 {
     /// <summary>
     /// Base of every modal window. It opens at the scale of its owner, binds its
-    /// ViewModel and closes with the result the ViewModel asks for, so a code-behind
-    /// only creates its ViewModel and exposes the result. A dialog with a fixed size
-    /// grows in height where its content needs the room, and the cursor waits in the
-    /// first field.
+    /// ViewModel and closes with the result the ViewModel asks for, so most code-behinds
+    /// only create their ViewModel and expose the result.
     /// </summary>
     public class DialogWindow : Window
     {
@@ -28,9 +26,8 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Shows the window as a modal dialog of the owner; true if it was confirmed. The
-        /// XAML describes the dialog at scale 1, like the main window; it opens at the
-        /// scale its owner is drawn at.
+        /// Shows the window as a modal dialog of the owner, at the owner's scale; true if it was
+        /// confirmed. The XAML describes the dialog at scale 1, like the main window.
         /// </summary>
         public bool ShowDialog(Window owner)
         {
@@ -40,8 +37,8 @@ namespace GreenKeeper.Views
             return ShowDialog() == true;
         }
 
-        // Windows draws the title bar and the frame at their own size, so only the
-        // area inside them is scaled.
+        // The title bar and the frame keep their size, so only the area inside them is
+        // scaled.
         private void ScaleTo(double factor)
         {
             Size frame = FrameSize();
@@ -60,8 +57,10 @@ namespace GreenKeeper.Views
             }
         }
 
-        // What Windows adds around the content of a window: the frame with the
-        // title bar, plus the border it reserves for resizing.
+        // Every window with a title bar has this frame, even a dialog that cannot be resized.
+        // The resize border counts twice in it: once in WindowNonClientFrameThickness with
+        // the title bar, and once more on its own, because the frame on screen is about one
+        // resize border wider than WindowNonClientFrameThickness alone.
         private static Size FrameSize()
         {
             Thickness frame = SystemParameters.WindowNonClientFrameThickness;
@@ -72,10 +71,9 @@ namespace GreenKeeper.Views
                 frame.Top + frame.Bottom + border.Top + border.Bottom);
         }
 
-        // The designed height stays the minimum; the dialog gets higher only where its
-        // content needs more room, such as a long plant name that wraps. Switched on once
-        // the dialog is loaded: a window sized to its content from the start is laid out
-        // before its bindings deliver their values.
+        // The designed height stays the minimum; content such as a long plant name that wraps can
+        // make the dialog higher. It runs on Loaded, when ActualHeight still holds the designed
+        // height, so MinHeight keeps that height once SizeToContent lets the dialog grow.
         private void GrowWithContent()
         {
             if (ResizeMode != ResizeMode.NoResize)
@@ -123,8 +121,8 @@ namespace GreenKeeper.Views
             CloseWithResult(dialogResult);
         }
 
-        // Setting DialogResult closes the window. Overridable for windows that
-        // intercept Closing and have to let this close through (see NotesView).
+        // Overridable for windows that intercept Closing and have to let this close through
+        // (see NotesView).
         protected virtual void CloseWithResult(bool dialogResult)
         {
             DialogResult = dialogResult;

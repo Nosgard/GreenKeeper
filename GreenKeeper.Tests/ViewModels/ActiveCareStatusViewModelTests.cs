@@ -7,10 +7,9 @@ using GreenKeeper.ViewModels.CareStatuses.Passive;
 namespace GreenKeeper.Tests.ViewModels
 {
     /// <summary>
-    /// Covers the status text of the active care status cards (Watering and Fertilizing).
-    /// The wording of the span itself belongs to DueDateCalculator and is tested
-    /// there - what is checked here is the "Due in" prefix the cards put in front
-    /// of it, and above all WHEN they do not.
+    /// The active cards (Watering and Fertilizing): the "Due in" prefix of their status text,
+    /// and from which day the Complete button works and the text turns red. DueDateCalculator
+    /// words the span itself and is tested there.
     /// </summary>
     public class ActiveCareStatusViewModelTests
     {
@@ -18,8 +17,7 @@ namespace GreenKeeper.Tests.ViewModels
         private static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
         private static readonly TimeProvider Clock = new FakeTimeProvider(Now);
 
-        // The cards only need a schedule and callbacks they never invoke here,
-        // so the callbacks are empty stand-ins.
+        // The callbacks are never invoked here, so they stay empty.
         private static WateringStatusViewModel WateringCard(DateTime? nextDueAt) =>
             new(new CareSchedule { Care = CareType.Watering, NextDueAt = nextDueAt },
                 onComplete: () => Task.CompletedTask, onEdit: () => { }, Clock);
@@ -57,7 +55,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the status text is read
             var result = card.StatusText;
 
-            // Then: months are prefixed just like days and weeks
+            // Then: months are prefixed like days and weeks
             Assert.Equal("Due in 2 months", result);
         }
 
@@ -70,7 +68,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the status text is read
             var result = card.StatusText;
 
-            // Then: years are prefixed just like the smaller units
+            // Then: years are prefixed like the smaller units
             Assert.Equal("Due in 1 year", result);
         }
 
@@ -90,15 +88,13 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         /// <summary>
-        /// The prefix is decided on the calendar date, not on the timestamp - the
-        /// same rule "Due today" and the Complete button already follow. A due date
-        /// later on the current day is still today and must not turn into
-        /// "Due in ...", and the first minute of the next day must.
+        /// The prefix goes by the calendar date, like "Due today" and the Complete button. A due
+        /// date later today stays "Due today", and one minute after midnight reads "Due in 1 day".
         /// </summary>
         [Fact]
         public void StatusText_GivenDueDateLaterOnTheCurrentDay_StillReturnsDueToday()
         {
-            // Given: a watering card due just before midnight of the current day
+            // Given: a watering card due one minute before midnight of the current day
             var card = WateringCard(Now.Date.AddHours(23).AddMinutes(59));
 
             // When: the status text is read
@@ -155,8 +151,8 @@ namespace GreenKeeper.Tests.ViewModels
         [Fact]
         public void StatusText_GivenNoScheduleAtAll_ReturnsEmptyStringWithoutPrefix()
         {
-            // Given: a watering card for a plant that has no watering schedule yet -
-            // MainViewModel creates the mandatory card even then, with a null schedule
+            // Given: a watering card for a plant that has no watering schedule yet; DashboardViewModel
+            // creates the mandatory card even then, with a null schedule
             var card = new WateringStatusViewModel(schedule: null, onComplete: () => Task.CompletedTask, onEdit: () => { }, Clock);
 
             // When: the status text is read
@@ -175,7 +171,7 @@ namespace GreenKeeper.Tests.ViewModels
         public void StatusText_GivenFertilizingCard_FollowsTheSameRuleAsWatering(
             int dayOffset, string expected)
         {
-            // Given: a fertilizing card - the second card sharing ActiveCareStatusViewModel
+            // Given: a fertilizing card, the second card built on ActiveCareStatusViewModel
             var card = FertilizingCard(Now.AddDays(dayOffset));
 
             // When: the status text is read
@@ -186,14 +182,13 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         /// <summary>
-        /// Guards the boundary of the change: the passive sunlight card describes an
-        /// amount per period rather than a due date, so it must never pick up the
-        /// prefix.
+        /// The passive sunlight card describes an amount per period rather than a due date, so
+        /// it never gets the prefix.
         /// </summary>
         [Fact]
         public void StatusText_GivenSunlightCard_IsNotPrefixed()
         {
-            // Given: a sunlight card, which has no due date at all
+            // Given: a sunlight card, which has no due date
             var requirement = new SunlightRequirement { Hours = 6, Period = SunlightPeriod.Day };
             var card = new SunlightStatusViewModel(requirement, onEdit: () => { }, onRemove: () => Task.CompletedTask);
 
@@ -207,9 +202,8 @@ namespace GreenKeeper.Tests.ViewModels
         // -- Complete button and overdue coloring --
 
         /// <summary>
-        /// IsCompletable is bound to the Complete button. A card due today has to be
-        /// completable: the status text already reads "Today", so a disabled button
-        /// would contradict it.
+        /// IsCompletable is bound to the Complete button. A card due today has to be completable:
+        /// its text reads "Due today", so a disabled button would contradict it.
         /// </summary>
         [Theory]
         [InlineData(-1, true)]  // overdue
@@ -228,9 +222,8 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         /// <summary>
-        /// IsOverdue drives the red status text. A card due today is not overdue yet -
-        /// red would contradict the green-yellow-red ladder of the plant's status dot,
-        /// which only turns red once a day was actually missed.
+        /// IsOverdue drives the red status text. A card due today is not overdue yet: like the
+        /// plant's status dot, the text turns red only once a day was missed.
         /// </summary>
         [Theory]
         [InlineData(-1, true)]  // overdue
@@ -244,14 +237,14 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the overdue state is read
             var result = card.IsOverdue;
 
-            // Then: only a day that was actually missed counts as overdue
+            // Then: only a missed day counts as overdue
             Assert.Equal(expected, result);
         }
 
         [Fact]
         public void IsCompletableAndIsOverdue_GivenDueDateLaterOnTheCurrentDay_TreatItAsToday()
         {
-            // Given: a watering card due just before midnight of the current day
+            // Given: a watering card due one minute before midnight of the current day
             var card = WateringCard(Now.Date.AddHours(23).AddMinutes(59));
 
             // When: both states are read

@@ -59,8 +59,8 @@
     </Style>
 
     <!-- Buttons of a card. A screen reader names each one with its card ("Complete
-         Watering"), since every card has an "Edit", and hears the status of the card,
-         which otherwise comes before the button only when the whole card is read. -->
+         Watering"), since every card has an "Edit". The help text gives the card's
+         status to a user who lands on the button directly. -->
     <Style x:Key="CareStatusCardButton" TargetType="Button" BasedOn="{StaticResource StatusCardActionButton}">
         <Setter Property="Padding" Value="10" />
         <Setter Property="AutomationProperties.Name">
@@ -89,12 +89,11 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Icon box -->
                 <Border Grid.Column="0" Style="{StaticResource CareIconBox}">
                     <Rectangle Style="{StaticResource CareIcon}" />
                 </Border>
 
-                <!-- Subtitle container; its margin keeps the text off the buttons
+                <!-- Title and status line; the margin keeps the text off the buttons
                      where the card gets narrow -->
                 <StackPanel Grid.Column="1"
                             Grid.ColumnSpan="2"
@@ -107,8 +106,8 @@
                        FontWeight="SemiBold" />
 
                     <!-- Wraps where the buttons leave too little room for one line.
-                         Foreground belongs in the style, not on the element: a
-                         local value would outrank the trigger below. -->
+                         With Foreground on the TextBlock itself, an overdue status
+                         would not take the overdue color. -->
                     <TextBlock Text="{Binding StatusText}"
                        AutomationProperties.Name="{Binding SpokenStatusText}"
                        FontSize="16"
@@ -126,8 +125,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <!-- Buttons-->
-                <!-- Will be filled via the implicit template of the actual type-->
+                <!-- Buttons, filled by the implicit template of the card's type -->
                 <ContentPresenter Grid.Column="3"
                                   Content="{Binding}"
                                   VerticalAlignment="Center" />
@@ -137,7 +135,6 @@
 
     <!-- DataTemplates to set the right buttons for each care status -->
 
-    <!-- Button set: Watering -->
     <DataTemplate DataType="{x:Type active:WateringStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource CareStatusCardButton}"
@@ -151,7 +148,6 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- Button set: Fertilizing -->
     <DataTemplate DataType="{x:Type active:FertilizingStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource CareStatusCardButton}"
@@ -169,7 +165,6 @@
         </StackPanel>
     </DataTemplate>
 
-    <!-- Button set: Sunlight -->
     <DataTemplate DataType="{x:Type passive:SunlightStatusViewModel}">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Style="{StaticResource CareStatusCardButton}"

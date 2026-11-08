@@ -4,15 +4,13 @@ using GreenKeeper.Models.Enums;
 namespace GreenKeeper.ViewModels.Base
 {
     /// <summary>
-    /// The "amount + time unit" input shared by every place where a care
-    /// interval is entered: the wizard steps and the edit dialog.
+    /// The "amount + time unit" input shared by every place where the interval of a care
+    /// schedule is entered: the wizard steps and the edit dialog.
     /// </summary>
     public class AmountAndUnitInputViewModel : ObservableObject
     {
         /// <summary>
-        /// Every available unit has a maximum amount to prevent misuse.
-        /// The limits for all active steps (for watering and fertilizing)
-        /// can be set from here.
+        /// The largest amount each unit accepts, for the watering and fertilizing inputs.
         /// </summary>
         private static readonly Dictionary<TimeUnit, int> MaxAmountsByUnit = new()
         {
@@ -22,15 +20,8 @@ namespace GreenKeeper.ViewModels.Base
             { TimeUnit.Years, 10 },
         };
 
-        // The length limit of the amount field, see AmountLimit.
         public static int MaxAmountLength { get; } = AmountLimit.FieldLengthFor(MaxAmountsByUnit.Values);
 
-        /// <summary>
-        /// Options for the ComboBox.
-        ///
-        /// Key: Actual enum value (will be bound)
-        /// Value: Text that the user sees.
-        /// </summary>
         public static IReadOnlyList<KeyValuePair<TimeUnit, string>> AvailableUnits { get; } =
             new List<KeyValuePair<TimeUnit, string>>
             {
@@ -74,34 +65,27 @@ namespace GreenKeeper.ViewModels.Base
 
         public int MaxAmount => MaxAmountsByUnit[SelectedUnit];
 
-        // Positive, but more than the selected unit allows.
         public bool IsAmountTooLarge => Amount > MaxAmount;
 
-        // The line below the field, see AmountLimit.
         public string AmountHint => AmountLimit.HintFor(MaxAmount, IsAmountTooLarge);
 
-        // The entered text as a number, or null while it is not a number at all.
         public int? Amount => int.TryParse(AmountText, out int amount) ? amount : null;
 
         /// <summary>
-        /// The amount needs to be a positive number and stay below the maximum of the selected unit.
-        /// This is a pure data-validity check - it says nothing about whether the value is mandatory or optional
-        /// for the surrounding context (wizard step or edit dialog); that decision is left to the classes that
-        /// use this property.
+        /// A positive amount within the maximum of the selected unit. Whether the field may stay
+        /// empty is up to the wizard step or the edit dialog.
         /// </summary>
         public bool HasValidAmount => Amount is > 0 && Amount <= MaxAmount;
 
-        // The entered interval as a schedule of the given care type. Only meaningful while HasValidAmount is true.
+        // Only meaningful while HasValidAmount is true.
         public CareSchedule ToCareSchedule(CareType care)
         {
             return new CareSchedule { Care = care, IntervalAmount = Amount, IntervalUnit = SelectedUnit };
         }
 
         /// <summary>
-        /// Hook for subclasses that need to react whenever AmountText or SelectedUnit changes
-        /// (e.g. to re-raise OnPropertyChanged for derived properties like CanProceed/NextButtonLabel
-        /// in ActiveStepViewModel, or PreviewText in EditActiveScheduleViewModel).
-        /// Default implementation remains empty.
+        /// Called after AmountText or SelectedUnit changed, for subclasses whose properties
+        /// depend on them (CanProceed, NextButtonLabel, PreviewText).
         /// </summary>
         protected virtual void OnAmountOrUnitChanged() { }
     }

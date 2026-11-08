@@ -30,10 +30,10 @@ namespace GreenKeeper.Commands
         }
 
         /// <summary>
-        /// Asks WPF to re-evaluate CanExecute of every command, for state changes
-        /// that no UI interaction announces (e.g. switching steps in the wizard).
-        /// Static because CommandManager.RequerySuggested is global: one call
-        /// refreshes all commands, not only a single instance.
+        /// Has every command check again whether it can run. Buttons otherwise update only
+        /// after the user releases a key or mouse button, or after the focus moves, so call it
+        /// after a state change like a wizard step switch.
+        /// The check runs later, so a button still shows its old state right after this call.
         /// </summary>
         public static void RaiseCanExecuteChanged()
         {

@@ -5,9 +5,8 @@ using System.Windows.Media;
 namespace GreenKeeper.Layout
 {
     /// <summary>
-    /// Draws a window at a scale factor. Everything inside the frame keeps its designed
-    /// sizes and is enlarged or reduced as a whole. The factor is set on the window and
-    /// inherited by all its elements.
+    /// Draws a window at the scale factor set on it. Everything inside the frame keeps
+    /// its designed sizes and is enlarged or reduced as a whole.
     /// </summary>
     public static class UiScale
     {
@@ -27,9 +26,8 @@ namespace GreenKeeper.Layout
             element.SetValue(FactorProperty, factor);
         }
 
-        // Runs for every element the factor reaches, but scales only two kinds: the window
-        // itself, and a context menu or tooltip, which opens in a window of its own and
-        // takes the factor over then.
+        // Scales the window, plus context menus and tooltips, which would otherwise keep
+        // their designed size. Every other element only passes the factor on.
         private static void OnFactorChanged(DependencyObject element, DependencyPropertyChangedEventArgs e)
         {
             var scaled = element switch
@@ -50,7 +48,8 @@ namespace GreenKeeper.Layout
         // content would otherwise keep its size.
         private static FrameworkElement? RootInsideFrame(Window window)
         {
-            // A dialog is scaled before it is shown, when its template is not applied yet.
+            // A dialog is scaled before it is shown. Without this call its content would stay
+            // unscaled.
             window.ApplyTemplate();
 
             return VisualTreeHelper.GetChildrenCount(window) > 0

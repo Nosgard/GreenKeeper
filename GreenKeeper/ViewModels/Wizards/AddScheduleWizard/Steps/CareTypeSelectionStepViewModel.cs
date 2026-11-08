@@ -5,12 +5,8 @@ using GreenKeeper.ViewModels.Wizards.Base;
 namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard.Steps
 {
     /// <summary>
-    /// Choose which CareType you want to add.
-    /// Depending on what you choose, the next step will be made ready.
-    /// 
-    /// Watering/Fertilizing: Open the related active step (similar to the step in the AddPlantWizard).
-    /// 
-    /// Sunlight: Open the passive step for the sunlight requirement.
+    /// The first step of the Add Schedule wizard: the care type to add.
+    /// AddScheduleWizardViewModel picks the next step from it.
     /// </summary>
     public class CareTypeSelectionStepViewModel : ObservableObject, IWizardStepViewModel
     {

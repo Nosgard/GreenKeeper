@@ -1,8 +1,8 @@
 ﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
-    /// The unit of a care interval. Stored as an integer by EF Core, so the
-    /// numbers are part of the persisted data format - see CareType.
+    /// The unit of a care schedule's interval. The numbers are part of the saved data (see
+    /// CareType).
     /// </summary>
     public enum TimeUnit
     {

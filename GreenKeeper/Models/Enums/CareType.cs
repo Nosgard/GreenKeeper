@@ -1,12 +1,10 @@
 ﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
-    /// All possible types of care schedules. The values are numbered explicitly because EF Core stores
-    /// enums as integers - those numbers are part of the persisted data format.
-    /// 
-    /// Warning:
-    /// Reordering or renumbering members would silently re-map existing user records to the wrong
-    /// care type. Renaming a member is safe, as long as its number stays the same.
+    /// The care types: Watering and Fertilizing for care schedules, Sunlight for the sunlight
+    /// requirement. A care schedule saves its type as a number: changing one maps existing
+    /// care schedules to the wrong care type. Moving or renaming a member is safe while its
+    /// number stays the same.
     /// </summary>
     public enum CareType
     {

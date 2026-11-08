@@ -15,8 +15,6 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
             {
                 if (SetProperty(ref _plantName, value))
                 {
-                    // The Next button and the live counter for the remaining
-                    // characters both depend on the name.
                     OnPropertyChanged(nameof(CanProceed));
                     OnPropertyChanged(nameof(CharactersRemaining));
                     OnPropertyChanged(nameof(CharactersRemainingText));
@@ -24,17 +22,12 @@ namespace GreenKeeper.ViewModels.Wizards.AddPlantWizard.Steps
             }
         }
 
-        // The number behind CharactersRemainingText.
         public int CharactersRemaining => Plant.MaxNameLength - PlantName.Length;
 
-        // The counter as it is shown below the field.
         public string CharactersRemainingText => NameLengthCounter.TextFor(CharactersRemaining);
 
-        // Mandatory: Only active when the name is not empty and is within
-        // the maximum length.
         public bool CanProceed => Plant.IsValidName(PlantName);
 
-        // Because the step is mandatory, the button always shows "Next".
         public string NextButtonLabel => "Next";
     }
 }

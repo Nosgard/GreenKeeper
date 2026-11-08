@@ -40,12 +40,12 @@ Indoor plants often die without drawing attention. Many people buy a houseplant 
 - **Notes.** Free text per plant: where you bought it, what it likes, what you tried.
 - **Search.** The list filters by name as you type.
 - **Bright and dark theme.** One click on the toggle in the sidebar; the choice is remembered.
-- **Keyboard and screen reader.** Every control has a keyboard path and a spoken name, and the result of an action is announced.
+- **Keyboard and screen reader.** Every control has a keyboard path, and most have a spoken name for screen readers (see [Known limitations](#known-limitations)).
 - **Your data stays with you.** One local SQLite file, nothing is sent anywhere.
 
 ## Download and first start
 
-Requirements: Windows 10 or 11, 64-bit. Nothing else needs to be installed; the download includes everything the app needs. The zip is about 57 MB, unpacked about 135 MB.
+Requirements: Windows 10 or 11, 64-bit. Nothing else needs to be installed; the download includes everything the app needs. The zip is about 59 MB, unpacked about 135 MB.
 
 1. Open the [latest release](https://github.com/Nosgard/GreenKeeper/releases/latest) and download the file that ends in `-win-x64.zip`. The two "Source code" files on the same page are not the app.
 2. Right-click the downloaded zip, choose **Extract All...** and pick any folder of your own, for example `Documents\GreenKeeper`. The folder has to keep all seven files together.
@@ -67,7 +67,7 @@ The program folder is the one you extracted. Your plants are stored separately i
 
 ### Add a plant
 
-**+ Add Plant** opens a short wizard: the name (up to 50 characters), the watering interval, the optional fertilizing interval, the optional sunlight requirement and a summary. Every step checks its input and shows the maximum for the chosen unit.
+**+ Add Plant** opens a short wizard: the name (up to 50 characters), the watering interval, the optional fertilizing interval, the optional sunlight requirement and a summary. Every step checks its input and shows the maximum for the chosen unit. GreenKeeper saves the name without spaces at its start and end, also when you rename the plant.
 
 <p align="center">
   <img src="docs/screenshots/add-plant-watering.png" alt="Screenshot of the Add Plant wizard at the watering step: a field with the value 2, a drop-down set to Weeks, the hint max. 52, and the buttons Back, Next and Cancel" width="434">
@@ -95,6 +95,7 @@ The dashboard shows one card per schedule. Watering and fertilizing count down a
 - **Edit** changes the interval. Saving restarts the countdown from the moment you save, also if you keep the old value.
 - **Remove** deletes the fertilizing schedule or the sunlight requirement. Watering cannot be removed, every plant keeps one.
 - **+ Add Schedule** in the header adds a schedule the plant does not have yet. Picking a type that already exists replaces it, after a question.
+- **- Delete Plant** in the header deletes the plant for good, after a question.
 
 The cards and dots refresh themselves every five minutes while the app is open, so a plant that becomes due during the day changes color without a restart.
 
@@ -117,16 +118,16 @@ Everything works without a mouse. The window is split into two regions, the plan
 | <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | Next or previous control |
 | <kbd>F6</kbd> / <kbd>Shift</kbd>+<kbd>F6</kbd> | Jump between the plant list and the dashboard |
 | Arrow keys | Step through the controls of the current region, or through the plants in the list |
-| <kbd>Enter</kbd> | Open the focused plant |
+| <kbd>Enter</kbd> | Open the focused plant while no other plant is selected |
 | <kbd>Space</kbd> | Open a drop-down list |
-| <kbd>Esc</kbd> | Close a dialog without saving |
+| <kbd>Esc</kbd> | Close a dialog without saving (not a yes/no question); Notes asks about changes |
 | Menu key or <kbd>Shift</kbd>+<kbd>F10</kbd> | Open the context menu of a plant (Rename) |
 
 After a dialog closes, the focus returns to the control it came from. Screen readers get the names of the visible labels: a plant entry is announced with its status ("Aloe Vera, due today"), a card button with its card ("Complete Watering"), and the outcome of completing, removing or saving is spoken. The app exposes all of this through Windows UI Automation, the interface Narrator and NVDA read. If something is not announced the way you expect, please [open an issue](https://github.com/Nosgard/GreenKeeper/issues).
 
 ## Building from source
 
-You need Windows 10 or 11 (WPF runs only on Windows), the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) and Git. Visual Studio 2022 or later with the .NET desktop workload is optional.
+You need Windows 10 or 11 (WPF runs only on Windows), the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0) version 9.0.308 or later (see `global.json`) and Git. Visual Studio 2022 or later with the .NET desktop workload is optional.
 
 ```powershell
 git clone https://github.com/Nosgard/GreenKeeper.git
@@ -135,7 +136,7 @@ dotnet build
 dotnet run --project GreenKeeper
 ```
 
-`dotnet build` compiles both projects, `dotnet run` starts the app. In Visual Studio, open `GreenKeeper.sln` and press F5 instead. A Debug build shows an extra "DEBUG: Simulate" panel under the cards that moves the due dates of the selected plant forward, so overdue states can be tried without waiting. The database is created on the first start in `%LocalAppData%\GreenKeeper`; the EF Core migrations run at startup, there is no `dotnet ef` step.
+`dotnet build` compiles both projects, `dotnet run` starts the app. In Visual Studio, open `GreenKeeper.sln` and press F5 instead. A Debug build shows an extra "DEBUG: Simulate" panel under the cards that moves the due dates of the selected plant earlier, so you can try "due today" and "overdue" without waiting. It changes the plant only in memory, not in the database. The database is created on the first start in `%LocalAppData%\GreenKeeper`; the EF Core migrations run at startup, there is no `dotnet ef` step.
 
 To build the same self-contained exe the releases ship:
 
@@ -151,7 +152,17 @@ A release is created by the [release workflow](.github/workflows/release.yml) wh
 dotnet test
 ```
 
-The tests in `GreenKeeper.Tests` use [xUnit](https://xunit.net/) and run in about a second without opening a window. They cover the ViewModels (against fakes for the repository, dialogs and timer), the repository against an in-memory SQLite database, the due date rules, the responsive layout math, the converters and the services. The [CI workflow](.github/workflows/ci.yml) runs the same build and the same tests on every push and pull request to `master`; that is what the badge at the top reports.
+The tests in `GreenKeeper.Tests` use [xUnit](https://xunit.net/) and run in about a second without opening a window. They cover:
+
+- the ViewModels, against fakes for the repository, the services and the clock
+- the repository, against an in-memory SQLite database
+- the due date and name rules
+- the responsive layout math
+- the converters and `AsyncRelayCommand`
+- the settings service
+- the keyboard and focus helpers
+
+The [CI workflow](.github/workflows/ci.yml) runs the same build and the same tests on every push and pull request to `master`; that is what the badge at the top reports.
 
 ## Tech stack
 
@@ -170,7 +181,7 @@ Why these: WPF gives a native Windows app with full keyboard and screen reader s
 
 ```text
 GreenKeeper.sln
-GreenKeeper/               the WPF app
+GreenKeeper/               the WPF app, with App.xaml and MainWindow.xaml in its root
   Commands/                RelayCommand and AsyncRelayCommand
   Converters/              value converters for the bindings (status dots, spoken names)
   Database/                DbContext, its factory and the database path
@@ -181,9 +192,10 @@ GreenKeeper/               the WPF app
   Resources/               icons, both themes and the styles
   Scheduling/              the rules for due, due today and overdue
   Services/                dialogs, settings, theme and timer
-  ViewModels/              one per window, wizard step and status card
-  Views/                   the windows and dialogs, plus the keyboard and focus helpers
-GreenKeeper.Tests/         xUnit tests, with fakes for the repository, dialogs and timer
+  ViewModels/              MainViewModel, PlantListViewModel (sidebar) and DashboardViewModel
+                           for the main window, one per dialog, wizard step and status card
+  Views/                   the dialogs and wizards, plus the keyboard and focus helpers
+GreenKeeper.Tests/         xUnit tests, with fakes for the repository, the services and the clock
 .github/workflows/         ci.yml and release.yml
 docs/                      the banner and the screenshots of this README
 ```
@@ -194,10 +206,11 @@ docs/                      the banner and the screenshots of this README
 - No installer and no code signing, so the first start goes through the SmartScreen dialog described above.
 - Reminders exist inside the app. GreenKeeper does not run in the background and sends no notifications while it is closed.
 - One database per Windows user account, no sync and no export.
+- Screen reader support is still limited: some controls and messages are not announced the way they should be.
 
 ## Getting help and contributing
 
-Questions and bug reports go to the [issues](https://github.com/Nosgard/GreenKeeper/issues); a report helps most with the Windows version, the app version from the Releases page and the steps that led to the problem. Pull requests are welcome; the CI build and the tests have to pass before a change is merged.
+Questions and bug reports go to the [issues](https://github.com/Nosgard/GreenKeeper/issues); a report helps most with the Windows version, the app version from the Releases page and the steps that led to the problem. If you see the dialog **Unexpected Error**, add its message to the report; GreenKeeper keeps running after you click **OK**. Pull requests are welcome; the CI build and the tests have to pass before a change is merged.
 
 ## Credits
 

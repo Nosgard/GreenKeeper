@@ -1,8 +1,8 @@
 ﻿namespace GreenKeeper.Tests.Fakes
 {
     /// <summary>
-    /// A clock the test sets, so due dates and "today" are the same on every run
-    /// and every day of the year. The value is treated as local time, like DateTime.Now.
+    /// A clock the test sets, so due dates and "today" are the same on every run.
+    /// The value is treated as local time.
     /// </summary>
     public class FakeTimeProvider : TimeProvider
     {

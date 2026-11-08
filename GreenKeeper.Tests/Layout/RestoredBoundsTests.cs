@@ -5,8 +5,8 @@ using System.Windows;
 namespace GreenKeeper.Tests.Layout
 {
     /// <summary>
-    /// Where the main window opens after a restart: at its stored place, as far as
-    /// the current screen still has that place.
+    /// Where the main window opens after a restart: at its stored place, moved or
+    /// shrunk to fit the current screen.
     /// </summary>
     public class RestoredBoundsTests
     {
@@ -39,7 +39,7 @@ namespace GreenKeeper.Tests.Layout
             // When: the bounds for the next start are calculated
             var bounds = RestoredBounds.For(stored, Screen);
 
-            // Then: the window keeps its size and moves just far enough to be fully visible
+            // Then: the window keeps its size and moves only as far as needed to be fully visible
             Assert.Equal(new Rect(expectedLeft, expectedTop, 1100, 700), bounds);
         }
 

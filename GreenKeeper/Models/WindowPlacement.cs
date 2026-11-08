@@ -2,8 +2,8 @@
 {
     /// <summary>
     /// Where the main window was when it was closed, so it can open there again.
-    /// Position and size are those of the normal state; a maximized window keeps them
-    /// for the moment it is restored.
+    /// Position and size are those of the normal state, the ones a maximized window
+    /// returns to.
     /// </summary>
     public record WindowPlacement
     {

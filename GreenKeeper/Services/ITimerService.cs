@@ -1,21 +1,18 @@
 ﻿namespace GreenKeeper.Services
 {
     /// <summary>
-    /// Abstraction over a periodic timer. Analogous to IDialogService.
-    /// Keeps the ViewModels free of WPF-specific classes like DispatcherTimer, which in turn
-    /// keeps them testable.
+    /// A periodic timer for the ViewModels. They do not use DispatcherTimer directly, so the
+    /// tests can use a fake that ticks on demand.
     /// </summary>
     public interface ITimerService
     {
         /// <summary>
-        /// Starts invoking the given callback repeatedly at the given interval,
-        /// until Stop() is called.
+        /// Calls the callback once per interval until Stop runs.
         /// </summary>
-        /// <param name="interval">How often the callback should be invoked</param>
-        /// <param name="callback">The action to invoke on every tick</param>
+        /// <param name="interval">Time between two calls</param>
+        /// <param name="callback">Runs on every tick</param>
         void Start(TimeSpan interval, Action callback);
 
-        // Stops any currently running periodic invocation started via Start().
         void Stop();
     }
 }

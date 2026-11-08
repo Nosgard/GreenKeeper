@@ -6,8 +6,8 @@ namespace GreenKeeper.Tests.Converters
     public class ThemeToggleIconConverterTests
     {
         /// <summary>
-        /// The toggle button shows where a click leads, not where the app is: the sun
-        /// while the dark theme is active, the moon while the bright one is.
+        /// The button shows where a click leads: the sun in the dark theme, the moon in the
+        /// bright one.
         /// </summary>
         [Theory]
         [InlineData(true, "/Resources/Icons/Themes/SunIcon.png")]

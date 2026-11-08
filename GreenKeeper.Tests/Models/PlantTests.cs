@@ -5,8 +5,8 @@ namespace GreenKeeper.Tests.Models
     public class PlantTests
     {
         /// <summary>
-        /// The Add Plant wizard and the rename dialog both follow this rule, so the
-        /// limit is checked once here instead of in each of them.
+        /// The Add Plant wizard and the rename dialog both follow this rule, so it is
+        /// tested once here.
         /// </summary>
         [Theory]
         [InlineData(1, true)]

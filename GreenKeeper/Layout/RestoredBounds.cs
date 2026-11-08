@@ -4,10 +4,9 @@ using System.Windows;
 namespace GreenKeeper.Layout
 {
     /// <summary>
-    /// Where the main window opens after a restart: at its stored place, as far as the
-    /// current screens still have it. A screen may have been unplugged or changed its
-    /// resolution in the meantime, so the window never exceeds the screen area and
-    /// never lies partly outside of it.
+    /// Where the main window opens after a restart: at its stored place, moved or
+    /// shrunk to fit the screen area. A screen may have been unplugged or changed its
+    /// resolution since then.
     /// </summary>
     public static class RestoredBounds
     {

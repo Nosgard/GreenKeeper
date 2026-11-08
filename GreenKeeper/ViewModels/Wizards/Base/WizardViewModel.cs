@@ -33,7 +33,7 @@ namespace GreenKeeper.ViewModels.Wizards.Base
             {
                 if (SetProperty(ref _currentStep, value))
                 {
-                    // The buttons depend on the step, and no UI interaction announces the switch.
+                    // The buttons depend on the step (see RelayCommand.RaiseCanExecuteChanged).
                     RelayCommand.RaiseCanExecuteChanged();
                 }
             }
@@ -43,7 +43,6 @@ namespace GreenKeeper.ViewModels.Wizards.Base
         public ICommand BackCommand { get; }
         public ICommand CancelCommand { get; }
 
-        // Signals the View that the wizard will be closed: true = finished, false = canceled.
         public event EventHandler<bool>? RequestClose;
 
         protected abstract bool CanGoBack { get; }

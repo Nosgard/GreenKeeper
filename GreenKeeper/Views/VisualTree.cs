@@ -5,13 +5,12 @@ using System.Windows.Media;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// Searches the elements a window is drawn from, for what XAML does not name: the
-    /// buttons inside a status card, the fields of a wizard step.
+    /// Searches the visual tree for what XAML does not name: the buttons inside a status
+    /// card, the fields of a wizard step.
     /// </summary>
     public static class VisualTree
     {
         // Every element of the type below the parent, in the order the XAML declares them.
-        // Lazy: the search ends with the first match it is asked for.
         public static IEnumerable<T> Descendants<T>(DependencyObject parent) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -30,8 +29,8 @@ namespace GreenKeeper.Views
             }
         }
 
-        // The entry a list shows the item in. A list only builds the entries in view,
-        // so the item is scrolled into view first.
+        // The entry a list shows the item in. The item is scrolled into view first, so
+        // that its entry exists.
         public static UIElement? EntryOf(ListBox list, object item)
         {
             list.ScrollIntoView(item);

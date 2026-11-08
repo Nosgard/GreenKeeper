@@ -4,10 +4,9 @@ using System.Windows.Controls;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// Limits a text box to a whole number as written: digits only, no leading zero,
-    /// no more digits than MaxDigits. Whatever else gets into the box, typed, pasted
-    /// or dropped, is taken out at once. Unlike MaxLength this cleans before it
-    /// counts, so a zero or a space in front cannot push a digit out of the field.
+    /// Limits a text box to digits, no leading zero and at most MaxDigits of them. Unlike
+    /// MaxLength this cleans before it counts, so a zero or a space in front cannot push a
+    /// digit out.
     /// </summary>
     public static class WholeNumberInput
     {

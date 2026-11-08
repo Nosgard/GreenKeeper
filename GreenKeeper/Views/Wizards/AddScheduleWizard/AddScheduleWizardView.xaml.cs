@@ -5,9 +5,6 @@ using GreenKeeper.ViewModels.Wizards.AddScheduleWizard;
 
 namespace GreenKeeper.Views.Wizards.AddScheduleWizard
 {
-    /// <summary>
-    /// Interaction logic for AddScheduleWizardView.xaml.
-    /// </summary>
     public partial class AddScheduleWizardView : WizardWindow
     {
         private readonly AddScheduleWizardViewModel _addScheduleWizardViewModel;
@@ -19,8 +16,7 @@ namespace GreenKeeper.Views.Wizards.AddScheduleWizard
             Attach(_addScheduleWizardViewModel);
         }
 
-        // Exposes the wizard's result to the caller (MainWindow), analogous to
-        // AddPlantWizardView.CreatedPlant - persistence itself happens outside this View, in MainViewModel.
+        // The wizard's result for MainWindow, which saves it through DashboardViewModel.
         public ScheduleInput? Result => _addScheduleWizardViewModel.Result;
     }
 }

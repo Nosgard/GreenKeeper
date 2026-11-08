@@ -1,10 +1,9 @@
 ﻿namespace GreenKeeper.Models.Enums
 {
     /// <summary>
-    /// The available color themes. Unlike CareType, these values are never
-    /// persisted as integers in the database - the user's choice is stored
-    /// as text in a settings file - so the numeric values carry no meaning
-    /// and can be reordered safely.
+    /// The color themes. A theme is saved by its name in the settings file (see
+    /// SettingsService), so the members can be reordered, but renaming one makes an older
+    /// settings file load as the defaults.
     /// </summary>
     public enum Theme
     {
