@@ -23,9 +23,7 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Overdue spans read in the largest unit that has elapsed in full, in the singular for
-        /// one and in the plural for more. A due date one calendar day back reads "Overdue for 1 day",
-        /// not "Overdue for 0 days".
+        /// A due date one calendar day back reads "Overdue for 1 day", not "Overdue for 0 days".
         /// </summary>
         [Theory]
         [InlineData(1, TimeUnit.Days, "Overdue for 1 day")]
@@ -72,17 +70,13 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// A month step can be clamped: Jan 31 + 1 month is Feb 28, so Feb 28 is one full month
-        /// after Jan 31, although 28 &lt; 31. Comparing the day-of-month numbers would count
-        /// zero months here, and the card would read "4 weeks" instead of "1 month".
-        ///
-        /// The dates are pinned rather than derived from DateTime.Now: a test relative to today
-        /// would reach such a month end on a few days per year only and pass on every other day.
+        /// A span from a month end to the last day of the next, shorter month counts as one
+        /// full month.
         /// </summary>
         [Theory]
-        [InlineData("2025-01-31", "2025-02-28")] // 28 days, Jan 31 + 1 month clamps to Feb 28
-        [InlineData("2024-01-31", "2024-02-29")] // 29 days, same in a leap year
-        [InlineData("2025-03-31", "2025-04-30")] // 30 days, 31-day month into a 30-day month
+        [InlineData("2025-01-31", "2025-02-28")] // 28 days
+        [InlineData("2024-01-31", "2024-02-29")] // 29 days, leap year
+        [InlineData("2025-03-31", "2025-04-30")] // 30 days, into a 30-day month
         [InlineData("2025-08-31", "2025-09-30")] // 30 days
         public void ToDueDateText_GivenUpcomingSpanEndingOnAClampedMonthEnd_ReturnsOneMonthNotFourWeeks(
             string today, string due)
@@ -100,8 +94,7 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// The overdue direction of the same clamping: the due date falls on a day the next month
-        /// does not have, and "today" is the clamped target.
+        /// The same check for an overdue date: from Jan 30 or Jan 31 to Feb 29 is one full month.
         /// </summary>
         [Theory]
         [InlineData("2024-02-29", "2024-01-31")] // 29 days overdue
@@ -129,7 +122,7 @@ namespace GreenKeeper.Tests.Scheduling
         public void ToDueDateText_GivenSpanFromALeapDayToTheClampedAnniversary_ReturnsOneYear()
         {
             // Given: a due date on a leap day and a reference exactly one year later,
-            // which AddYears clamps to Feb 28
+            // which falls on Feb 28
             var reference = new DateTime(2025, 2, 28);
             var nextDueAt = new DateTime(2024, 2, 29);
 
@@ -141,9 +134,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Unit and amount have to come from the same count; a separate amount could disagree
-        /// with the unit and make the card read "12 months". The text switches to years once a
-        /// whole calendar year has elapsed, not a day earlier.
+        /// The text switches to years once a whole calendar year has elapsed, not a day earlier.
+        /// Unit and amount come from one count, so the card cannot read "12 months".
         /// </summary>
         [Theory]
         [InlineData("2025-12-31", "11 months")] // one day short of the year
@@ -189,9 +181,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Checks every calendar position, not only the two pinned dates above, for the text
-        /// "12 months". Counting whole units rules it out; this test notices if a separate
-        /// amount calculation comes back.
+        /// Looks for the text "12 months" on every day of a leap year, not only on the two dates
+        /// above. It fails if a separate amount calculation produces that text.
         /// </summary>
         [Fact]
         public void ToDueDateText_ForEveryReferenceDayOfALeapYear_NeverRendersTwelveMonths()
@@ -214,9 +205,8 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Weeks do not depend on the calendar and count in steps of seven days. Pinned days
-        /// make the boundaries explicit: a second week is only reported once all fourteen days
-        /// are over.
+        /// Weeks count in steps of seven days, independent of the calendar, so a second week is
+        /// only reported once all fourteen days are over.
         /// </summary>
         [Theory]
         [InlineData(7, "1 week")]
@@ -238,18 +228,15 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Pins the day on which the text switches from one unit to the next. The property test
-        /// below only checks the amount, so without these pairs a span of 28 days could read
-        /// "28 days" instead of "4 weeks" and still pass.
-        ///
-        /// May is the reference month because its 31 days let the week branch reach its widest
-        /// before a full month is complete.
+        /// Pins the day on which the text switches to the next unit, because the property test
+        /// below would accept "28 days" as well as "4 weeks". May is used for its 31 days, which
+        /// keep the text in weeks for as long as possible.
         /// </summary>
         [Theory]
-        [InlineData(6, "6 days")]     // days ...
-        [InlineData(7, "1 week")]     // ... become weeks
-        [InlineData(30, "4 weeks")]   // weeks ...
-        [InlineData(31, "1 month")]   // ... become months once the month is full
+        [InlineData(6, "6 days")]
+        [InlineData(7, "1 week")]
+        [InlineData(30, "4 weeks")]
+        [InlineData(31, "1 month")]   // the month is full
         [InlineData(60, "1 month")]   // one day short of the second month
         [InlineData(61, "2 months")]
         public void ToDueDateText_AtEachUnitBoundary_SwitchesOnlyWhenTheNextUnitIsComplete(
@@ -267,11 +254,9 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         /// <summary>
-        /// Checks the rule on every calendar position instead of on single pinned dates: the
-        /// reported amount has fully elapsed, and one unit more has not.
-        ///
-        /// The check turns the text back into a date with ToDueDate, so it measures against the
-        /// same definition of a unit that the app schedules by.
+        /// Checks every day of a leap year: the reported amount has fully elapsed, and one unit
+        /// more has not. ParseDueDateText reads amount and unit back from the text, and ToDueDate
+        /// turns them into a date, as NextDueDateFrom does for a care schedule.
         /// </summary>
         [Fact]
         public void ToDueDateText_ForEveryCalendarPosition_NeverReportsMoreTimeThanHasElapsed()
@@ -290,8 +275,7 @@ namespace GreenKeeper.Tests.Scheduling
         }
 
         // Then: the stated amount fits into the span, and one more would not.
-        // The direction decides which end of the span is the due date, so the caller passes it;
-        // "earlier" is the start of the span.
+        // isOverdue says which end of the span is the due date.
         private static void AssertTruncated(DateTime earlier, DateTime later, bool isOverdue)
         {
             var nextDueAt = isOverdue ? earlier : later;

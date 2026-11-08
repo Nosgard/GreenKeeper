@@ -50,11 +50,10 @@ namespace GreenKeeper.Scheduling
         }
 
         /// <summary>
-        /// The due date as text: "Today", "3 days", "Overdue for 2 weeks". The status cards
-        /// word it further ("Due today", "Due in 3 days").
+        /// The due date as text: "Today", "3 days", "Overdue for 2 weeks". The status cards show
+        /// the first two as "Due today" and "Due in 3 days".
         ///
-        /// The caller passes "today" instead of the method reading the clock: the result
-        /// depends on the month lengths around it, so the tests pass a pinned date.
+        /// The caller passes today's date, so the tests can pin it.
         /// </summary>
         public static string ToDueDateText(DateTime? nextDueAt, DateTime reference)
         {
@@ -78,8 +77,7 @@ namespace GreenKeeper.Scheduling
 
             var (amount, unit) = ElapsedUnitsBetween(earlier, later);
 
-            // The amount is at least 1: "Today" has returned above, and ElapsedUnitsBetween
-            // takes a larger unit only once a whole one has elapsed.
+            // The amount is never 0 here: that case already returned "Today".
             string unitLabel = UnitLabels[unit] + (amount == 1 ? "" : "s");
 
             return isOverdue
@@ -89,10 +87,7 @@ namespace GreenKeeper.Scheduling
 
         /// <summary>
         /// Picks the largest unit that has fully elapsed between the two dates and counts it.
-        /// Nothing is rounded, so the text never claims more time than has passed: "2 weeks"
-        /// begins on day 14, not on day 11, and "2 months" with the second full calendar month.
-        ///
-        /// The month branch ends below 12, so "12 months" cannot occur.
+        /// Nothing is rounded up, so the text never claims more time than has passed.
         /// </summary>
         private static (int Amount, TimeUnit Unit) ElapsedUnitsBetween(DateTime earlier, DateTime later)
         {
@@ -106,7 +101,6 @@ namespace GreenKeeper.Scheduling
 
             if (fullMonths == 0)
             {
-                // Floors, like the calendar counts below.
                 return (daysDiff / DaysPerWeek, TimeUnit.Weeks);
             }
 
@@ -115,9 +109,8 @@ namespace GreenKeeper.Scheduling
                 return (fullMonths, TimeUnit.Months);
             }
 
-            // A year is twelve calendar months: AddYears(n) lands where AddMonths(12 * n) does,
-            // even from Feb 29 (both give Feb 28 in a common year). So the full years are the
-            // full months divided by twelve.
+            // The full years are the full months divided by twelve. That matches ToDueDate:
+            // from Feb 29, a year ends on Feb 28 of the next year in both.
             return (fullMonths / MonthsPerYear, TimeUnit.Years);
         }
 
@@ -125,14 +118,13 @@ namespace GreenKeeper.Scheduling
 
         /// <summary>
         /// Counts the full calendar months between two dates, floored: Jan 15 to Mar 10 is one
-        /// month (Jan 15 to Feb 15), since Mar 10 has not reached Feb 15 + 1 month.
+        /// month. The loop starts at the month number difference and only steps back: that
+        /// number is never too small and at most one too large.
         ///
-        /// The loop steps the date instead of comparing day-of-month numbers, because a step can
-        /// be clamped: Jan 31 + 1 month is Feb 28, a full month, while comparing 28 &lt; 31 would
-        /// count zero months and the card would read "4 weeks".
-        ///
-        /// The count starts at the difference of the month numbers. That is never too small and
-        /// at most one month too large, so the loop only steps back.
+        /// The loop adds whole months to the earlier date, so in 2025 Jan 31 to Feb 28 counts
+        /// as a full month.
+        /// Comparing the days of the month, 28 against 31, would count zero months, and the card
+        /// would read "4 weeks".
         /// </summary>
         private static int FullCalendarMonthsBetween(DateTime earlier, DateTime later)
         {
