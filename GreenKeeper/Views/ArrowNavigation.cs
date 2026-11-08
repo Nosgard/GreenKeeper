@@ -5,11 +5,10 @@ using System.Windows.Input;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// Lets the arrow keys step through everything in a region of a window, as ArrowKeys
-    /// describes it. WPF's own arrow key handling goes by the position on screen and
-    /// leaves traps: a scroll area and a list keep the focus, a text field lets it go
-    /// nowhere, and a step can end in another region. Here only F6 crosses to another
-    /// region.
+    /// Lets the arrow keys step through everything in a region of a window in Tab order,
+    /// as ArrowKeys describes it. Without this they get stuck in scroll areas, lists and
+    /// text fields, and a step can end in another region. Here an arrow step stays in its
+    /// region, and F6 crosses to another.
     /// </summary>
     public sealed class ArrowNavigation
     {
@@ -22,7 +21,7 @@ namespace GreenKeeper.Views
 
         /// <summary>
         /// Lets the arrow keys step through each of the regions; without regions, the
-        /// whole window is one. The window's key event keeps it alive.
+        /// whole window is one.
         /// </summary>
         public static void Attach(Window window, params FrameworkElement[] regions)
         {
@@ -121,7 +120,6 @@ namespace GreenKeeper.Views
         {
             return stop switch
             {
-                // The list itself has the focus only until one of its entries takes it.
                 ListBox => FocusStopKind.KeepsAllArrows,
                 TextBox { AcceptsReturn: true } => FocusStopKind.KeepsAllArrows,
                 TextBox => FocusStopKind.TextLine,
@@ -131,8 +129,8 @@ namespace GreenKeeper.Views
             };
         }
 
-        // How many stops come before the gap the focus is in. Everything in a region is
-        // drawn in the order of Tab.
+        // How many stops come before the gap the focus is in. Every region declares its
+        // elements in Tab order.
         private static int StopsBefore(UIElement focused, List<Control> stops, FrameworkElement region)
         {
             var drawn = VisualTree.Descendants<UIElement>(region).ToList();

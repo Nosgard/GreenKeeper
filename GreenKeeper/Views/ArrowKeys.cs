@@ -3,12 +3,10 @@
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// What an arrow key does inside a region of a window: it steps to the previous or
-    /// the next element in the order of Tab, around the end, so the arrow keys alone
-    /// reach everything in the region. An element that needs an arrow key for itself
-    /// keeps it: the cursor of a text field, the selection of a list, an open
-    /// drop-down. A closed drop-down does not, or its value would change while the
-    /// user walks through the region.
+    /// An arrow key steps to the previous or next element of a region in Tab order,
+    /// around the end, so the arrow keys alone reach everything in it. An element that
+    /// needs the key keeps it: a text field, a list, an open drop-down. A closed
+    /// drop-down does not, or its value would change while the user walks past.
     /// </summary>
     public static class ArrowKeys
     {
@@ -39,10 +37,9 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// The step an arrow key takes from an entry of a list. Up and down belong to the
-        /// list, which moves its selection with them, until its end: there they step on
-        /// to the neighbor of the list, or nothing above or below it could be reached.
-        /// Left and right always step.
+        /// The step an arrow key takes from an entry of a list. Up and down move the list's
+        /// selection until its end and then step out of the list, which keeps the elements
+        /// beyond it reachable. Left and right always step.
         /// </summary>
         /// <param name="key">One of the four arrow keys</param>
         /// <param name="entryIndex">The entry that has the focus</param>
@@ -56,8 +53,7 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// The element next to another one on the side of the step, around the end of
-        /// the region.
+        /// The element one step away from another one, around the end of the region.
         /// </summary>
         /// <param name="index">The element the step starts from</param>
         /// <param name="step">Back or On</param>
@@ -68,20 +64,19 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// The element next to a gap between the elements, on the side of the step. The
-        /// focus is in a gap while it is on none of them: on the window right after the
-        /// start, or on a list that has lost its last entry.
+        /// The element one step away from a gap between the elements. The focus is in a
+        /// gap while it is on none of them: on the window right after the start, or on a
+        /// list that has lost its last entry.
         /// </summary>
         /// <param name="elementsBefore">How many elements of the region come before the gap</param>
         /// <param name="step">Back or On</param>
         /// <param name="count">The number of elements in the region, at least one</param>
         public static int NeighborOfGap(int elementsBefore, int step, int count)
         {
-            // The first element after the gap is the one a step on arrives at.
+            // Stepping on arrives at the first element after the gap.
             return step == On ? elementsBefore % count : NeighborOf(elementsBefore, Back, count);
         }
 
-        // Up and left go back, down and right on, where nothing keeps the key.
         private static int PlainStep(Key key)
         {
             return key is Key.Up or Key.Left ? Back : On;

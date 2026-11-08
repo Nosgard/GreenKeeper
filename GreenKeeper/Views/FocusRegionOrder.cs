@@ -1,9 +1,8 @@
 ﻿namespace GreenKeeper.Views
 {
     /// <summary>
-    /// The order in which F6 visits the regions of a window: on to the next one, or back
-    /// to the previous one with Shift, around the end, and past every region that has
-    /// nothing to focus at the moment.
+    /// The order in which F6 visits the regions of a window: forward, with Shift
+    /// backward, around the end and past every region with nothing to focus.
     /// </summary>
     public static class FocusRegionOrder
     {

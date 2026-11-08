@@ -4,9 +4,8 @@ using System.Windows.Controls;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// A grid a screen reader knows as a region of the window, by its
-    /// AutomationProperties.Name: on entering it, the user hears where they are. A
-    /// plain grid has no automation element, so a name set on it is never read.
+    /// A grid with an automation element, so a screen reader user hears its
+    /// AutomationProperties.Name on entering it. Without one, the name is never read.
     /// </summary>
     public class RegionGrid : Grid
     {

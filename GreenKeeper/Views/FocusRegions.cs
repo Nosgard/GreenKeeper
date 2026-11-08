@@ -6,10 +6,9 @@ namespace GreenKeeper.Views
 {
     /// <summary>
     /// F6 moves the keyboard focus to the next region of a window, Shift+F6 back to the
-    /// previous one: in the main window between the sidebar and the dashboard, so a
-    /// keyboard user does not have to Tab through the one to reach the other. A region
-    /// gets the focus back where the user left it; on the first visit, or when that
-    /// element is gone, the focus goes to where the region starts.
+    /// previous one, so in the main window a keyboard user does not have to Tab through
+    /// the sidebar to reach the dashboard. A region gets the focus back where the user
+    /// left it, else where it starts.
     /// </summary>
     public sealed class FocusRegions
     {
@@ -24,8 +23,7 @@ namespace GreenKeeper.Views
         }
 
         /// <summary>
-        /// Lets F6 and Shift+F6 move through the regions, in the order given. The window's
-        /// events keep the regions alive.
+        /// Lets F6 and Shift+F6 move through the regions, in the order given.
         /// </summary>
         public static void Attach(Window window, params FocusRegion[] regions)
         {
@@ -58,10 +56,9 @@ namespace GreenKeeper.Views
             e.Handled = true;
             bool backwards = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift);
 
-            // WPF asks a command whether it can run only after the next key, with low
-            // priority, after this handler. Until then a button whose command cannot run any
-            // more still looks enabled; F6 would focus it and lose the focus again at once.
-            // So F6 waits for the answer.
+            // Right after the F6 key press a button whose command can no longer run still
+            // looks enabled, and F6 would focus it and lose the focus at once. So F6 starts a
+            // new check of the commands itself and moves the focus after the check has run.
             CommandManager.InvalidateRequerySuggested();
             _window.Dispatcher.BeginInvoke(DispatcherPriority.ContextIdle, () => MoveFocus(backwards));
         }
@@ -70,8 +67,8 @@ namespace GreenKeeper.Views
         {
             int? current = RegionWithFocus();
 
-            // The region with the focus is never the target, so its own start, which may scroll,
-            // is not looked for.
+            // The region with the focus is never the target, and looking up its start could
+            // scroll it.
             var targets = _regions.Select((region, index) => index == current ? null : TargetIn(region)).ToList();
             int? next = FocusRegionOrder.Next(current, targets.Select(target => target != null).ToList(), backwards);
 
