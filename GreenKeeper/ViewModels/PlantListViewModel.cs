@@ -41,7 +41,7 @@ namespace GreenKeeper.ViewModels
             _announce = announce;
             _onSelectionChanged = onSelectionChanged;
 
-            // The ListView shows the default view of Plants, so it picks up this filter.
+            // The plant list in the sidebar picks up this filter.
             CollectionViewSource.GetDefaultView(Plants).Filter = FilterPlants;
 
             AddPlantCommand = new RelayCommand(_ => AddPlantRequested?.Invoke(this, EventArgs.Empty));
@@ -145,8 +145,8 @@ namespace GreenKeeper.ViewModels
             });
         }
 
-        // Rebuilding the view re-runs PlantStatusDotConverter and PlantAccessibleNameConverter
-        // for every entry, so the remembered states are the ones on screen afterwards.
+        // The rebuild runs PlantStatusDotConverter and PlantAccessibleNameConverter again for
+        // every entry, so the remembered states match the screen afterwards.
         public void RefreshSidebar()
         {
             RememberPlantStatus();
@@ -218,11 +218,11 @@ namespace GreenKeeper.ViewModels
             await _plantRepository.RenamePlantAsync(plant.Id, newName);
             plant.Name = newName;
 
-            // Plant raises no PropertyChanged, so the ListView would not notice the new name on its own.
+            // Plant raises no PropertyChanged, so without this the sidebar would show the old name.
             CollectionViewSource.GetDefaultView(Plants).Refresh();
 
-            // The dashboard header binds to SelectedPlant.Name, so this raises PropertyChanged for
-            // SelectedPlant in case the renamed plant is the selected one.
+            // The dashboard header binds to SelectedPlant.Name, and the renamed plant may be the
+            // selected one.
             OnPropertyChanged(nameof(SelectedPlant));
 
             _announce($"Renamed to {newName}");

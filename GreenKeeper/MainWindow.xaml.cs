@@ -21,8 +21,8 @@ namespace GreenKeeper
     /// </summary>
     public partial class MainWindow : Window
     {
-        // How far the focus ring reaches beyond a control: 5 (Margin="-5" of FocusRing in
-        // FocusStyles.xaml) and 3 of air.
+        // How far the focus ring reaches beyond a control (Margin="-5" of FocusRing in
+        // FocusStyles.xaml), plus some air.
         private const double FocusRingReach = 8;
 
         private readonly MainViewModel _mainViewModel;
@@ -83,8 +83,9 @@ namespace GreenKeeper
         // -- Keyboard Section --
 
         // Tab focuses an entry without choosing it, and the list chooses only with Space
-        // or the arrow keys. Enter opens the entry as users expect; without it the
-        // dashboard would stay empty and its cards out of reach.
+        // or the arrow keys. While no plant is chosen, Enter opens the entry as users
+        // expect. With another plant chosen, Enter only adds the entry to the selection and
+        // opens nothing (see FocusStops.Focus).
         private void PlantEntry_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key != Key.Enter || sender is not ListViewItem entry)
@@ -107,8 +108,9 @@ namespace GreenKeeper
 
         // -- Responsive Size Section --
 
-        // The size in the XAML is the design size. The window opens at it, or at the size
-        // that suits the screen, and draws its content at the scale of its current size.
+        // Sets the start size that suits the screen (see StartSize). The window opens at it
+        // only without a saved placement, since RestorePlacement overwrites it. The content
+        // is drawn at the scale of the window's current size.
         private void InitializeResponsiveSize()
         {
             var designSize = new Size(Width, Height);
@@ -166,7 +168,7 @@ namespace GreenKeeper
         {
             var settings = _settingsService.Load();
 
-            // RestoreBounds is the window in its normal state, also while it is maximized.
+            // RestoreBounds, so a maximized window keeps its normal position and size.
             settings.WindowPlacement = new WindowPlacement
             {
                 Left = RestoreBounds.Left,
@@ -199,13 +201,13 @@ namespace GreenKeeper
             }
         }
 
-        // A card button the keyboard scrolls into view comes in only up to its own edge, and
-        // the scroll area would cut its focus ring off. This handler asks again for the button
-        // plus the ring's reach (FocusRingReach) on every side.
+        // The keyboard scrolls a card button into view only up to the button's edge, so the
+        // scroll area would cut off its focus ring. This handler asks again with FocusRingReach
+        // added on every side.
         private void StatusPanel_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
         {
-            // Requests that already name a rectangle, including the one raised below, and
-            // those of the panel itself go on to the scroll area unchanged.
+            // Requests with a rectangle, like the one raised below, and those of the panel
+            // itself go on unchanged.
             if (!e.TargetRect.IsEmpty || e.TargetObject is not FrameworkElement target || ReferenceEquals(target, sender))
             {
                 return;
@@ -220,9 +222,10 @@ namespace GreenKeeper
         }
 
         // -- Dialogs Section --
-        // Nobody awaits these async void handlers, so loading the plants and saving a dialog's
-        // result go through RunAsync, which reports a failure as an error dialog. The notes
-        // window handles its own failures.
+        // An exception from these handlers would reach App.ReportUnexpectedError, which shows
+        // only a general message, so loading the plants and saving a dialog's result go through
+        // RunAsync, which names the failed step in its error dialog. The notes window handles
+        // its own failures.
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -253,8 +256,9 @@ namespace GreenKeeper
             await RunAsync(() => wizardView.Result.SaveAsync(_mainViewModel.Dashboard), "Schedule could not be saved", "Saving Error");
         }
 
-        // Opens the edit dialog. Its result is saved like a wizard result: for the database,
-        // editing a schedule and replacing it through the wizard are the same operation.
+        // The edit dialog's result is saved like a result of the Add Schedule wizard: for the
+        // database, editing a care schedule or the sunlight requirement and replacing it through
+        // that wizard are the same operation.
         private async void MainViewModel_EditScheduleRequested(object? sender, (Plant plant, CareType care) e)
         {
             var editView = new EditScheduleView(e.plant, e.care, _timeProvider);
@@ -306,8 +310,8 @@ namespace GreenKeeper
 
         // -- Search Box Focus Section --
 
-        // Clicking anywhere outside the search box takes the keyboard focus away from it
-        // (IsAncestorOf counts the box itself as inside).
+        // Clicking anywhere outside the search box takes the keyboard focus away from it, so an
+        // empty box shows "Search..." again. A click inside the box keeps the focus there.
         private void Window_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (!SearchTextBox.IsFocused)

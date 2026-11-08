@@ -14,12 +14,12 @@
         Width="900"
         WindowStartupLocation="CenterScreen">
 
-    <!-- Width and Height above are the design size: the UI is drawn at scale 1 there and
-         scales from it at every other size (InitializeResponsiveSize in MainWindow.xaml.cs) -->
+    <!-- Width and Height above are the design size, where the UI is drawn at scale 1
+         (InitializeResponsiveSize in MainWindow.xaml.cs) -->
 
     <Grid Background="{DynamicResource WindowBackground}">
-        <!-- Sidebar and dashboard share the width as at the design size, where 250 + 634
-             are the 884 px inside the window frame. -->
+        <!-- Sidebar and dashboard share the width as they do at the design size, where 250
+             and 634 fill the space inside the window frame. -->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="250*"
                               MinWidth="{StaticResource SidebarMinWidth}"
@@ -47,8 +47,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Heading of the plant list, one step smaller than the plant name in the
-                     dashboard, the main title. The top margin puts both on one baseline. -->
+                <!-- One step smaller than the plant name in the dashboard, which is the main
+                     title. The top margin puts both on one baseline. -->
                 <TextBlock Grid.Column="0"
                            AutomationProperties.HeadingLevel="Level1"
                            Text="My Plants"
@@ -59,9 +59,9 @@
                            Margin="0, 4, 0, 0" />
 
                 <!-- Theme toggle. Its label changes with every click, so it goes through
-                     AccessibleName. The top margin centers the icon on the capital
-                     letters of the heading, about 22 below the top of the row, and makes the
-                     row 38 high, which keeps the edges of the search box below sharp. -->
+                     AccessibleName. The top margin centers the icon on the capital letters of
+                     the heading and gives the row a whole-pixel height, which keeps the edges
+                     of the search box below sharp. -->
                 <Button Grid.Column="1"
                         Style="{StaticResource IconButton}"
                         views:AccessibleName.Text="{Binding Theme.ToggleLabel}"
@@ -72,9 +72,8 @@
                         Padding="4"
                         Margin="0, 6, 0, 0"
                         Command="{Binding Theme.ToggleCommand}">
-                    <!-- The PNG supplies only the shape (its alpha channel); the color comes from
-                         PrimaryText, so the icon fades along with a theme change.
-                         24 = the button's 32 minus its padding. -->
+                    <!-- The PNG supplies only the shape; the color comes from PrimaryText, so
+                         the icon fades along with a theme change. -->
                     <Rectangle Width="24"
                                Height="24"
                                Fill="{DynamicResource PrimaryText}"
@@ -151,9 +150,8 @@
                       SelectedItem="{Binding PlantList.SelectedPlant, Mode=TwoWay}"
                       SelectionChanged="PlantList_SelectionChanged">
                 <ListView.Resources>
-                    <!-- Context menu of a plant entry. It sits on the entry rather than on its
-                         content, so the keyboard opens it too (menu key, Shift+F10): WPF looks for a
-                         context menu on the focused element and its ancestors. -->
+                    <!-- Context menu of a plant entry. It sits on the entry, which takes the
+                         focus, so the menu key and Shift+F10 open the menu of the focused entry. -->
                     <ContextMenu x:Key="PlantContextMenu"
                                  x:Shared="False"
                                  Style="{StaticResource ThemedContextMenu}">
@@ -166,13 +164,13 @@
 
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
-                        <!-- A screen reader announces the entry by its name and the state of its
-                             status dot: "Aloe Vera, overdue". The state changes while the entry is
-                             in use, so the name goes through AccessibleName. -->
+                        <!-- The spoken name, like "Aloe Vera, overdue". The list sets it when it
+                             builds an entry, and a changed name or state shows only in a rebuilt
+                             entry, so a screen reader hears no change on an existing one. -->
                         <Setter Property="views:AccessibleName.Text" Value="{Binding Converter={StaticResource PlantAccessibleNameConverter}}" />
                         <EventSetter Event="KeyDown" Handler="PlantEntry_KeyDown" />
-                        <!-- The context menu opens in a popup outside the window's tree: it
-                             reaches the window's ViewModel through PlacementTarget.Tag -->
+                        <!-- The context menu cannot find the window, so it reaches the
+                             window's ViewModel through PlacementTarget.Tag -->
                         <Setter Property="Tag" Value="{Binding DataContext, RelativeSource={RelativeSource AncestorType=Window}}" />
                         <Setter Property="ContextMenu" Value="{StaticResource PlantContextMenu}" />
                         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRingInset}" />
@@ -212,8 +210,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- Status dot. Its shapes have no automation element, so a screen
-                                 reader skips it; the entry's name carries its state. -->
+                            <!-- Status dot. A screen reader skips it, so the entry's name carries
+                                 its state. -->
                             <ContentPresenter Grid.Column="0"
                                               Content="{Binding Converter={StaticResource PlantStatusDotConverter}}"
                                               ContentTemplate="{StaticResource PlantStatusDot}"
@@ -235,8 +233,8 @@
                 </ListView.ItemTemplate>
             </ListView>
 
-            <!-- Says why the list is empty. The text is set in the style, because a text
-                 set on the element would win over the trigger that changes it. -->
+            <!-- Says why the list is empty. The text sits in the style so the trigger below
+                 can change it. -->
             <TextBlock Grid.Row="2"
                        Foreground="{DynamicResource SecondaryText}"
                        FontSize="16"
@@ -352,9 +350,9 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Shown while no plant is selected, so the empty dashboard says what to do.
-                 F6 reads it out as well. The text sits in the style, because a text set on the
-                 element would win over the trigger that changes it. -->
+            <!-- Tells what to do while no plant is selected. F6 from the sidebar reads it out
+                 when the dashboard has nothing to focus (see FocusRegions). The text sits in
+                 the style so the trigger below can change it. -->
             <TextBlock x:Name="EmptyDashboardHint"
                        Grid.Row="2"
                        Foreground="{DynamicResource MutedText}"

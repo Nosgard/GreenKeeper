@@ -44,19 +44,18 @@ namespace GreenKeeper
                 TimeProvider.System,
                 new ThemeViewModel(themeService, settingsService));
 
-            // The app creates the window here, not through StartupUri, which would show it before
-            // the code above has run.
             var mainWindow = new MainWindow(mainViewModel, dialogService, TimeProvider.System, settingsService);
             mainWindow.Show();
 
-            // The app subscribes only after Show, so an exception before this line ends the app,
-            // also one while the "Database Error" dialog is open.
+            // OnStartup subscribes only after Show. An exception before this line ends the app,
+            // also one thrown while the "Database Error" dialog is open.
             DispatcherUnhandledException += (_, args) => ReportUnexpectedError(args, mainWindow, dialogService);
         }
 
         /// <summary>
-        /// Applies the pending migrations. Users of the release never run Update-Database, so
-        /// without this the first query would fail with "no such table".
+        /// Applies the pending migrations on every start, because users of the release never
+        /// update the database themselves. Without them the first query would fail with
+        /// "no such table".
         /// </summary>
         private static async Task<bool> TryPrepareDatabaseAsync(GreenKeeperDbContextFactory contextFactory, IDialogService dialogService)
         {
@@ -76,22 +75,19 @@ namespace GreenKeeper
         }
 
         /// <summary>
-        /// Once OnStartup has shown the main window, this method receives each exception
-        /// on the UI thread that no helper caught (see IDialogService.ShowError). It shows
-        /// the dialog "Unexpected Error", and the app keeps running. After the main window
-        /// has closed, or while that dialog is already open, this method does nothing and
-        /// the exception ends the app.
+        /// Shows the dialog "Unexpected Error" for each UI-thread exception that no helper
+        /// caught (see IDialogService.ShowError), and the app keeps running.
         /// </summary>
         private void ReportUnexpectedError(DispatcherUnhandledExceptionEventArgs e, Window mainWindow, IDialogService dialogService)
         {
-            // IsVisible turns false when the main window closes.
+            // After the main window has closed, the exception ends the app without a dialog.
             if (!mainWindow.IsVisible)
             {
                 return;
             }
 
-            // A second exception while the dialog is open ends the app. Without this check,
-            // this method would stack dialog on dialog for a layout pass that fails every time.
+            // An exception that comes back on every redraw would otherwise stack dialog on
+            // dialog, so an exception while this dialog is open ends the app.
             if (_isReportingUnexpectedError)
             {
                 return;

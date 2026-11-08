@@ -620,7 +620,6 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // The replacement schedule uses a different interval (14 days instead of 30).
             var replacementSchedule = new CareSchedule
             {
                 Care = CareType.Fertilizing,
@@ -763,7 +762,6 @@ namespace GreenKeeper.Tests.ViewModels
             var viewModel = await CreateInitializedViewModelAsync(plantRepository);
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // The replacement uses different values (3 hours per week instead of 6 per day).
             var replacementRequirement = new SunlightRequirement { Hours = 3, Period = SunlightPeriod.Week };
 
             // When: the sunlight requirement is replaced
@@ -1008,7 +1006,7 @@ namespace GreenKeeper.Tests.ViewModels
             // When: the watering is completed
             await viewModel.Dashboard.CareStatuses.OfType<WateringStatusViewModel>().Single().CompleteCommand!.ExecuteAsync(null);
 
-            // Then: the announcement names the care and what its card reads now
+            // Then: the announcement names the care schedule and what its card reads now
             Assert.Equal(new[] { "Watering completed. Due in 1 week" }, announcements);
         }
 
@@ -1191,9 +1189,9 @@ namespace GreenKeeper.Tests.ViewModels
             var first = viewModel.Dashboard.CareStatuses.ToList();
             var second = viewModel.Dashboard.CareStatuses.ToList();
 
-            // Then: the same card objects (cards have no Equals of their own, so Assert.Equal
-            // compares references). A new one would make the UI build a new element, which a
-            // screen reader reads out again
+            // Then: the same card objects; the cards do not override Equals, so the check passes
+            // only for the same objects. With new objects, a screen reader would announce the
+            // cards again
             Assert.Equal(first, second);
         }
 

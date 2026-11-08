@@ -49,9 +49,8 @@ namespace GreenKeeper.ViewModels
         // -- Announcements Section --
 
         /// <summary>
-        /// What an action did, in a short sentence. Sighted users see the result on screen;
-        /// MainWindow hands this text to a screen reader, which stays silent otherwise
-        /// because the focus does not move.
+        /// What an action did, in a short sentence. MainWindow passes it to a screen reader,
+        /// which stays silent otherwise because the focus does not move.
         /// </summary>
         public event EventHandler<string>? Announced;
 
@@ -61,10 +60,10 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// The periodic refresh. Only time has passed, so only what depends on the current
-        /// day is re-read. The cards keep their objects, and the sidebar is rebuilt only
-        /// once a plant shows a different state, since a screen reader announces every
-        /// rebuilt element again.
+        /// The periodic refresh updates only what depends on the current day. The cards stay.
+        /// A screen reader announces the focused entry again after each rebuild of the
+        /// sidebar, so the refresh rebuilds it only when a plant's state changed, or when the
+        /// remembered states no longer fit the plants, as after adding or deleting one.
         /// </summary>
         private void RefreshDueStatus()
         {

@@ -16,8 +16,7 @@ namespace GreenKeeper.Tests.ViewModels
         // The clock every ViewModel under test runs on, so due dates are exact instead of "now".
         public static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
 
-        // How often the sidebar's view is rebuilt from now on. WPF reports
-        // ICollectionView.Refresh() as a Reset, so that is the action counted.
+        // How often the sidebar's view is rebuilt from now on, counted by its Reset events.
         public static Func<int> SidebarRebuildsOf(MainViewModel viewModel)
         {
             int rebuilds = 0;

@@ -61,9 +61,9 @@ namespace GreenKeeper.Tests.ViewModels
             // When: a plant is selected
             viewModel.PlantList.SelectedPlant = viewModel.PlantList.Plants[0];
 
-            // Then: the ViewModels raised PropertyChanged for SelectedPlant, then IsPlantSelected
-            // with the watering card already built, so the heading appears with the cards. None for
-            // CareStatuses: it stays the same collection and reports its own changes.
+            // Then: PropertyChanged was raised for SelectedPlant, then for IsPlantSelected with
+            // the watering card already built, so the heading appears with the cards. None is
+            // raised for CareStatuses: it stays the same ObservableCollection
             Assert.Equal(
                 new[]
                 {

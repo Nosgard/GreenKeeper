@@ -25,9 +25,8 @@ namespace GreenKeeper.ViewModels
         private readonly PlantListViewModel _plantList;
         private readonly Action<string> _announce;
 
-        // The cards of the selected plant. A rebuild replaces all of them; until then
-        // CareStatuses hands out the same objects, so the periodic refresh updates them in
-        // place and a screen reader stays on its element (see MainViewModel.RefreshDueStatus).
+        // The cards of the selected plant. The periodic refresh updates them in place, so a
+        // screen reader stays on its element (see MainViewModel.RefreshDueStatus).
         private readonly ObservableCollection<CareStatusViewModel> _careStatuses = new();
 
         // plantList: owns the selection and the sidebar, which a change to a plant's care refreshes.
@@ -55,9 +54,8 @@ namespace GreenKeeper.ViewModels
         public bool IsPlantSelected => SelectedPlant != null;
 
         /// <summary>
-        /// Shows the cards of the plant now selected in the sidebar. MainViewModel hands
-        /// this to PlantListViewModel, whose SelectedPlant setter calls it after reporting
-        /// the new selection.
+        /// Shows the cards of the plant now selected in the sidebar. The SelectedPlant setter
+        /// of PlantListViewModel calls it through onSelectionChanged.
         /// </summary>
         public void ShowSelectedPlant()
         {
@@ -79,9 +77,9 @@ namespace GreenKeeper.ViewModels
         /// </summary>
         public IEnumerable<CareStatusViewModel> CareStatuses => _careStatuses;
 
-        // Builds the cards of the selected plant, only when the plant or its data changed:
-        // a card holds the schedule it was built on, and AddOrReplace puts a new schedule
-        // object in its place. The periodic refresh keeps the cards (see MainViewModel.RefreshDueStatus).
+        // Builds the cards of the selected plant. Call it after the plant or its data changed,
+        // because a card holds the care schedule or sunlight requirement it was built on, and
+        // AddOrReplace puts a new object in its place.
         private void RebuildCareStatuses()
         {
             _careStatuses.Clear();
@@ -142,9 +140,9 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Rebuilds the cards and refreshes the sidebar after a change to a plant's care. Plant
-        /// and CareSchedule raise no PropertyChanged, so without RefreshSidebar the status dot
-        /// and the spoken name of a plant would not follow the change.
+        /// Rebuilds the cards and the sidebar after a change to a plant's care. The status dot
+        /// and the spoken name follow only through RefreshSidebar, because Plant and
+        /// CareSchedule raise no PropertyChanged.
         /// </summary>
         public void RefreshCareStatuses()
         {
@@ -254,8 +252,8 @@ namespace GreenKeeper.ViewModels
         }
 
         /// <summary>
-        /// Completes an active care (Watering, Fertilizing): the next due date counts from the
-        /// moment of the click.
+        /// Completes an active care schedule (Watering, Fertilizing): the next due date counts
+        /// from the moment of the click.
         /// </summary>
         private async Task CompleteCareScheduleAsync(CareType careType)
         {
