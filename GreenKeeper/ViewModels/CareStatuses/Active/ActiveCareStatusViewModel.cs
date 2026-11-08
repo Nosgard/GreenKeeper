@@ -23,7 +23,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
             _timeProvider = timeProvider;
         }
 
-        // Completes the care; the next due date then counts from this moment.
+        // Completes the care schedule; the next due date then counts from this moment.
         public AsyncRelayCommand? CompleteCommand { get; protected set; }
 
         /// <summary>
@@ -33,13 +33,10 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         public bool IsCompletable => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsDue(dueAt, Today);
 
         /// <summary>
-        /// A due date that is still ahead reads as "Due in 3 days" rather than a bare
-        /// "3 days", and the due day itself as "Due today", so the card uses the same
-        /// form every time. "Overdue for ..." already says it.
-        ///
-        /// The wording lives here and not in DueDateCalculator: the calculator also feeds
-        /// the preview of the edit dialog, which puts "New due date in:" in front of the
-        /// text. A prefix there would read "New due date in: Due in 4 days".
+        /// Adds "Due in" to a date still ahead and reads "Due today" on the due day, so the card
+        /// uses the same form every time. "Overdue for ..." already has that form. The wording
+        /// lives here and not in DueDateCalculator, because the edit dialog's preview puts its
+        /// own "New due date in:" in front of the calculator's text.
         /// </summary>
         public override string StatusText
         {
@@ -62,7 +59,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Active
         private bool IsDueToday => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsDueToday(dueAt, Today);
 
         // Drives the red status text. Strict ("before today"), so a card reading "Due today"
-        // is not painted red; the plant's status dot also turns red only once a day was missed.
+        // is not painted red.
         public override bool IsOverdue => _schedule?.NextDueAt is DateTime dueAt && DueDateRules.IsOverdue(dueAt, Today);
 
         // IsCompletable depends on the day as well.

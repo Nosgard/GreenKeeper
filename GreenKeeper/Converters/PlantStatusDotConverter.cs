@@ -7,15 +7,13 @@ using System.Windows.Data;
 namespace GreenKeeper.Converters
 {
     /// <summary>
-    /// The status dot shown next to a plant in the sidebar: the plant's status as of
-    /// today (PlantStatusRules decides which state wins). StatusDotStyles.xaml decides
-    /// how each status looks.
+    /// The plant's status as of today, for the status dot in the sidebar. PlantStatusRules
+    /// picks it, StatusDotStyles.xaml sets its look.
     /// </summary>
     public class PlantStatusDotConverter : IValueConverter
     {
         private readonly TimeProvider _timeProvider;
 
-        // XAML creates the converter through this constructor, so the app judges by the system clock.
         public PlantStatusDotConverter()
             : this(TimeProvider.System)
         {

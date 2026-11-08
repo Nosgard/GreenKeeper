@@ -10,8 +10,8 @@ namespace GreenKeeper.Views.Notes
         private readonly NotesViewModel _notesViewModel;
 
         // Set once the close is confirmed, so the Closing handler lets the window close.
-        // Without it, setting DialogResult in CloseWithResult would raise Closing again and
-        // run the confirmation a second time.
+        // The handler would otherwise cancel the close from CloseWithResult and ask a
+        // second time.
         private bool _closeConfirmed;
 
         public NotesView(Plant plant, IDialogService dialogService, Func<string, Task> saveNotesAsync)
@@ -24,8 +24,7 @@ namespace GreenKeeper.Views.Notes
         }
 
         // Save disables itself once the notes are saved, and the focus on it would fall
-        // back to the window. The focus goes back to the notes instead, and a screen
-        // reader hears the result.
+        // back to the window.
         private void NotesViewModel_Saved(object? sender, EventArgs e)
         {
             NotesBox.Focus();
@@ -51,8 +50,8 @@ namespace GreenKeeper.Views.Notes
 
             e.Cancel = true;
 
-            // Runs after this handler, once the close is canceled. CancelCommand then asks about
-            // unsaved changes, if there are any, and closes the window itself unless a save fails.
+            // Runs after this handler, once the close is canceled. CancelCommand closes the
+            // window itself unless a save fails.
             Dispatcher.BeginInvoke(() => _notesViewModel.CancelCommand.Execute(null));
         }
     }

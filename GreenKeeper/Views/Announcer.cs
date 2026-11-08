@@ -7,8 +7,7 @@ namespace GreenKeeper.Views
 {
     /// <summary>
     /// Tells a screen reader what is otherwise only visible: the result of an action,
-    /// or a text that appears while the focus stays where it is. Sighted users notice
-    /// nothing of it.
+    /// or a text that appears while the focus stays where it is.
     /// </summary>
     public static class Announcer
     {
@@ -41,8 +40,8 @@ namespace GreenKeeper.Views
 
             var peer = UIElementAutomationPeer.FromElement(source) ?? UIElementAutomationPeer.CreatePeerForElement(source);
 
-            // MostRecent: a newer announcement replaces one that is still waiting, and
-            // neither cuts off what the screen reader is saying right now.
+            // A newer announcement replaces one that still waits. A screen reader can also cut
+            // off what it is speaking at that moment, such as the name of a newly focused control.
             peer?.RaiseNotificationEvent(
                 AutomationNotificationKind.ActionCompleted,
                 AutomationNotificationProcessing.MostRecent,
@@ -52,8 +51,7 @@ namespace GreenKeeper.Views
 
         /// <summary>
         /// Announces the text once the screen has settled: after the layout and every
-        /// pending focus change, because a screen reader drops what it is saying when
-        /// the focus moves.
+        /// pending focus change, so no focus change cuts it off.
         /// </summary>
         public static void AnnounceAfterFocusSettles(UIElement source, string text)
         {
@@ -62,7 +60,7 @@ namespace GreenKeeper.Views
 
         private static void OnMessageChanged(DependencyObject element, DependencyPropertyChangedEventArgs e)
         {
-            // Not while the element is being built: only a change the user caused is news.
+            // Not while the element is being built: only a change the user caused is announced.
             if (element is FrameworkElement { IsLoaded: true } source)
             {
                 Announce(source, (string?)e.NewValue ?? string.Empty);

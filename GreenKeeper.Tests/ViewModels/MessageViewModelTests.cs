@@ -3,8 +3,8 @@
 namespace GreenKeeper.Tests.ViewModels
 {
     /// <summary>
-    /// The answer of the message window. Every confirmation in the app (deleting a
-    /// plant, removing a schedule, saving notes) depends on it.
+    /// The answer of the message window, which every question asked through
+    /// MessageDialogService.Confirm depends on.
     /// </summary>
     public class MessageViewModelTests
     {

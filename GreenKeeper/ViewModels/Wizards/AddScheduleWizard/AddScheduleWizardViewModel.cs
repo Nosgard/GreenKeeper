@@ -50,8 +50,8 @@ namespace GreenKeeper.ViewModels.Wizards.AddScheduleWizard
             }
         }
 
-        // Back to the first step: the detail step is discarded. An entered value is not
-        // kept, as that is not worth the effort for only two steps.
+        // Back to the first step. With only two steps the entered value is lost on purpose:
+        // moving on creates a new detail step.
         protected override void GoBack()
         {
             CurrentStep = _selectionStep;

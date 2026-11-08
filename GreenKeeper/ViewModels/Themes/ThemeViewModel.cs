@@ -33,8 +33,7 @@ namespace GreenKeeper.ViewModels.Themes
 
         /// <summary>
         /// What a click on the toggle does, in words, since the button shows only an icon.
-        /// A screen reader announces the button by it, and the tooltip shows it. Like the
-        /// icon, it names the theme the click switches to.
+        /// A screen reader announces the button by it, and the tooltip shows it.
         /// </summary>
         public string ToggleLabel => IsDarkTheme ? "Switch to light theme" : "Switch to dark theme";
 
@@ -44,9 +43,8 @@ namespace GreenKeeper.ViewModels.Themes
 
             _themeService.ApplyTheme(newTheme);
 
-            // Remember the choice for the next start. Read-modify-write, so the other settings,
-            // such as the window placement, stay as they are. Neither call throws (see
-            // ISettingsService).
+            // Remember the choice for the next start. Read-modify-write, so the other settings
+            // such as the window placement stay as they are.
             var settings = _settingsService.Load();
             settings.Theme = newTheme;
             _settingsService.Save(settings);

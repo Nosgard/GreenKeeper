@@ -6,9 +6,8 @@ using System.Windows.Input;
 namespace GreenKeeper.ViewModels.CareStatuses.Abstract
 {
     /// <summary>
-    /// One status card of the dashboard. Icon and color of a card are chosen by
-    /// the card template from the care type (StatusCardStyles.xaml), so no
-    /// UI detail lives here.
+    /// One status card of the dashboard. StatusCardStyles.xaml picks its icon and color
+    /// from the care type.
     /// </summary>
     public abstract class CareStatusViewModel : ObservableObject
     {
@@ -28,8 +27,7 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
 
         public abstract string StatusText { get; }
 
-        // The status text the way a screen reader should say it. Most status texts
-        // read well as they are; a card with abbreviations writes them out.
+        // The status text as a screen reader should say it; a card with abbreviations writes them out.
         public virtual string SpokenStatusText => StatusText;
 
         /// <summary>
@@ -39,9 +37,9 @@ namespace GreenKeeper.ViewModels.CareStatuses.Abstract
         public virtual bool IsOverdue => false;
 
         /// <summary>
-        /// Re-reads everything that depends on the current day without replacing the card.
-        /// A new card would make the UI build a new element, which a screen reader
-        /// announces again (see MainViewModel.RefreshDueStatus).
+        /// Raises PropertyChanged for everything that depends on the current day. The card
+        /// stays, because a screen reader would announce a replaced one again (see
+        /// MainViewModel.RefreshDueStatus).
         /// </summary>
         public virtual void NotifyDueStatusChanged()
         {

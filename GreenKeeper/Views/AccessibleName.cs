@@ -5,11 +5,9 @@ using System.Windows.Automation.Peers;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// The name a screen reader announces for an element whose name changes while it
-    /// is in use, like the theme toggle, which offers the other theme after a click.
-    /// Sets AutomationProperties.Name and reports every change of it, which WPF does
-    /// not do by itself; a screen reader on the element would otherwise keep the old
-    /// name.
+    /// The name a screen reader announces for an element whose name changes while it is
+    /// in use, like the theme toggle. Sets AutomationProperties.Name and reports each
+    /// change; a screen reader on the element would otherwise keep the old name.
     /// </summary>
     public static class AccessibleName
     {
@@ -35,7 +33,6 @@ namespace GreenKeeper.Views
             string newName = (string?)e.NewValue ?? string.Empty;
             AutomationProperties.SetName(element, newName);
 
-            // A peer exists only once a screen reader or another client has asked for the element.
             if (element is UIElement uiElement
                 && AutomationPeer.ListenerExists(AutomationEvents.PropertyChanged)
                 && UIElementAutomationPeer.FromElement(uiElement) is { } peer)

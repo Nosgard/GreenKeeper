@@ -4,9 +4,8 @@ using System.Windows.Data;
 namespace GreenKeeper.Converters
 {
     /// <summary>
-    /// Picks the icon for the theme toggle from IsDarkTheme: a sun while the dark theme is
-    /// active, because a click switches to bright, and a moon while bright is active. The
-    /// view uses only the shape of the image (see MainWindow.xaml).
+    /// The theme toggle shows where a click leads: a sun in the dark theme, a moon in the
+    /// bright one. The view uses only the shape of the image (see MainWindow.xaml).
     /// </summary>
     public class ThemeToggleIconConverter : IValueConverter
     {

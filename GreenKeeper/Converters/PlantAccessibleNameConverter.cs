@@ -14,7 +14,6 @@ namespace GreenKeeper.Converters
     {
         private readonly TimeProvider _timeProvider;
 
-        // XAML uses this constructor, so the app runs on the system clock.
         public PlantAccessibleNameConverter()
             : this(TimeProvider.System)
         {

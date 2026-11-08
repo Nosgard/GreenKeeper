@@ -6,9 +6,8 @@ using System.Windows.Media;
 namespace GreenKeeper.Views
 {
     /// <summary>
-    /// Lets the title bar Windows draws follow the theme of the app. Without this it follows
-    /// the Windows setting, so a dark app gets a light title bar or a light app a dark one,
-    /// tinted with the Windows accent color.
+    /// Lets the title bar Windows draws follow the theme ThemeService applies. Without this it
+    /// follows the Windows setting, so a window in the dark theme can get a light title bar.
     /// </summary>
     public static class TitleBarTheme
     {
@@ -53,8 +52,7 @@ namespace GreenKeeper.Views
                 return;
             }
 
-            // Older Windows versions do not know these attributes and return an error; the title
-            // bar then keeps the Windows setting.
+            // On older Windows versions the title bar keeps the Windows setting.
             int isDark = _caption != DefaultColor ? 1 : 0;
             DwmSetWindowAttribute(handle, UseImmersiveDarkMode, ref isDark, sizeof(int));
             DwmSetWindowAttribute(handle, CaptionColor, ref _caption, sizeof(int));

@@ -3,9 +3,9 @@
 namespace GreenKeeper.ViewModels.Base
 {
     /// <summary>
-    /// The limit of an amount field, the same for the interval input
-    /// (AmountAndUnitInputViewModel) and the sunlight input (HoursPerPeriodInputViewModel):
-    /// how many digits the field takes and how the line below it words the limit.
+    /// The limit of an amount field, shared by AmountAndUnitInputViewModel and
+    /// HoursPerPeriodInputViewModel: how many digits the field takes and how the line below
+    /// it words the limit.
     /// </summary>
     public static class AmountLimit
     {

@@ -76,9 +76,8 @@ namespace GreenKeeper.ViewModels.Notes
         public event EventHandler? Saved;
 
         /// <summary>
-        /// Saves through the callback, marks the text as saved on success and returns whether it
-        /// worked. After a failure both commands keep the dialog open, with the entered text
-        /// still in the field.
+        /// Returns whether the notes were saved. After a failure both commands keep the dialog
+        /// open, with the entered text still in the field.
         /// </summary>
         private async Task<bool> TrySaveAsync()
         {

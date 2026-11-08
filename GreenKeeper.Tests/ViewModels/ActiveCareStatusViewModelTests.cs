@@ -17,8 +17,7 @@ namespace GreenKeeper.Tests.ViewModels
         private static readonly DateTime Now = new(2025, 5, 1, 10, 30, 0);
         private static readonly TimeProvider Clock = new FakeTimeProvider(Now);
 
-        // The cards only need a schedule and callbacks they never invoke here,
-        // so the callbacks are empty stand-ins.
+        // The callbacks are never invoked here, so they stay empty.
         private static WateringStatusViewModel WateringCard(DateTime? nextDueAt) =>
             new(new CareSchedule { Care = CareType.Watering, NextDueAt = nextDueAt },
                 onComplete: () => Task.CompletedTask, onEdit: () => { }, Clock);
@@ -89,10 +88,8 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         /// <summary>
-        /// The prefix is decided on the calendar date, not on the timestamp, by the same rule
-        /// that "Due today" and the Complete button follow. A due date later on the current day
-        /// is still today and must not turn into "Due in ...", and the first minute of the next
-        /// day must.
+        /// The prefix goes by the calendar date, like "Due today" and the Complete button. A due
+        /// date later today stays "Due today", and one minute after midnight reads "Due in 1 day".
         /// </summary>
         [Fact]
         public void StatusText_GivenDueDateLaterOnTheCurrentDay_StillReturnsDueToday()
@@ -225,9 +222,8 @@ namespace GreenKeeper.Tests.ViewModels
         }
 
         /// <summary>
-        /// IsOverdue drives the red status text. A card due today is not overdue yet: red would
-        /// contradict the green-yellow-red ladder of the plant's status dot, which turns red only
-        /// once a day was missed.
+        /// IsOverdue drives the red status text. A card due today is not overdue yet: like the
+        /// plant's status dot, the text turns red only once a day was missed.
         /// </summary>
         [Theory]
         [InlineData(-1, true)]  // overdue

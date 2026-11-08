@@ -18,7 +18,6 @@ namespace GreenKeeper.ViewModels.CareStatuses.EditOption
         // The entered values as a new object, instead of changing the plant. Null until saved.
         public ScheduleInput? Result { get; private set; }
 
-        // Either an active (Watering / Fertilizing) or passive (Sunlight) care type.
         public EditScheduleViewModel(Plant plant, CareType careType, TimeProvider timeProvider)
         {
             CurrentStep = CreateStep(plant, careType, timeProvider);
