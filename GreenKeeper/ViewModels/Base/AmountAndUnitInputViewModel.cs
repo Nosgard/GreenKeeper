@@ -4,8 +4,8 @@ using GreenKeeper.Models.Enums;
 namespace GreenKeeper.ViewModels.Base
 {
     /// <summary>
-    /// The "amount + time unit" input shared by every place where a care
-    /// interval is entered: the wizard steps and the edit dialog.
+    /// The "amount + time unit" input shared by every place where the interval of a care
+    /// schedule is entered: the wizard steps and the edit dialog.
     /// </summary>
     public class AmountAndUnitInputViewModel : ObservableObject
     {
